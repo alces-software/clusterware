@@ -1,0 +1,64 @@
+#!/bin/bash
+#==============================================================================
+# Copyright (C) 2015 Stephen F. Norledge and Alces Software Ltd.
+#
+# This file/package is part of Alces Clusterware.
+#
+# Alces Clusterware is free software: you can redistribute it and/or
+# modify it under the terms of the GNU Affero General Public License
+# as published by the Free Software Foundation, either version 3 of
+# the License, or (at your option) any later version.
+#
+# Alces Clusterware is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+# Affero General Public License for more details.
+#
+# You should have received a copy of the GNU Affero General Public License
+# along with this package.  If not, see <http://www.gnu.org/licenses/>.
+#
+# For more information on the Alces Clusterware, please visit:
+# https://github.com/alces-software/clusterware
+#==============================================================================
+if (( UID != 0 )); then
+  echo "$0: must run as root"
+  exit 1
+fi
+
+src_dir="${alces_SRC_DIR:-/root/clusterware}"
+if [ ! -d "${src_dir}"  ]; then
+    # clone the git tree to /root/clusterware
+    git clone https://github.com/alces-software/clusterware $src_dir
+fi
+
+# move installed pieces out of the way
+mkdir -p /opt/clusterware/dist
+for a in lib bin; do
+    mv /opt/clusterware/$a /opt/clusterware/dist
+    ln -s ${src_dir}/$a /opt/clusterware/$a
+done
+
+mkdir -p ${src_dir}/lib/ruby/.bundle
+sed -e 's,vendor,/opt/clusterware/dist/lib/ruby/vendor,g' /opt/clusterware/dist/lib/ruby/.bundle/config > ${src_dir}/lib/ruby/.bundle/config
+
+cat <<EOF
+Clusterware development set up complete.  Edits to the source tree in
+${src_dir}/bin and ${src_dir}/lib will be immediately reflected.  Note
+that etc is handled locally, and modifications will need to be dealt
+with separately.
+
+You probably want to run git config to set your name and email address
+for commits:
+
+  git config --global --add user.email lovely.moose@alces-software.com
+  git config --global --add user.name "Lovely R. Moose"
+
+If you use ssh for commits to GitHub you'll need to change the remote
+to do this:
+
+  git remote rm origin
+  git remote add origin git@github.com:alces-software/clusterware
+
+Otherwise you can authenticate over HTTPS with your username and
+password!
+EOF

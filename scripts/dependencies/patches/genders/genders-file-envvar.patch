@@ -1,0 +1,30 @@
+--- src/nodeattr/nodeattr.c.orig	2011-10-21 22:03:09.000000000 +0100
++++ src/nodeattr/nodeattr.c	2015-09-23 15:09:47.000000000 +0100
+@@ -111,7 +111,10 @@
+     int c, errors;
+     int Aopt = 0, lopt = 0, qopt = 0, Xopt = 0, vopt = 0, Qopt = 0,
+       Vopt = 0, Uopt = 0, kopt = 0, dopt = 0, eopt = 0, Copt = 0;
+-    char *filename = GENDERS_DEFAULT_FILE;
++    char *filename = getenv("GENDERS_FILE");
++    if (!filename)
++      filename = GENDERS_DEFAULT_FILE;
++
+     char *dfilename = NULL;
+     char *excludequery = NULL;
+     fmt_t qfmt = FMT_HOSTLIST;
+--- src/libgenders/genders_parsing.c.orig	2013-08-03 00:26:09.000000000 +0100
++++ src/libgenders/genders_parsing.c	2015-09-23 15:09:12.000000000 +0100
+@@ -676,8 +676,11 @@
+   int len, errcount = 0, fd = -1, rv = -1, line_count = 1, parsed_nodes = 0;
+   char buf[GENDERS_BUFLEN];
+ 
+-  if (!filename || !strlen(filename))
+-    filename = GENDERS_DEFAULT_FILE;
++  if (!filename || !strlen(filename)) {
++    filename = getenv("GENDERS_FILE");
++    if (!filename)
++      filename = GENDERS_DEFAULT_FILE;
++  }
+ 
+   if ((fd = open(filename, O_RDONLY)) < 0) 
+     {

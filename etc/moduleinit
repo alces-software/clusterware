@@ -1,0 +1,12 @@
+#%Module1.0#####################################################################
+##
+## Alces Clusterware - Environment modules initialization file
+## Copyright (c) 2008-2015 Alces Software Ltd
+##
+################################################################################
+if { [info exists ::env(ALCES_TRACE)] } {
+    puts stderr " -> $::ModulesCurrentModulefile"
+}
+
+catch {exec /opt/clusterware/bin/alces module aliases} alces_aliases
+eval $alces_aliases

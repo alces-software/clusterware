@@ -1,0 +1,24 @@
+################################################################################
+##
+## Alces Clusterware - Systemd service unit file
+## Copyright (c) 2015 Alces Software Ltd
+##
+################################################################################
+# Serf Agent (systemd service unit)
+[Unit]
+Description=Alces Clusterware Serf Agent
+After=syslog.target
+After=network.target
+
+[Service]
+Type=simple
+ExecStart=/opt/clusterware/opt/serf/bin/serf agent -config-dir=/opt/clusterware/etc/serf
+# Use SIGINT instead of SIGTERM so serf can depart the cluster.
+KillSignal=SIGINT
+# Restart on success, failure, and any emitted signals like HUP.
+Restart=always
+# Wait ten seconds before respawn attempts.
+RestartSec=10
+
+[Install]
+WantedBy=multi-user.target

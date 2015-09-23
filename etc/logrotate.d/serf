@@ -1,0 +1,16 @@
+################################################################################
+##
+## Alces Clusterware - Log rotation configuration
+## Copyright (c) 2015 Alces Software Ltd
+##
+################################################################################
+/var/log/serf.log
+{
+  daily
+  missingok
+  rotate 7
+  compress
+  delaycompress
+  notifempty
+  copytruncate
+}

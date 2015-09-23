@@ -1,0 +1,26 @@
+################################################################################
+##
+## Alces Clusterware - Log rotation configuration
+## Copyright (c) 2015 Alces Software Ltd
+##
+################################################################################
+/var/log/gridware/packager.log
+{
+  postrotate
+    cd /var/log/gridware
+    for a in 7 6 5 4 3 2 1 0; do
+      if [ -f builds.$a.tar.gz ]; then
+        mv builds.$a.tar.gz builds.$(($a+1)).tar.gz
+      fi
+    done
+    rm -f builds.8.tar.gz
+    tar czf builds.0.tar.gz builds
+    rm -rf builds/*
+  endscript
+  daily
+  missingok
+  rotate 7
+  compress
+  delaycompress
+  notifempty
+}

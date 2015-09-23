@@ -1,0 +1,19 @@
+--- tigervnc-1.3.1.orig/CMakeLists.txt	2014-03-19 14:03:53.000000000 +0000
++++ tigervnc-1.3.1/CMakeLists.txt	2014-11-17 16:50:46.802395003 +0000
+@@ -250,7 +250,7 @@
+ set(FLTK_SKIP_FLUID TRUE)
+ set(FLTK_SKIP_OPENGL TRUE)
+ set(FLTK_SKIP_FORMS TRUE)
+-find_package(FLTK)
++#find_package(FLTK)
+ 
+ if(UNIX AND NOT APPLE)
+   # No proper handling for extra X11 libs that FLTK might need...
+--- tigervnc-1.3.1.orig/vncviewer/CMakeLists.txt	2014-03-19 14:03:53.000000000 +0000
++++ tigervnc-1.3.1/vncviewer/CMakeLists.txt	2014-11-17 16:51:26.100034529 +0000
+@@ -1,4 +1,4 @@
+-include_directories(${FLTK_INCLUDE_DIR})
++#include_directories(${FLTK_INCLUDE_DIR})
+ include_directories(${GETTEXT_INCLUDE_DIR})
+ 
+ include_directories(${CMAKE_SOURCE_DIR}/common)

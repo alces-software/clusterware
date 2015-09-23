@@ -1,0 +1,8 @@
+################################################################################
+##
+## Alces Clusterware - Gridware repository configuration
+## Copyright (c) 2012-2015 Alces Software Ltd
+##
+################################################################################
+---
+:source: https://github.com/alces-software/packager-base.git

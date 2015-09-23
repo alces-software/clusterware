@@ -1,0 +1,19 @@
+#%Module1.0#####################################################################
+##
+## Alces Clusterware - Environment modules initialization file
+## Copyright (c) 2008-2015 Alces Software Ltd
+##
+################################################################################
+if { [info exists ::env(ALCES_TRACE)] } {
+    puts stderr " -> $::ModulesCurrentModulefile"
+}
+
+if { [info exists ::env(MODULES_ALCES_TCL)] == 0 } { set ::env(MODULES_ALCES_TCL) /opt/clusterware/etc/modules-alces.tcl }
+if { [file exists $::env(MODULES_ALCES_TCL)] } {
+  if { [namespace exists alces] == 0 } { source $::env(MODULES_ALCES_TCL) }
+  if { [file exists /opt/clusterware/etc/moduleinit ] } {
+    alces once { source /opt/clusterware/etc/moduleinit }
+  }
+} else {
+  unset ::env(MODULES_ALCES_TCL)
+}

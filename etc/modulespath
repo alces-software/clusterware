@@ -1,0 +1,21 @@
+################################################################################
+##
+## Alces Clusterware - Environment modules initialization file
+## Copyright (c) 2008-2015 Alces Software Ltd
+##
+################################################################################
+#
+#  System MODULEPATH setup file
+#  ============================
+#
+#  This file defines the initial setup for the system-wide portion of
+#  the module files search path. System-wide paths are added first,
+#  user-specific paths contained in ~/.modules are added subsequently.
+#
+#  Comments may be added anywhere, which begin on # and continue until the
+#     end of the line
+#  Each line containing a single path will be added to the MODULEPATH
+#     environment variable. You may add as many as you want - just
+#     limited by the maximum variable size of your shell.
+#
+/opt/gridware/etc/$alces_OS/modules

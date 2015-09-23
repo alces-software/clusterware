@@ -1,0 +1,72 @@
+#!/bin/bash
+#==============================================================================
+# Copyright (C) 2015 Stephen F. Norledge and Alces Software Ltd.
+#
+# This file/package is part of Alces Clusterware.
+#
+# Alces Clusterware is free software: you can redistribute it and/or
+# modify it under the terms of the GNU Affero General Public License
+# as published by the Free Software Foundation, either version 3 of
+# the License, or (at your option) any later version.
+#
+# Alces Clusterware is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+# Affero General Public License for more details.
+#
+# You should have received a copy of the GNU Affero General Public License
+# along with this package.  If not, see <http://www.gnu.org/licenses/>.
+#
+# For more information on the Alces Clusterware, please visit:
+# https://github.com/alces-software/clusterware
+#==============================================================================
+BINDIR=$(cd "$(dirname "${BASH_SOURCE[0]}")" && echo "$PWD")
+LIBDIR=$(cd "${BINDIR}"/../lib && echo "$PWD")
+LIBEXECDIR=$(cd "${BINDIR}"/../libexec && echo "$PWD")
+SHAREDIR=$(cd "${BINDIR}"/../share && echo "$PWD")
+
+source "$LIBDIR"/base.functions.sh
+source "$LIBDIR"/vnc.functions.sh
+
+cleanup() {
+  :
+}
+
+main() {
+    local pidfile sessiondir sessionid shortid h
+    local -A vnc
+    for sessiondir in "${SESSIONSDIR}"/*; do
+	if [ -d "$sessiondir" ]; then
+	    if [ ! "$h" ]; then
+		h=true
+		echo "+----------+---------+------+----------+-------------------------------------------------------+"
+		echo "| Identity | Display | Port | Password | URL                                                   |"
+		echo "+----------+---------+------+----------+-------------------------------------------------------+"
+	    fi
+	    pidfile="$sessiondir"/vncserver.pid
+	    sessionid=$(basename "$sessiondir")
+	    shortid=$(echo "$sessionid" | cut -f1 -d'-')
+
+	    if [ -f "${sessiondir}/starting.txt" ]; then
+		echo "| ${shortid} | $(printf %7s 'STARTUP') |    - |        - | -                                                     |"
+	    elif pgrep -F $pidfile &>/dev/null; then
+		. "${sessiondir}"/metadata.vars.sh
+		echo "| ${shortid} | $(printf "%7s" :${vnc[DISPLAY]}) | ${vnc[PORT]} | ${vnc[PASSWORD]} | $(printf %-53s "vnc://${USER}:${vnc[PASSWORD]}@${vnc[ADDRESS]}:${vnc[PORT]}") |"
+	    else
+		echo "| ${shortid} | $(printf %7s '-DEAD-') |    - |        - | -                                                     |"
+	    fi
+	else
+	    say "No sessions found in $SESSIONSDIR."
+	fi
+    done
+    if [ "$h" ]; then
+  	echo "+----------+---------+------+----------+-------------------------------------------------------+"
+    fi
+    cleanup
+}
+
+trap "cleanup" SIGTERM SIGINT
+
+SESSIONSDIR="${XDG_CACHE_HOME:-$HOME/.cache}/clusterware/sessions"
+
+main

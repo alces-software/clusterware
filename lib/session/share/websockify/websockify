@@ -1,0 +1,3 @@
+#!/bin/bash
+pushd $(dirname "$BASH_SOURCE")/lib > /dev/null
+exec ./run "$@"

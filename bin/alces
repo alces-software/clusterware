@@ -1,0 +1,142 @@
+#!/bin/bash
+#==============================================================================
+# Copyright (C) 2007-2015 Stephen F. Norledge and Alces Software Ltd.
+#
+# This file/package is part of Alces Clusterware.
+#
+# Alces Clusterware is free software: you can redistribute it and/or
+# modify it under the terms of the GNU Affero General Public License
+# as published by the Free Software Foundation, either version 3 of
+# the License, or (at your option) any later version.
+#
+# Alces Clusterware is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+# Affero General Public License for more details.
+#
+# You should have received a copy of the GNU Affero General Public License
+# along with this package.  If not, see <http://www.gnu.org/licenses/>.
+#
+# For more information on the Alces Clusterware, please visit:
+# https://github.com/alces-software/clusterware
+#==============================================================================
+function usage {
+    if [ -f $alces_CMDDIR/help ]; then
+        exec $0 help
+    else
+        # Fallback to something trivial until help is installed!
+        echo "Usage: $alces_BINNAME <command>"
+    fi
+}
+
+function alces_RUBY_EXEC {
+  eval '
+    if [ "$alces_RUBY" ]; then
+      if [ -x "$alces_RUBY" ]; then
+        exec $alces_RUBY $0 "$@"
+      else
+        echo "ERROR: No ruby environment available."
+        exit 1
+      fi
+    else
+      echo "ERROR: \$alces_RUBY was not set."
+      exit 1
+    fi'
+}
+export -f alces_RUBY_EXEC
+
+function extract_info() {
+    info=$(awk -f <(cat <<\EOF
+  {
+    if (substr($0,0,1) != ":") {
+      next
+    }
+    split($0, a, ": ")
+    gsub(/[[:space:]]*/, "", a[2])
+    if (a[3]) {
+      print "cmd_" a[2] "='" a[3] "'"
+    }
+    if (a[2]=="'") {
+      if (started) {
+        exit
+      } else {
+        started=1
+      }
+    }
+  }
+EOF
+    ) $1)
+    if [ -z "$info" ]; then
+        unset cmd_NAME cmd_SYNOPSIS cmd_VERSION
+    else
+        eval "$info"
+    fi
+}
+export -f extract_info
+
+function display_help {
+    extract_info $1
+    # Render a help template here
+    cat <<EOF
+  [1mNAME[0m:
+
+    $alces_BINNAME $cmd_NAME
+
+  [1mDESCRIPTION[0m:
+
+    $cmd_SYNOPSIS.
+
+EOF
+    #printf "    %-20s %s" "command" "XXX Command synopsis."
+    echo ""
+}
+export -f display_help
+
+export alces_BINNAME="alces"
+export alces_BASE="/opt/clusterware"
+export alces_CMDDIR="$alces_BASE/lib/actions"
+if [ -t 2 ]; then
+    export alces_COLOUR=${alces_COLOUR:-1}
+else
+    export alces_COLOUR=${alces_COLOUR:-0}
+fi
+if [[ ":$alces_FLAGS:" =~ :nocolou?r: || "$TERM" == "linux" ]]; then
+    export alces_COLOUR=0
+fi
+### RUBY
+export alces_RUBY="$alces_BASE/opt/ruby/bin/ruby"
+export alces_RUBYHOME="$alces_BASE/opt/ruby"
+export LD_LIBRARY_PATH="${alces_RUBYHOME}/lib:$LD_LIBRARY_PATH"
+export GEM_HOME="${alces_RUBYHOME}/lib/ruby/gems/2.2.0"
+export GEM_PATH="${alces_RUBYHOME}/lib/ruby/gems/2.2.0"
+
+cmd=$1
+
+shift
+
+if [ "$cmd" == '-h' -o "$cmd" == '--help' ]; then
+    usage
+elif [ -f "$alces_CMDDIR/$cmd" ]; then
+    /bin/bash $alces_CMDDIR/$cmd "$@"
+elif [ "$cmd" ]; then
+    x=("$alces_CMDDIR/$cmd"*)
+
+    if [ $x = "$alces_CMDDIR/$cmd"'*' ]; then
+        # no match
+        echo "$alces_BINNAME: '$cmd' is not a known command. See '$alces_BINNAME --help'."
+    elif [ ${#x[*]} = 1 ]; then
+        # matched one
+        /bin/bash "$alces_CMDDIR/$cmd"* "$@"
+    elif [ ${#x[*]} -gt 1 ]; then
+        # matched > 1
+        echo "$alces_BINNAME: ambiguous command: $cmd"
+        echo "Did you mean one of these?"
+        for a in ${x[*]}; do
+            echo "        `basename $a`"
+        done
+        echo ""
+        exit 1
+    fi
+else
+    usage
+fi

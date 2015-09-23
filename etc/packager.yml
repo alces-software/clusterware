@@ -1,0 +1,18 @@
+################################################################################
+##
+## Alces Clusterware - Gridware packager configuration
+## Copyright (c) 2012-2015 Alces Software Ltd
+##
+################################################################################
+---
+:log_root: /var/log/gridware
+:repo_paths:
+ - /opt/gridware/etc/repos/base
+ - /opt/gridware/etc/repos/local
+:gridware: /opt/gridware
+:modules_dir: /opt/gridware/etc/_OS_/modules
+:packages_dir: /opt/gridware/pkg/_OS_
+:archives_dir: /var/cache/gridware/archives
+:local_archives_dir: /opt/gridware/src
+:buildroot: /var/cache/gridware/src
+:dbroot: /opt/gridware/etc/_OS_

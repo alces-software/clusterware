@@ -1,0 +1,189 @@
+#!/bin/bash
+#==============================================================================
+# Copyright (C) 2015 Stephen F. Norledge and Alces Software Ltd.
+#
+# This file/package is part of Alces Clusterware.
+#
+# Alces Clusterware is free software: you can redistribute it and/or
+# modify it under the terms of the GNU Affero General Public License
+# as published by the Free Software Foundation, either version 3 of
+# the License, or (at your option) any later version.
+#
+# Alces Clusterware is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+# Affero General Public License for more details.
+#
+# You should have received a copy of the GNU Affero General Public License
+# along with this package.  If not, see <http://www.gnu.org/licenses/>.
+#
+# For more information on the Alces Clusterware, please visit:
+# https://github.com/alces-software/clusterware
+#==============================================================================
+source=$(cd "$(dirname "${BASH_SOURCE[0]}")"/.. && pwd)
+target=/opt/clusterware
+gridware_target=/opt/gridware
+dist_url=https://clusterware.storage.googleapis.com
+source $source/scripts/lib/ui.functions.sh
+source $source/scripts/lib/fetch.functions.sh
+source $source/scripts/lib/install.functions.sh
+
+deps="git libyaml ruby bundler modules genders pdsh components tigervnc xwd serf pluginhook s3cmd"
+
+if [ -z "$2" ]; then
+  echo "$0: invalid parameters"
+  cat <<EOF
+Usage: $0 <OS> <fresh|dist>
+
+OS must be one of the systems supported by clusterware: 'el6', 'el7'
+
+Supply 'fresh' or 'dist' to select whether to build dependencies from
+source or to download prebuilt distributions of the dependencies.
+EOF
+  exit 1
+else
+  os="$1"
+  dep_source="$2"
+fi
+
+cat <<EOF
+[33m===============================================================================
+ STARTING INSTALLATION
+===============================================================================[0m
+EOF
+
+source "${source}/scripts/os/${os}.sh"
+
+mkdir -p ${source}/tmp/log ${source}/tmp/src ${source}/tmp/build
+dep_logs="${source}/tmp/log"
+dep_build="${source}/tmp/build"
+dep_src="${source}/tmp/src"
+
+# Install pre-requisites
+title "Installing prerequisites"
+doing 'Base'
+install_base_prerequisites &> "${dep_logs}/base-prereqs.log"
+say_done $?
+if [ "${dep_source}" == "fresh" ]; then
+    doing 'Build'
+    install_build_prerequisites &> "${dep_logs}/build-prereqs.log"
+    say_done $?
+fi
+doing 'Runtime'
+install_runtime_prerequisites &> "${dep_logs}/runtime-prereqs.log"
+say_done $?
+
+title "Creating clusterware directory structure"
+doing 'Create'
+[[ -d "${target}" ]] || mkdir -p "${target}"
+cp -R "${source}/bin" "${source}/etc" "${source}/lib" "${target}"
+sed -i -e "s/_OS_/${os}/g" "${target}/etc/packager.yml"
+mkdir -p /var/cache/gridware/{archives,src} /var/log/gridware ${gridware_target}/etc
+say_done $?
+
+for dep in ${deps}; do
+    source "${source}/scripts/dependencies/${dep}.sh"
+    if ! detect_${dep}; then
+        fetch_${dep}
+    fi
+done
+
+for dep in ${deps}; do
+    if ! detect_${dep}; then
+        install_${dep}
+    fi
+done
+
+title "Configuring gridware group"
+if /usr/bin/getent group gridware >/dev/null; then
+    doing 'Detect'
+else
+    doing 'Configure'
+    /usr/bin/getent group gridware >/dev/null || /usr/sbin/groupadd -g 341 gridware
+    access_targets=(/var/cache/gridware /var/log/gridware)
+    chmod -R g+rw "${access_targets[@]}"
+    find "${access_targets[@]}" -type d -exec chmod 2775 {} \;
+    chgrp -R gridware "${access_targets[@]}"
+fi
+say_done $?
+
+title "Setting up gridware package structure for '${os}'"
+if [ -d "${gridware_target}/pkg/${os}" ]; then
+    doing 'Detect'
+else
+    doing "Configure"
+    mkdir -p "${gridware_target}/pkg/${os}" "${gridware_target}/etc/${os}/modules"
+    cp -R "${source}/dist/modules"/* "${gridware_target}"/etc/${os}/modules
+    "$alces_RUBY" "${source}/scripts/init-gridware.rb"
+    chmod -R g+rw "${gridware_target}"/*
+    find "${gridware_target}"/* -type d -exec chmod 2775 {} \;
+    chgrp -R gridware "${gridware_target}"/*
+fi
+say_done $?
+
+title "Setting up gridware base repository"
+if [ -d "${gridware_target}/etc/repos" ]; then
+    doing 'Detect'
+else
+    doing 'Configure'
+    cp -R "${source}/dist/repos" "${gridware_target}/etc"
+    say_done $?
+    doing 'Initialize'
+    "${target}/bin/alces" gridware update base &> "${dep_logs}/gridware-init.log"
+    chmod -R g+rw "${gridware_target}"/etc
+    find "${gridware_target}"/etc -type d -exec chmod 2775 {} \;
+    chgrp -R gridware "${gridware_target}"/etc
+fi
+say_done $?
+
+title "Installing profile hooks"
+doing 'Install'
+cp "${source}/dist/profile"/* /etc/profile.d
+sed -i -e "s/_OS_/${os}/g" /etc/profile.d/alces-clusterware.*
+say_done $?
+
+title "Installing logrotate hooks"
+doing 'Install'
+cp "${source}/dist/logrotate/clusterware" /etc/logrotate.d
+say_done $?
+
+title "Installing startup scripts"
+doing 'Install'
+install_startup_hooks &> "${dep_logs}/install-startup-hooks.log"
+say_done $?
+
+if [ "$(type -t lsof)" ]; then
+    ppid=`ps -p $$ -o ppid=`
+    user_shell=`lsof -p $ppid | awk '(NR==2) {print $1}'`
+fi
+
+case $user_shell in
+    sh|bash|ksh|zsh)
+        rc_script_ext=sh
+        ;;
+    tcsh|csh)
+        rc_script_ext=csh
+        ;;
+    *)
+        rc_script_ext=sh
+        ;;
+esac
+
+cat <<EOF
+[33m
+===============================================================================
+ INSTALLATION COMPLETE
+===============================================================================
+[0m[1m
+Global profile scripts have been installed in:
+
+/etc/profile.d/alces-clusterware.sh
+/etc/profile.d/alces-clusterware.csh
+
+Please login again, or manually run the following:
+
+source /etc/profile.d/alces-clusterware.${rc_script_ext}
+
+Afterwards, execute 'alces' for further information.
+[0m
+EOF
