@@ -1,0 +1,30 @@
+#!/bin/bash
+
+cd /opt/clusterware
+outdir=/tmp/clusterware
+mkdir -p ${outdir}
+
+echo "genders"
+tar czf ${outdir}/genders.tar.gz opt/genders
+echo "git"
+tar czf ${outdir}/git.tar.gz opt/git
+echo "modules"
+tar czf ${outdir}/modules.tar.gz opt/Modules
+echo "libyaml"
+tar czf ${outdir}/libyaml.tar.gz opt/lib
+echo "pdsh"
+tar czf ${outdir}/pdsh.tar.gz opt/pdsh
+echo "pluginhook"
+tar czf ${outdir}/pluginhook.tar.gz opt/pluginhook
+echo "ruby"
+tar czf ${outdir}/ruby.tar.gz opt/ruby
+echo "s3cmd"
+tar czf ${outdir}/s3cmd.tar.gz opt/s3cmd
+echo "serf"
+tar czf ${outdir}/serf.tar.gz opt/serf
+echo "tigervnc"
+tar czf ${outdir}/tigervnc.tar.gz opt/tigervnc
+echo "xwd"
+tar czf ${outdir}/xwd.tar.gz opt/xwd
+echo "components"
+tar czf ${outdir}/components.tar.gz lib/ruby/.bundle lib/ruby/vendor/ruby
