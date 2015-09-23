@@ -23,7 +23,7 @@
 source=$(cd "$(dirname "${BASH_SOURCE[0]}")"/.. && pwd)
 target=/opt/clusterware
 gridware_target=/opt/gridware
-dist_url=https://clusterware.storage.googleapis.com
+dist_url=https://s3-eu-west-1.amazonaws.com/packages.alces-software.com/clusterware/dist
 source $source/scripts/lib/ui.functions.sh
 source $source/scripts/lib/fetch.functions.sh
 source $source/scripts/lib/install.functions.sh

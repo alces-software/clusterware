@@ -23,7 +23,7 @@ fetch_dist() {
     local name=$1
     # XXX - compare md5?
     if [ ! -f "${dep_src}/${name}.tar.gz" ]; then
-        curl -# -L ${dist_url}/clusterware/dist/${os}/${name}.tar.gz > "${dep_src}/${name}.tar.gz"
+        curl -# -L ${dist_url}/${os}/${name}.tar.gz > "${dep_src}/${name}.tar.gz"
     else
         doing 'Detect'
         say_done $?
