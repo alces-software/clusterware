@@ -13,6 +13,16 @@ The install scripts handle the installation of all required packages from your d
 
 ## Installation
 
+### TL;DR
+
+One-line installation - **note that you must verify you have the correct value for** `alces_OS`:
+
+```bash
+curl -sL http://git.io/clusterware-installer | sudo alces_OS=el7 /bin/bash
+```
+
+### Basic installation
+
 Clusterware is a system-level package and must be installed by the `root` user.
 
 1. Become root.
@@ -21,30 +31,22 @@ Clusterware is a system-level package and must be installed by the `root` user.
    sudo -s
    ```
 
-2. Set installation parameters:
-
-   * You **must** set the `alces_OS` environment variable to match the distribution on which you are installing. Currently supported options are `el6` and `el7`:
+2. Set the `alces_OS` environment variable to match the distribution on which you are installing. Currently supported options are `el6` and `el7`:
 
      ```bash
      export alces_OS=el7
-     ```
-   
-   * Optionally set the `alces_SOURCE` variable to indicate that you want to build from source code rather than installing prebuilt binaries for your distribution.  Choose `fresh` to download and build components from upstream sources, or `dist` to use prebuilt binaries downloaded on Amazon S3.
-   
-     ```bash
-     export alces_SOURCE=fresh
      ```
 
 3. Invoke installation by piping output from `curl` to `bash`:
 
    ```bash
-   curl -sL http://git.io/clusterware-master | /bin/bash
+   curl -sL http://git.io/clusterware-installer | /bin/bash
    ```
 
    If you want to you can download the script first.  You might want to do this if you want to inspect what it's going to do, or if you're nervous about it being truncated during download:
 
    ```bash
-   curl -sL http://git.io/clusterware-master > /tmp/bootstrap.sh
+   curl -sL http://git.io/clusterware-installer > /tmp/bootstrap.sh
    less /tmp/bootstrap.sh
    bash /tmp/bootstrap.sh
    ```
@@ -54,6 +56,8 @@ Clusterware is a system-level package and must be installed by the `root` user.
    ```bash
    source /etc/profile.d/alces-clusterware.sh
    ```
+
+### Advanced installation
 
 For further installation techniques, please refer to [INSTALL.md](INSTALL.md).
 
