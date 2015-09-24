@@ -35,9 +35,9 @@ fi
 # set alces_SOURCE to either 'fresh' or 'dist'
 #  'fresh' -- build all dependencies
 #  'dist'  -- download prebuilt dependencies
-alces_SOURCE="${alces_SOURCE:-fresh}"
+alces_SOURCE="${alces_SOURCE:-dist}"
 
-src_dir="${alces_SRC_DIR:-$(mktemp -d clusterware.XXXXXXXX)}"
+src_dir="${alces_SRC_DIR:-$(mktemp -d /tmp/clusterware.XXXXXXXX)}"
 
 if [ ! -f "${src_dir}"/scripts/install ]; then
     src_url_base="https://github.com/alces-software/clusterware/archive"
