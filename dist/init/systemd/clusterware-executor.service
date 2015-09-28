@@ -1,0 +1,17 @@
+[Unit]
+Description=Execute clusterware task
+Requires=clusterware-configurator.service
+After=clusterware-configurator.service
+
+[Service]
+Type=oneshot
+Environment=PLUGIN_PATH=/opt/clusterware/etc/handlers
+ExecStart=/opt/clusterware/opt/pluginhook/bin/pluginhook execute
+RemainAfterExit=yes
+TimeoutSec=0
+
+# Output needs to appear in instance console output
+StandardOutput=journal+console
+
+[Install]
+WantedBy=multi-user.target
