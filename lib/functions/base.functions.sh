@@ -20,6 +20,10 @@
 # https://github.com/alces-software/clusterware
 #==============================================================================
 alces_BINNAME="$alces_BINNAME $(basename "$0")"
+# ensure all children die when we do
+trap "/bin/kill -- -$BASHPID &>/dev/null" EXIT
+# `bail` has the above kill built-in
+trap "bail 1" TERM INT
 
 fail_hook() {
     return 1
@@ -72,6 +76,8 @@ EOF
 
 bail() {
     cleanup
+    # ensure all our (owned) children die
+    /bin/kill -- -$BASHPID &>/dev/null
     exit $1
 }
 
@@ -91,7 +97,7 @@ say() {
     local msg
     msg="$1"
 
-    echo "$alces_BINNAME: ${msg}"
+    echo "$alces_BINNAME: ${msg}" 1>&2
 }
 
 debug() {
@@ -131,4 +137,10 @@ wait_for_pid() {
         # receives.
         wait $!
     done
+}
+
+reexec_sudo() {
+    if [ "$UID" != "0" ]; then
+        exec sudo "$0" "$@"
+    fi
 }

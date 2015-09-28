@@ -72,6 +72,7 @@ vnc_write_vars_file() {
     display="$3"
     port=$(($display+5900))
     password="$4"
+    websocket="$5"
 
     metadata_file="${sessiondir}/metadata.vars.sh"
 
@@ -82,6 +83,7 @@ vnc[DISPLAY]="${display}"
 vnc[PORT]="${port}"
 vnc[PASSWORD]="${password}"
 vnc[ADDRESS]="${address}"
+vnc[WEBSOCKET]="${websocket}"
 EOF
     chmod 0600 "${metadata_file}"
 }
@@ -110,9 +112,11 @@ vnc_emit_details() {
     port=$(($display+5900))
     cat <<EOF
 VNC server started:
-     Host: $address
-     Port: $port
-  Display: $display
+Identifier: $SESSIONID
+      Host: $address
+      Port: $port
+   Display: $display
+  Password: $password
 
 Depending on your client, you can connect to the session using:
 
@@ -188,5 +192,34 @@ vnc_session_kill() {
         fi
     else
         say "no matching session could be found"
+    fi
+}
+
+vnc_session_wait() {
+    local sessiondir sessionid shortid pidfile
+    sessiondir="$1"
+    if [ -d "$sessiondir" ]; then
+        sessionid=$(basename "$sessiondir")
+        shortid=$(echo "$sessionid" | cut -f1 -d'-')
+        pidfile="$sessiondir"/vncserver.pid
+        say "waiting for session ${shortid} to complete..."
+        while pgrep -F $pidfile &>/dev/null; do
+            sleep 1
+        done
+        say "session ${shortid} completed at $(date "+%Y-%m-%d %H:%M:%S")"
+    fi
+}
+
+vnc_find_sessiondir() {
+    local sessionid sessiondir
+    sessionid="$1"
+    sessiondir=$(echo "${SESSIONSDIR}"/${sessionid}-*)
+    if [ ! -d "${sessiondir}" ]; then
+        sessiondir=$(echo "${SESSIONSDIR}"/${sessionid})
+    fi
+    if [ ! -d "${sessiondir}" ]; then
+        return 1
+    else
+        echo "${sessiondir}"
     fi
 }
