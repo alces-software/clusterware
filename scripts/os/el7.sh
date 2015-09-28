@@ -30,7 +30,7 @@ install_runtime_prerequisites() {
         yum -e0 -y install tcl && \
         yum -e0 -y install openssl readline zlib libffi && \
         yum -e0 -y install mesa-libGL libXdmcp pixman xorg-x11-fonts-misc && \
-        yum -e0 -y install uuid netpbm-progs net-tools xauth xkeyboard-config xorg-x11-xkb-utils xterm && \
+        yum -e0 -y install uuid netpbm-progs iproute xauth xkeyboard-config xorg-x11-xkb-utils xterm && \
         yum -e0 -y install python-dateutil
 }
 
@@ -66,8 +66,12 @@ install_build_prerequisites() {
 
 install_startup_hooks() {
     for a in "${source}/dist/init/systemd"/*; do
-        cp $a /etc/systemd/system && \
-            systemctl enable $(basename $a) || \
-            return 1
+        if [ "${a##*.}" == 'inactive' ]; then
+            cp $a /etc/systemd/system/$(basename "$a" .inactive) || return 1
+        else
+            cp $a /etc/systemd/system && \
+                systemctl enable "$(basename $a)" || \
+                return 1
+        fi
     done
 }

@@ -30,7 +30,7 @@ install_runtime_prerequisites() {
         yum -e0 -y install tcl && \
         yum -e0 -y install openssl readline zlib libffi && \
         yum -e0 -y install mesa-libGL libXdmcp pixman xorg-x11-fonts-misc && \
-        yum -e0 -y install uuid netpbm-progs net-tools xauth xkeyboard-config xorg-x11-xkb-utils xterm && \
+        yum -e0 -y install uuid netpbm-progs iproute xauth xkeyboard-config xorg-x11-xkb-utils xterm && \
         yum -e0 -y install python-dateutil
 }
 
@@ -61,17 +61,23 @@ install_build_prerequisites() {
         openssl-devel gnutls-devel pam-devel \
         libSM-devel && \
         yum -e0 -y install libxkbfile-devel && \
-	yum -e0 -y install epel-release && \
+        yum -e0 -y install epel-release && \
         yum -e0 -y install git golang
 }
 
 install_startup_hooks() {
     local target_init_script
     for a in "${source}/dist/init/sysv"/*.el6; do
-	target_init_script="$(basename "$a" .el6)"
-        cp $a /etc/init.d/${target_init_script} && \
-	    chmod 755 /etc/init.d/${target_init_script} && \
-            chkconfig ${target_init_script} on || \
-            return 1
+        target_init_script="$(basename "$a" .el6)"
+        if [ "${target_init_script##*.}" == 'inactive' ]; then
+            cp $a /etc/init.d/${target_init_script} $(basename "${target_init_script}" .inactive) && \
+                chmod 755 /etc/init.d/${target_init_script} || \
+                return 1
+        else
+            cp $a /etc/init.d/${target_init_script} && \
+                chmod 755 /etc/init.d/${target_init_script} && \
+                chkconfig "${target_init_script}" on || \
+                return 1
+        fi
     done
 }
