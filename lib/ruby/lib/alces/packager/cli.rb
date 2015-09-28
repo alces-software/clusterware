@@ -131,7 +131,6 @@ module Alces
         c.action HandlerProxy, :install
         add_package_options(c)
         c.option '-m', '--modules STRING', String, 'Specify modules to load before build'
-        c.option '--background', 'Perform installation in background session'
       end
       set_aliases(:install, min: 4)
 

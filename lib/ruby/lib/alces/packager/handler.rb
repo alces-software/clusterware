@@ -141,24 +141,14 @@ module Alces
         #Validate the package before going any further
         say "Installing #{colored_path(metadata)}"
         metadata.validate!
-        if options.background
-          puts "\nRunning in background."
-          task = run_bash("~/.alces/bin/alces session spawn package install --non-interactive #{metadata.name}") do |r|
-            if r.stdout =~ /Spawned task: (.*)/
-              $1
-            end
+        if metadata.metadata[:variants] && variant == 'all'
+          metadata.metadata[:variants].keys.each do |v|
+            Actions.install(metadata, action_opts(:install).merge(variant: v), IoHandler)
           end
-          puts "Task identifier: #{task}"
         else
-          if metadata.metadata[:variants] && variant == 'all'
-            metadata.metadata[:variants].keys.each do |v|
-              Actions.install(metadata, action_opts(:install).merge(variant: v), IoHandler)
-            end
-          else
-            Actions.install(metadata, action_opts(:install), IoHandler)
-          end
-          puts "\nInstallation complete."
+          Actions.install(metadata, action_opts(:install), IoHandler)
         end
+        puts "\nInstallation complete."
       end
 
       def purge
