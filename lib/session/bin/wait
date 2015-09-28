@@ -33,7 +33,7 @@ main() {
     sessionid="$1"
     if [ "$sessionid" ]; then
         if sessiondir=$(vnc_find_sessiondir "${sessionid}"); then
-            vnc_session_kill "$sessiondir"
+            vnc_session_wait "$sessiondir"
         else
             say "no matching session could be found"
             bail 1
@@ -47,7 +47,6 @@ main() {
 
 trap "bail 1" SIGTERM SIGINT
 
-VNCSERVER="${LIBEXECDIR}/vncserver"
 SESSIONSDIR="${XDG_CACHE_HOME:-$HOME/.cache}/clusterware/sessions"
 
 main "$@"

@@ -20,126 +20,30 @@
 # For more information on the Alces Clusterware, please visit:
 # https://github.com/alces-software/clusterware
 #==============================================================================
-# The X display to screen shot.
-DISPLAY=$1
-# The URL to which the screen shots can be PUT to save them.
-CONNECTION_URL=$2
+BINDIR=$(cd "$(dirname "${BASH_SOURCE[0]}")" && echo "$PWD")
+LIBDIR=$(cd "${BINDIR}"/../lib && echo "$PWD")
 
-if [ -z "$CONNECTION_URL" ] ; then
-    fail "CONNECTION_URL not set"
-fi
-if [ -z "$DISPLAY" ] ; then
-    fail "DISPLAY not set"
-fi
-
-log() {
-    echo "$(date --rfc-3339=seconds): $@"
-}
-
-fail() {
-    log "$@"
-    exit 1
-}
-
-check_progs() {
-    local progs n p r
-    progs="dirname $*"
-    n=0
-    for p in $progs; do
-        n=$(($n+1))
-        r=$(type -p $p)
-        if [ $? != 0 -o ! -x "$r" ]; then
-            fail "Unable to find required binary ($p)"
-        fi
-    done
-}
-
-check_progs_safe() {
-    local progs n p r
-    progs="dirname $*"
-    n=0
-    for p in $progs; do
-        n=$(($n+1))
-        r=$(type -p $p)
-        if [ $? != 0 -o ! -x "$r" ]; then
-            return 1
-        fi
-    done
-}
-
-check_screenshotting_progs() {
-    if check_progs_safe xwd xwdtopnm pnmtopng ; then
-        USE_XWD=1
-    elif check_progs_safe import; then
-        USE_IMPORT=1
-    else
-        fail "Unable to find any screen shotting programs"
-    fi
-}
+source "$LIBDIR"/base.functions.sh
+source "$LIBDIR"/hook.functions.sh
 
 take_screenshot() {
-    if [ "$USE_XWD" -eq "1" ] ; then
-        xwd -root -silent -display :${DISPLAY} | xwdtopnm | pnmtopng | base64
-    elif [ "$USE_IMPORT" -eq "1" ] ; then
-        import -window root png:- | base64
-    fi
-}
-
-send_screenshot() {
-    local alces_USER alces_AUTH_TOKEN json_prefix json_postfix
-    local result httpcode
-
-    alces_USER='{{ user }}'
-    alces_AUTH_TOKEN='{{ auth_token }}'
-
-    # Use a funky mixture of json_{pre,post}fix and `cat` to pass the JSON to
-    # curl without this long-lived-process loading the entire screenshot into
-    # memory.
-    json_prefix='{"connection":{"metadata":{"screenshot":"'
-    json_postfix='"}}}'
-
-    result=$( (echo -n $json_prefix ; cat ; echo $json_postfix) | curl \
-        -s -d @- \
-        -u $alces_USER:$alces_AUTH_TOKEN \
-        -X PUT \
-        -H 'Accept: application/x-vnd.alces-software.webapp.api+json;version=1' \
-        -H 'Content-Type: application/x-vnd.alces-software.webapp.api+json;version=1'  \
-        -w '\n%{http_code}\n' \
-        $CONNECTION_URL
-    )
-    local curl_exit=$?
-
-    if [ $curl_exit -ne 0 ]; then
-        log "Screenshotting failed: C$curl_exit"
-    fi
-
-    httpcode=$(echo "$result" | tail -n1)
-
-    case $httpcode in
-        20*)
-            # Everything has been handled
-            log "Saved"
-            ;;
-        *)
-            log "Screenshotting failed: H$httpcode"
-            ;;
-    esac
-}
-
-
-periodically_send_screenshot() {
-    while true ; do
-        log "Taking screenshot"
-        take_screenshot
-        #take_screenshot | send_screenshot
-        sleep 60
-    done
+    local display
+    display=$1
+    xwd -root -silent -display :${display} | xwdtopnm | pnmtopng | base64
 }
 
 main() {
-    check_progs base64
-    check_screenshotting_progs
-    periodically_send_screenshot
+    local display sessionid
+    display="$1"
+    sessionid="$2"
+    check_progs base64 xwd xwdtopnm pnmtopng
+    # Give the session a chance to start first.
+    sleep 10
+    while true; do
+        say "$(date --rfc-3339=seconds): Taking screenshot"
+        take_screenshot $display | hook_run session-screenshot "$sessionid"
+        sleep 60
+    done
 }
 
 main "$@"

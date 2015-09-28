@@ -29,11 +29,30 @@ source "$LIBDIR"/base.functions.sh
 source "$LIBDIR"/vnc.functions.sh
 
 main() {
-    local sessionid shortid pidfile sessiondir
+    local sessionid shortid pidfile sessiondir vars
+    local -A vnc
+    if [ "$1" == "--vars" ]; then
+	vars=true
+	shift
+    fi
     sessionid="$1"
     if [ "$sessionid" ]; then
         if sessiondir=$(vnc_find_sessiondir "${sessionid}"); then
-            vnc_session_kill "$sessiondir"
+	    sessionid=$(basename "$sessiondir")
+	    if [ "$vars" ]; then
+		echo "vnc[ID]=\"${sessionid}\""
+		cat "${sessiondir}"/metadata.vars.sh
+	    else
+		. "${sessiondir}"/metadata.vars.sh
+		cat <<EOF
+Identifier: ${sessionid}
+Display:    ${vnc[DISPLAY]}
+Port:       ${vnc[PORT]}
+Password:   ${vnc[PASSWORD]}
+Address:    ${vnc[ADDRESS]}
+Websocket:  ${vnc[WEBSOCKET]}
+EOF
+	    fi
         else
             say "no matching session could be found"
             bail 1
@@ -47,7 +66,6 @@ main() {
 
 trap "bail 1" SIGTERM SIGINT
 
-VNCSERVER="${LIBEXECDIR}/vncserver"
 SESSIONSDIR="${XDG_CACHE_HOME:-$HOME/.cache}/clusterware/sessions"
 
 main "$@"

@@ -21,7 +21,7 @@
 # https://github.com/alces-software/clusterware
 #==============================================================================
 BINDIR=$(cd "$(dirname "${BASH_SOURCE[0]}")" && echo "$PWD")
-LIBDIR=$(cd "${BINDIR}"/../lib && echo "$PWD")
+LIBDIR=$(cd "${BINDIR}"/../../functions && echo "$PWD")
 LIBEXECDIR=$(cd "${BINDIR}"/../libexec && echo "$PWD")
 SHAREDIR=$(cd "${BINDIR}"/../share && echo "$PWD")
 
@@ -30,27 +30,27 @@ source "$LIBDIR"/files.functions.sh
 source "$LIBDIR"/network.functions.sh
 source "$LIBDIR"/service.functions.sh
 source "$LIBDIR"/vnc.functions.sh
+source "$LIBDIR"/hook.functions.sh
 
 cleanup() {
     if [ "$CLEANED" ]; then return; fi
     CLEANED=true
     if [ "${VNC_DISPLAY}" ]; then
-	vnc_cleanup "${VNC_DISPLAY}" "${SESSIONDIR}"
+        vnc_cleanup "${VNC_DISPLAY}" "${SESSIONDIR}"
     fi
     service_cleanup
     files_cleanup
-    # echo "Session service termination complete"
 }
 
 start_grabber() {
-    local display connection_url grabber_log
+    local display log sessionid
     display=$1
-    connection_url=$2
+    sessionid=$2
 
-    grabber_log=${SESSIONDIR}/grabber.log
-    files_mark_tempfile "$grabber_log"
+    log=${SESSIONDIR}/grabber.log
+    files_mark_tempfile "$log"
 
-    PATH="${XWDBIN}:$PATH" $GRABBER $display $connection_url >$grabber_log 2>&1 &
+    PATH="${XWDBIN}:$PATH" $GRABBER $display $sessionid >$log 2>&1 &
     service_add 'grabber' $!
 }
 
@@ -58,10 +58,6 @@ start_websocket() {
     local address port websockify_log
     address="$1"
     port="$2"
-
-    while netstat -atn | grep -q :${port}; do
-        port=$(($port+1))
-    done
 
     websockify_log="$SESSIONDIR/websockify.log"
     files_mark_tempfile "$websockify_log"
@@ -71,8 +67,12 @@ start_websocket() {
 }
 
 main() {
-    local sessionscript password vnc_vars address
+    local sessionscript password vnc_vars address terse
     local -A vnc
+    if [ "$1" == "--terse" ]; then
+        terse=true
+        shift
+    fi
     sessionscript="$1"
 
     files_mktempdir "${SESSIONDIR}"
@@ -80,21 +80,21 @@ main() {
     files_mark_tempfile "${SESSIONDIR}/starting.txt"
 
     if [ "$sessionscript" == "-" ]; then
-	cat > "${SESSIONDIR}/session.sh"
+        cat > "${SESSIONDIR}/session.sh"
     elif [ -f "$sessionscript" ]; then
-	cp "$sessionscript" "${SESSIONDIR}/session.sh"
+        cp "$sessionscript" "${SESSIONDIR}/session.sh"
     elif [ -f "${alces_BASE}/etc/sessions/${sessionscript}.sh" ]; then
-	cp "${alces_BASE}/etc/sessions/${sessionscript}.sh" "${SESSIONDIR}/session.sh"
+        cp "${alces_BASE}/etc/sessions/${sessionscript}.sh" "${SESSIONDIR}/session.sh"
     elif [ "$sessionscript" ]; then
-	say "unable to locate session script: $sessionscript"
-	bail 1
+        say "unable to locate session script: $sessionscript"
+        bail 1
     else
-	for a in "${alces_BASE}/etc/sessions"/*.sh; do
-	    sessionscripts="$sessionscripts, $(basename $a .sh)"
-	done
-	sessionscripts="${sessionscripts:2}"
-	say "no session script provided - specify path or specify one of: $sessionscripts"
-	bail 1
+        for a in "${alces_BASE}/etc/sessions"/*.sh; do
+            sessionscripts="$sessionscripts, $(basename $a .sh)"
+        done
+        sessionscripts="${sessionscripts:2}"
+        say "no session script provided - specify path or specify one of: $sessionscripts"
+        bail 1
     fi
 
     files_mark_tempfile "${SESSIONDIR}/session.sh"
@@ -103,41 +103,48 @@ main() {
     vnc_session_start "${password}" "${SESSIONDIR}"
 
     if ! vnc_vars="$(vnc_read_vars "${SESSIONDIR}")"; then
-	echo "Unfortunately a VNC server could not be started at this time."
-	bail 1
+        say "VNC server could not be started, unable to locate configuration file."
+        bail 1
     fi
 
     eval "$vnc_vars"
     if [ -z "${vnc[HOST]}" ]; then
-	echo "Unfortunately a VNC server could not be started at this time."
-	bail 1
+        say "VNC server could not be started, unable to determine host."
+        bail 1
     fi
     VNC_DISPLAY="${vnc[DISPLAY]}"
     files_mark_tempfile "${vnc[LOG]}"
     files_mark_tempfile "${vnc[PIDFILE]}"
 
     address=$(network_get_public_address)
-    start_websocket "$address" 41361
+    vnc[WEBSOCKET]=$(network_get_free_port 41361)
+    start_websocket "$address" "${vnc[WEBSOCKET]}"
 
     if [ ! -f "${vnc[PIDFILE]}" ]; then
-	echo "Unfortunately the VNC server did not start successfully."
-	bail 1
+        say "VNC server did not start successfully, unable to locate process file."
+        bail 1
     fi
 
     vnc_write_detail_file "${SESSIONDIR}" "${address}" "${vnc[DISPLAY]}" "${password}"
-    vnc_write_vars_file "${SESSIONDIR}" "${address}" "${vnc[DISPLAY]}" "${password}"
-    vnc_emit_details "${address}" "${vnc[DISPLAY]}" "${password}"
+    vnc_write_vars_file "${SESSIONDIR}" "${address}" "${vnc[DISPLAY]}" "${password}" "${vnc[WEBSOCKET]}"
+    if [ "$terse" ]; then
+        echo "$SESSIONID"
+    else
+        vnc_emit_details "${address}" "${vnc[DISPLAY]}" "${password}"
+    fi
 
-    start_grabber "${vnc[DISPLAY]}" "${SESSIONDIR}" "XXX TBC"
+    hook_run session-start "$SESSIONID"
+    start_grabber "${vnc[DISPLAY]}" "$SESSIONID"
 
     rm -f "${SESSIONDIR}/starting.txt"
     {
-	wait_for_pid $(cat "${vnc[PIDFILE]}")
-	cleanup
-    } &
+        wait_for_pid $(cat "${vnc[PIDFILE]}")
+	hook_run session-end "$SESSIONID"
+        cleanup
+    } &>/dev/null &
 }
 
-trap "cleanup" SIGTERM SIGINT
+trap "bail 1" SIGTERM SIGINT
 
 VNCSERVER="${LIBEXECDIR}/vncserver"
 WEBSOCKIFY="${SHAREDIR}/websockify/websockify"
@@ -148,7 +155,8 @@ XWDBIN="${alces_BASE}/opt/xwd/bin"
 
 check_progs "${VNCSERVER}" "${VNCPASSWD}" "${WEBSOCKIFY}" "${GRABBER}" "${XWDBIN}/xwd" uuid
 
-SESSIONDIR="${XDG_CACHE_HOME:-$HOME/.cache}/clusterware/sessions/$(uuid)"
+SESSIONID="$(uuid)"
+SESSIONDIR="${XDG_CACHE_HOME:-$HOME/.cache}/clusterware/sessions/${SESSIONID}"
 VNC_DISPLAY=""
 
 main "$@"

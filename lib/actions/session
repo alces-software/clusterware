@@ -31,31 +31,39 @@ alces_BINNAME="${alces_BINNAME} $(basename "$0")"
 case $action in
     h|he|hel|help)
         exec /bin/bash $alces_BASE/lib/session/bin/help "$@"
-	;;
+        ;;
     s|st|sta|star|start)
         exec /bin/bash $alces_BASE/lib/session/bin/start "$@"
-	;;
+        ;;
     ls|l|li|lis|list)
         exec /bin/bash $alces_BASE/lib/session/bin/list "$@"
-	;;
+        ;;
     k|ki|kil|kill)
         exec /bin/bash $alces_BASE/lib/session/bin/kill "$@"
-	;;
+        ;;
     c|cl|cle|clea|clean)
         exec /bin/bash $alces_BASE/lib/session/bin/clean "$@"
-	;;
+        ;;
+    w|wa|wai|wait)
+        exec /bin/bash $alces_BASE/lib/session/bin/wait "$@"
+        ;;
+    i|in|inf|info)
+        exec /bin/bash $alces_BASE/lib/session/bin/info "$@"
+        ;;
     *)
-	cat <<EOF
+        cat <<EOF
 Usage: $alces_BINNAME COMMAND [[OPTION]... [ARGS]]
 Perform interactive VNC management activities.
 
 Commands:
 EOF
-printf "  %-20s  %s\n" "$alces_BINNAME session help" "More help about this command."
-printf "  %-20s  %s\n" "$alces_BINNAME session list" "List running interactive VNC sessions."
-printf "  %-20s  %s\n" "$alces_BINNAME session start" "Start an interactive VNC session."
-printf "  %-20s  %s\n" "$alces_BINNAME session kill" "Terminate an interactive VNC session."
-printf "  %-20s  %s\n" "$alces_BINNAME session clean" "Clean inactive interactive VNC sessions."
+printf "  %-20s  %s\n" "$alces_BINNAME help" "More help about this command."
+printf "  %-20s  %s\n" "$alces_BINNAME list" "List running interactive VNC sessions."
+printf "  %-20s  %s\n" "$alces_BINNAME info" "Show information about a running session."
+printf "  %-20s  %s\n" "$alces_BINNAME start" "Start an interactive VNC session."
+printf "  %-20s  %s\n" "$alces_BINNAME kill" "Terminate an interactive VNC session."
+printf "  %-20s  %s\n" "$alces_BINNAME clean" "Clean inactive interactive VNC sessions."
+printf "  %-20s  %s\n" "$alces_BINNAME wait" "Wait for completion of an interactive VNC session."
 cat <<EOF
 
 Please report bugs to support@alces-software.com
