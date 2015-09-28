@@ -19,7 +19,7 @@
 # For more information on the Alces Clusterware, please visit:
 # https://github.com/alces-software/clusterware
 #==============================================================================
-export alces_OS="_OS_"
+. /opt/clusterware/etc/distro.vars.sh
 
 if [ -d /opt/clusterware/etc/profile.d ]; then
     for i in /opt/clusterware/etc/profile.d/*.sh ; do

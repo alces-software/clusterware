@@ -19,7 +19,7 @@
 # For more information on the Alces Clusterware, please visit:
 # https://github.com/alces-software/clusterware
 #==============================================================================
-setenv alces_OS "_OS_"
+source /opt/clusterware/etc/distro.vars.csh
 
 if ( -d /opt/clusterware/etc/profile.d ) then
         set nonomatch
