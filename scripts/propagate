@@ -33,18 +33,21 @@ src_url_base="https://github.com/alces-software/clusterware/archive"
 src_url_file="${alces_SOURCE_BRANCH:-master}.tar.gz"
 src_url="${src_url_base}/${src_url_file}"
 
+dist_url=${alces_DIST_URL:-https://s3-eu-west-1.amazonaws.com/packages.alces-software.com/clusterware/dist}
+dep_source=dist
+
 prop_dir="${target}/var/lib/clusterware"
 
 title "Fetching Clusterware source"
 mkdir -p "${prop_dir}"
-curl -# -L "${src_url}" > "{$prop_dir}/clusterware.tar.gz"
+curl -# -L "${src_url}" > "${prop_dir}/clusterware.tar.gz"
 if [ $? -gt 0 ]; then
     echo "Unable to retrieve clusterware source, aborting."
     exit 1
 fi
 
-for a in $dists; do
-    dep_src="${prop_dir}/dist/${a}"
+for os in $dists; do
+    dep_src="${prop_dir}/dist/${os}"
     mkdir -p "${dep_src}"
     for dep in ${deps}; do
         source "${source}/scripts/dependencies/${dep}.sh"
