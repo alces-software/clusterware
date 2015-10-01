@@ -28,7 +28,7 @@ fi
 src_dir="${alces_SOURCE_DIR:-$(mktemp -d /tmp/clusterware.XXXXXXXX)}"
 
 if [ ! -f "${src_dir}"/scripts/control.vars.sh ]; then
-    if [ -d "${src_dir}" ]; then
+    if [ "$(ls -A "${src_dir}" 2>/dev/null)" ]; then
 	echo "An incomplete source directory already exists, please remove or specify a different location: ${src_dir}"
 	exit 1
     fi

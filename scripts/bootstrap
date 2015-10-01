@@ -43,9 +43,9 @@ alces_FETCH_HANDLING="${alces_FETCH_HANDLING:-bin}"
 src_dir="${alces_SOURCE_DIR:-$(mktemp -d /tmp/clusterware.XXXXXXXX)}"
 
 if [ ! -f "${src_dir}"/scripts/install ]; then
-    if [ -d "${src_dir}" ]; then
-	echo "An incomplete source directory already exists, please remove or specify a different location: ${src_dir}"
-	exit 1
+    if [ "$(ls -A "${src_dir}" 2>/dev/null)" ]; then
+        echo "An incomplete source directory already exists, please remove or specify a different location: ${src_dir}"
+        exit 1
     fi
     cleanup=true
     src_url_base="https://github.com/alces-software/clusterware/archive"
@@ -69,8 +69,8 @@ EOF
     fi
 
     if [ "$alces_REPOS_URL" ]; then
-	curl -# -L "${alces_REPOS_URL}/clusterware-handlers.tar.gz" > "${src_dir}/clusterware-handlers.tar.gz"
-	curl -# -L "${alces_REPOS_URL}/packager-base.tar.gz" > "${src_dir}/packager-base.tar.gz"
+        curl -# -L "${alces_REPOS_URL}/clusterware-handlers.tar.gz" > "${src_dir}/clusterware-handlers.tar.gz"
+        curl -# -L "${alces_REPOS_URL}/packager-base.tar.gz" > "${src_dir}/packager-base.tar.gz"
     fi
 fi
 
