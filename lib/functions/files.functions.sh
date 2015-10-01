@@ -41,17 +41,33 @@ files_mark_tempfile() {
 
 files_cleanup() {
     for file in "${TEMPFILES[@]}" ; do
-	if [ -z "$cw_DEBUG" ]; then
+        if [ -z "$cw_DEBUG" ]; then
             rm $file 2>/dev/null
-	else
-	    action_debug "rm $file"
-	fi
+        else
+            action_debug "rm $file"
+        fi
     done
     for dir in "${TEMPDIRS[@]}" ; do
-	if [ -z "$cw_DEBUG" ]; then
+        if [ -z "$cw_DEBUG" ]; then
             rmdir $dir 2>/dev/null
-	else
-	    action_debug "rmdir $dir"
-	fi
+        else
+            action_debug "rmdir $dir"
+        fi
+    done
+}
+
+files_wait_for_file() {
+    local file tmout tmr
+    file="$1"
+    tmout="$2"
+    while true; do
+        if [ -f "$file" ]; then
+            break
+        elif [ "$tmout" -a $tmr -lt $tmout ]; then
+            tmr=$(($tmr+1))
+            sleep 1
+        else
+            return 1
+        fi
     done
 }
