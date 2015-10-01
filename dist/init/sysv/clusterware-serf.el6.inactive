@@ -8,7 +8,7 @@
 #
 # serf - this script starts and stops the serf service daemon
 #
-# chkconfig: 345 99 1
+# chkconfig: 2345 99 1
 # description:  serf
 # processname: serf
 # pidfile:     /var/run/serf.pid

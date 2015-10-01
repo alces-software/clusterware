@@ -1,12 +1,18 @@
+################################################################################
+##
+## Alces Clusterware - Systemd service unit file
+## Copyright (c) 2015 Alces Software Ltd
+##
+################################################################################
+# Alces Clusterware boot configurator (systemd service unit)
 [Unit]
-Description=Apply clusterware configuration
-Requires=cloud-final.service
-After=cloud-final.service
+Description=Alces Clusterware boot configurator
+After=network.target
 
 [Service]
 Type=oneshot
-Environment=PLUGIN_PATH=/opt/clusterware/etc/handlers
-ExecStart=/opt/clusterware/opt/pluginhook/bin/pluginhook configure
+EnvironmentFile=/etc/xdg/clusterware/config.vars.sh
+ExecStart=$cw_ROOT/libexec/share/configurator
 RemainAfterExit=yes
 TimeoutSec=0
 

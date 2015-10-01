@@ -1,0 +1,49 @@
+#!/bin/sh
+################################################################################
+##
+## Alces Clusterware - SysVInit service file
+## Copyright (c) 2015 Alces Software Ltd
+##
+################################################################################
+#
+# clusterware-configurator - this script performs boot time configuration
+#
+# chkconfig: 2345 99 1
+# description: clusterware-configurator
+#
+# Source function library.
+. /etc/rc.d/init.d/functions
+
+prog=clusterware-configurator
+
+[[ -f /etc/xdg/clusterware/config.vars.sh ]] && . /etc/xdg/clusterware/config.vars.sh
+
+start() {
+    echo -n "Starting $prog: "
+    ${cw_ROOT}/libexec/share/configurator &>/dev/null &
+    retval=$?
+    success
+    echo
+    return $retval
+}
+
+stop() {
+    echo -n "Stopping $prog: "
+    retval=$?
+    success
+    echo
+    return $retval
+}
+
+case "$1" in
+start)
+    $1
+    ;;
+stop)
+    $1
+    ;;
+*)
+    echo "Usage: $0 {start|stop}"
+    exit 2
+esac
+exit 0
