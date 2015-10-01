@@ -23,7 +23,11 @@ if [ "$cw_DEBUG" ]; then
   set -x
 fi
 
-cw_BINNAME="$cw_BINNAME $(basename "$0")"
+if [ "$cw_BINNAME" ]; then
+  cw_BINNAME="$cw_BINNAME $(basename "$0")"
+else
+  cw_BINNAME="$(basename "$0")"
+fi
 
 trap "action_exit 1" TERM INT
 
