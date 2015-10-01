@@ -28,9 +28,9 @@ cw_HANDLER_DEFAULT_REPO_URL="${cw_HANDLER_DEFAULT_REPO_URL:-https://:@github.com
 
 hook_run() {
     local event
-    event=$1
+    event="$1"
     shift
-    "$cw_HOOK_RUNNER" $event "$@"
+    "$cw_HOOK_RUNNER" "$event" "$@"
 }
 
 handler_is_enabled() {
