@@ -33,7 +33,7 @@ if [ ! -f "${src_dir}"/scripts/control.vars.sh ]; then
 	exit 1
     fi
     cleanup=true
-    src_url_base="${alces_SOURCE_URL:-https://raw.githubusercontent.com/alces-software/clusterware}/${alces_SOURCE_BRANCH:-master}"
+    src_url_base="${alces_SOURCE_URL:-https://raw.githubusercontent.com/alces-software/clusterware}/${alces_SOURCE_BRANCH:-master}/scripts"
     mkdir -p "${src_dir}"/scripts/lib
     for a in bootstrap control.vars.sh lib/ui.functions.sh lib/fetch.functions.sh; do
 	curl -# -L "${src_url_base}"/${a} > "${src_dir}"/scripts/$a
