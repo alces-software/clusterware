@@ -26,5 +26,9 @@ echo "tigervnc"
 tar czf ${outdir}/tigervnc.tar.gz opt/tigervnc
 echo "xwd"
 tar czf ${outdir}/xwd.tar.gz opt/xwd
+echo "websockify"
+tar czf ${outdir}/websockify.tar.gz opt/websockify
+echo "jq"
+tar czf ${outdir}/jq.tar.gz opt/jq
 echo "components"
 tar czf ${outdir}/components.tar.gz lib/ruby/.bundle lib/ruby/vendor/ruby

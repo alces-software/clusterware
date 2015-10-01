@@ -25,7 +25,7 @@ detect_pluginhook() {
 
 fetch_pluginhook() {
     title "Fetching pluginhook"
-    if [ "$dep_source" == "fresh" ]; then
+    if fetch_handling_is_source; then
         fetch_source https://github.com/progrium/pluginhook/archive/7b91f7692d3ec494d4945f27d6b88864cd2f4bde.tar.gz pluginhook-source.tar.gz
     else
         fetch_dist pluginhook
@@ -34,7 +34,7 @@ fetch_pluginhook() {
 
 install_pluginhook() {
     title "Installing pluginhook"
-    if [ "$dep_source" == "fresh" ]; then
+    if fetch_handling_is_source; then
         doing 'Extract'
         tar -C "${dep_build}" -xzf "${dep_src}/pluginhook-source.tar.gz"
         say_done $?

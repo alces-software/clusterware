@@ -4,4 +4,4 @@
 ## Copyright (c) 2008-2015 Alces Software Ltd
 ##
 ################################################################################
-export alces_OS="_OS_"
+export cw_DIST="_OS_"

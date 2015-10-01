@@ -21,29 +21,29 @@
 # https://github.com/alces-software/clusterware
 #==============================================================================
 function usage {
-    if [ -f $alces_CMDDIR/help ]; then
+    if [ -f $cw_CMDDIR/help ]; then
         exec $0 help
     else
         # Fallback to something trivial until help is installed!
-        echo "Usage: $alces_BINNAME <command>"
+        echo "Usage: $cw_BINNAME <command>"
     fi
 }
 
-function alces_RUBY_EXEC {
+function cw_RUBY_EXEC {
   eval '
-    if [ "$alces_RUBY" ]; then
-      if [ -x "$alces_RUBY" ]; then
-        exec $alces_RUBY $0 "$@"
+    if [ "$cw_RUBY" ]; then
+      if [ -x "$cw_RUBY" ]; then
+        exec $cw_RUBY $0 "$@"
       else
         echo "ERROR: No ruby environment available."
         exit 1
       fi
     else
-      echo "ERROR: \$alces_RUBY was not set."
+      echo "ERROR: \$cw_RUBY was not set."
       exit 1
     fi'
 }
-export -f alces_RUBY_EXEC
+export -f cw_RUBY_EXEC
 
 function extract_info() {
     info=$(awk -f <(cat <<\EOF
@@ -80,7 +80,7 @@ function display_help {
     cat <<EOF
   [1mNAME[0m:
 
-    $alces_BINNAME $cmd_NAME
+    $cw_BINNAME $cmd_NAME
 
   [1mDESCRIPTION[0m:
 
@@ -92,51 +92,71 @@ EOF
 }
 export -f display_help
 
-export alces_BINNAME="alces"
-export alces_BASE="/opt/clusterware"
-export alces_CMDDIR="$alces_BASE/lib/actions"
-if [ -t 2 ]; then
-    export alces_COLOUR=${alces_COLOUR:-1}
-else
-    export alces_COLOUR=${alces_COLOUR:-0}
-fi
-if [[ ":$alces_FLAGS:" =~ :nocolou?r: || "$TERM" == "linux" ]]; then
-    export alces_COLOUR=0
-fi
-### RUBY
-export alces_RUBY="$alces_BASE/opt/ruby/bin/ruby"
-export alces_RUBYHOME="$alces_BASE/opt/ruby"
-export LD_LIBRARY_PATH="${alces_RUBYHOME}/lib:$LD_LIBRARY_PATH"
-export GEM_HOME="${alces_RUBYHOME}/lib/ruby/gems/2.2.0"
-export GEM_PATH="${alces_RUBYHOME}/lib/ruby/gems/2.2.0"
-
-cmd=$1
-
-shift
-
-if [ "$cmd" == '-h' -o "$cmd" == '--help' ]; then
-    usage
-elif [ -f "$alces_CMDDIR/$cmd" ]; then
-    /bin/bash $alces_CMDDIR/$cmd "$@"
-elif [ "$cmd" ]; then
-    x=("$alces_CMDDIR/$cmd"*)
-
-    if [ $x = "$alces_CMDDIR/$cmd"'*' ]; then
-        # no match
-        echo "$alces_BINNAME: '$cmd' is not a known command. See '$alces_BINNAME --help'."
-    elif [ ${#x[*]} = 1 ]; then
-        # matched one
-        /bin/bash "$alces_CMDDIR/$cmd"* "$@"
-    elif [ ${#x[*]} -gt 1 ]; then
-        # matched > 1
-        echo "$alces_BINNAME: ambiguous command: $cmd"
-        echo "Did you mean one of these?"
-        for a in ${x[*]}; do
-            echo "        `basename $a`"
-        done
-        echo ""
-        exit 1
+setup() {
+    local a xdg_config
+    IFS=: read -a xdg_config <<< "${XDG_CONFIG_HOME:-$HOME/.config}:${XDG_CONFIG_DIRS:-/etc/xdg}"
+    for a in "${xdg_config[@]}"; do
+	if [ -e "${a}"/clusterware/config.vars.sh ]; then
+            source "${a}"/clusterware/config.vars.sh
+            break
+	fi
+    done
+    export cw_ROOT=${cw_ROOT:-/opt/clusterware}
+    export cw_BINNAME="alces"
+    export cw_CMDDIR="$cw_ROOT/libexec/actions"
+    if [ -t 2 ]; then
+	export cw_COLOUR=${cw_COLOUR:-1}
+    else
+	export cw_COLOUR=${cw_COLOUR:-0}
     fi
-else
-    usage
+    if [[ ":$cw_FLAGS:" =~ :nocolou?r: || "$TERM" == "linux" ]]; then
+	export cw_COLOUR=0
+    fi
+    ### RUBY
+    export cw_RUBY="$cw_ROOT/opt/ruby/bin/ruby"
+    export cw_RUBYHOME="$cw_ROOT/opt/ruby"
+    export LD_LIBRARY_PATH="${cw_RUBYHOME}/lib:$LD_LIBRARY_PATH"
+    export GEM_HOME="${cw_RUBYHOME}/lib/ruby/gems/2.2.0"
+    export GEM_PATH="${cw_RUBYHOME}/lib/ruby/gems/2.2.0"
+}
+
+main() {
+    local cmd x a
+    cmd=$1
+    shift
+
+    if [ "$cmd" == '-h' -o "$cmd" == '--help' ]; then
+	usage
+    elif [ -f "$cw_CMDDIR/$cmd" ]; then
+	/bin/bash $cw_CMDDIR/$cmd "$@"
+    elif [ "$cmd" ]; then
+	x=("$cw_CMDDIR/$cmd"*)
+
+	if [ $x = "$cw_CMDDIR/$cmd"'*' ]; then
+            # no match
+            echo "$cw_BINNAME: '$cmd' is not a known command. See '$cw_BINNAME --help'."
+	    exit 1
+	elif [ ${#x[*]} = 1 ]; then
+            # matched one
+            exec /bin/bash "$cw_CMDDIR/$cmd"* "$@"
+	elif [ ${#x[*]} -gt 1 ]; then
+            # matched > 1
+            echo "$cw_BINNAME: ambiguous command: $cmd"
+            echo "Did you mean one of these?"
+            for a in ${x[*]}; do
+		echo "        `basename $a`"
+            done
+            echo ""
+            exit 1
+	fi
+    else
+	usage
+    fi
+}
+
+if [ "$cw_DEBUG" ]; then
+    set -x
 fi
+setup
+source ${cw_ROOT}/lib/functions/core.functions.sh
+main "$@"

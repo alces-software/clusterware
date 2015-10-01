@@ -5,9 +5,9 @@
 ##
 ################################################################################
 if ($?tcsh) then
-	setenv alces_SHELL "tcsh"
+	setenv cw_SHELL "tcsh"
 else
-	setenv alces_SHELL "csh"
+	setenv cw_SHELL "csh"
 endif
 
 set prefix=""

@@ -25,30 +25,30 @@ if [ -d "/opt/clusterware/opt/Modules" ]; then
 fi
 alias mod="alces module"
 
-alces_silence_modules() {
-    export alces_MODULES_VERBOSE_ORIGINAL=${alces_MODULES_VERBOSE}
-    export alces_MODULES_RECORD_ORIGINAL=${alces_MODULES_RECORD}
-    export alces_MODULES_RECORD=0
-    export alces_MODULES_VERBOSE=0
+cw_silence_modules() {
+    export cw_MODULES_VERBOSE_ORIGINAL=${cw_MODULES_VERBOSE}
+    export cw_MODULES_RECORD_ORIGINAL=${cw_MODULES_RECORD}
+    export cw_MODULES_RECORD=0
+    export cw_MODULES_VERBOSE=0
 }
 
-alces_desilence_modules() {
-    if [ "${alces_MODULES_VERBOSE_ORIGINAL}" ]; then
-        export alces_MODULES_VERBOSE=${alces_MODULES_VERBOSE_ORIGINAL}
+cw_desilence_modules() {
+    if [ "${cw_MODULES_VERBOSE_ORIGINAL}" ]; then
+        export cw_MODULES_VERBOSE=${cw_MODULES_VERBOSE_ORIGINAL}
     else
-        unset alces_MODULES_VERBOSE
+        unset cw_MODULES_VERBOSE
     fi
-    unset alces_MODULES_VERBOSE_ORIGINAL
-    if [ "${alces_MODULES_RECORD_ORIGINAL}" ]; then
-        export alces_MODULES_RECORD=${alces_MODULES_RECORD_ORIGINAL}
+    unset cw_MODULES_VERBOSE_ORIGINAL
+    if [ "${cw_MODULES_RECORD_ORIGINAL}" ]; then
+        export cw_MODULES_RECORD=${cw_MODULES_RECORD_ORIGINAL}
     else
-        unset alces_MODULES_RECORD
+        unset cw_MODULES_RECORD
     fi
-    unset alces_MODULES_RECORD_ORIGINAL
+    unset cw_MODULES_RECORD_ORIGINAL
 }
 
-if [ -z "${alces_MODULES_VERBOSE}" ]; then
-    export alces_MODULES_VERBOSE=1
+if [ -z "${cw_MODULES_VERBOSE}" ]; then
+    export cw_MODULES_VERBOSE=1
 fi
 
 # Source modules from home directory
@@ -149,7 +149,7 @@ fi;;
     }
 
     _alces_package_list_expired() {
-        if (($(date +%s)-$alces_PACKAGE_LIST_MTIME > 60)); then
+        if (($(date +%s)-$cw_PACKAGE_LIST_MTIME > 60)); then
             return 0
         else
             return 1
@@ -162,11 +162,11 @@ fi;;
         if ((COMP_CWORD > 2)); then
             case "$prev" in
                 i*)
-                    if [ -z "$alces_PACKAGE_LIST" ] || _alces_package_list_expired; then
-                        alces_PACKAGE_LIST=$(_alces_gridware_list)
-                        alces_PACKAGE_LIST_MTIME=$(date +%s)
+                    if [ -z "$cw_PACKAGE_LIST" ] || _alces_package_list_expired; then
+                        cw_PACKAGE_LIST=$(_alces_gridware_list)
+                        cw_PACKAGE_LIST_MTIME=$(date +%s)
                     fi
-                    COMPREPLY=( $(compgen -W "$alces_PACKAGE_LIST" -- "$cur") )
+                    COMPREPLY=( $(compgen -W "$cw_PACKAGE_LIST" -- "$cur") )
                     ;;
                 p*|c*|d*)
                     # for purge, clean and default, we provide a module list

@@ -1,0 +1,58 @@
+#!/bin/bash
+#==============================================================================
+# Copyright (C) 2015 Stephen F. Norledge and Alces Software Ltd.
+#
+# This file/package is part of Alces Clusterware.
+#
+# Alces Clusterware is free software: you can redistribute it and/or
+# modify it under the terms of the GNU Affero General Public License
+# as published by the Free Software Foundation, either version 3 of
+# the License, or (at your option) any later version.
+#
+# Alces Clusterware is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+# Affero General Public License for more details.
+#
+# You should have received a copy of the GNU Affero General Public License
+# along with this package.  If not, see <http://www.gnu.org/licenses/>.
+#
+# For more information on the Alces Clusterware, please visit:
+# https://github.com/alces-software/clusterware
+#==============================================================================
+require action
+require git
+require hook
+require ui
+require process
+
+main() {
+    local repo url
+    if [ "$1" ]; then
+	repo="$1"
+	url="$2"
+    else
+	repo="${cw_HANDLER_DEFAULT_REPO}"
+	url="${cw_HANDLER_DEFAULT_REPO_URL}"
+    fi
+
+    if [ ! -d "${cw_HANDLER_REPODIR}/${repo}" ]; then
+	if [ -z "$url" ]; then
+	    say "no repository URL was specified for repo: $1"
+	    bail 1
+	fi
+	echo "Initializing handlers: ${repo}"
+	doing 'Clone'
+	git_clone "${url}" "${cw_HANDLER_REPODIR}/${repo}"
+	say_done $?
+    else
+	echo "Updating handlers: ${repo}"
+	doing 'Update'
+	git_update "${cw_HANDLER_REPODIR}/${repo}"
+	say_done $?
+    fi
+    action_cleanup
+}
+
+process_reexec_sudo "$@"
+main "$@"

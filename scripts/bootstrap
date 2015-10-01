@@ -30,16 +30,24 @@ if [ -z "$alces_OS" ]; then
   exit 1
 fi
 
-# XXX - requires curl, tar -- check here
+# Configuration parameters for isolated network propagation
+#export alces_SOURCE_URL=""
+#export alces_DIST_URL=""
+#export alces_REPOS_URL=""
 
-# set alces_SOURCE to either 'fresh' or 'dist'
-#  'fresh' -- build all dependencies
-#  'dist'  -- download prebuilt dependencies
-alces_SOURCE="${alces_SOURCE:-dist}"
+# set alces_FETCH_HANDLING to either 'source' or 'bin'
+#  'source' -- build all dependencies
+#  'bin'    -- download prebuilt dependencies
+alces_FETCH_HANDLING="${alces_FETCH_HANDLING:-bin}"
 
-src_dir="${alces_SRC_DIR:-$(mktemp -d /tmp/clusterware.XXXXXXXX)}"
+src_dir="${alces_SOURCE_DIR:-$(mktemp -d /tmp/clusterware.XXXXXXXX)}"
 
 if [ ! -f "${src_dir}"/scripts/install ]; then
+    if [ -d "${src_dir}" ]; then
+	echo "An incomplete source directory already exists, please remove or specify a different location: ${src_dir}"
+	exit 1
+    fi
+    cleanup=true
     src_url_base="https://github.com/alces-software/clusterware/archive"
     src_url_file="${alces_SOURCE_BRANCH:-master}.tar.gz"
     src_url="${alces_SOURCE_URL:-${src_url_base}/${src_url_file}}"
@@ -52,12 +60,17 @@ if [ ! -f "${src_dir}"/scripts/install ]; then
 [0m
 EOF
     mkdir -p "${src_dir}"
-    curl -L "${src_url}" | \
+    curl -# -L "${src_url}" | \
         tar -C "${src_dir}" --strip-components 1 -xz
 
     if [ $? -gt 0 ]; then
-        echo "Unable to retrieve clusterware source, aborting."
+        echo "Unable to retrieve Alces Clusterware source tree, aborting."
         exit 1
+    fi
+
+    if [ "$alces_REPOS_URL" ]; then
+	curl -# -L "${alces_REPOS_URL}/clusterware-handlers.tar.gz" > "${src_dir}/clusterware-handlers.tar.gz"
+	curl -# -L "${alces_REPOS_URL}/packager-base.tar.gz" > "${src_dir}/packager-base.tar.gz"
     fi
 fi
 
@@ -68,4 +81,7 @@ cat <<EOF
 ===============================================================================
 [0m
 EOF
-bash "${src_dir}/scripts/install" "$alces_OS" "$alces_SOURCE"
+bash "${src_dir}/scripts/install" "$alces_OS" "$alces_FETCH_HANDLING"
+if [ "$cleanup" = "true" ]; then
+    rm -rf "${src_dir}"
+fi

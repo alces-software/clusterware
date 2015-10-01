@@ -41,3 +41,7 @@ fetch_source() {
         say_done $?
     fi
 }
+
+fetch_handling_is_source() {
+    [ "$fetch_handling" == "source" ]
+}

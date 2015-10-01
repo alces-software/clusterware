@@ -19,10 +19,11 @@
 # For more information on the Alces Clusterware, please visit:
 # https://github.com/alces-software/clusterware
 #==============================================================================
-. /opt/clusterware/etc/distro.vars.sh
+. /etc/xdg/clusterware/config.vars.sh
+. "${cw_ROOT}"/etc/distro.vars.sh
 
-if [ -d /opt/clusterware/etc/profile.d ]; then
-    for i in /opt/clusterware/etc/profile.d/*.sh ; do
+if [ -d "${cw_ROOT}"/etc/profile.d ]; then
+    for i in "${cw_ROOT}"/etc/profile.d/*.sh ; do
         if [ -r "$i" ]; then
             if [ "${-#*i}" != "$-" ]; then
                 . "$i"
@@ -31,6 +32,7 @@ if [ -d /opt/clusterware/etc/profile.d ]; then
             fi
         fi
     done
+    unset i
 fi
 
-unset i
+unset cw_ROOT

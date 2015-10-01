@@ -25,7 +25,7 @@ detect_xwd() {
 
 fetch_xwd() {
     title "Fetching xwd"
-    if [ "$dep_source" == "fresh" ]; then
+    if fetch_handling_is_source; then
         fetch_source http://xorg.freedesktop.org/archive/individual/app/xwd-1.0.6.tar.bz2 xwd-source.tar.bz2
     else
         fetch_dist xwd
@@ -34,7 +34,7 @@ fetch_xwd() {
 
 install_xwd() {
     title "Installing xwd"
-    if [ "$dep_source" == "fresh" ]; then
+    if fetch_handling_is_source; then
         doing 'Extract'
         tar -C "${dep_build}" -xjf "${dep_src}/xwd-source.tar.bz2"
         say_done $?

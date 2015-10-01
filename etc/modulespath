@@ -18,4 +18,4 @@
 #     environment variable. You may add as many as you want - just
 #     limited by the maximum variable size of your shell.
 #
-/opt/gridware/etc/$alces_OS/modules
+/opt/gridware/etc/$cw_DIST/modules

@@ -25,7 +25,7 @@ detect_s3cmd() {
 
 fetch_s3cmd() {
     title "Fetching s3cmd"
-    if [ "$dep_source" == "fresh" ]; then
+    if fetch_handling_is_source; then
         fetch_source https://github.com/s3tools/s3cmd/releases/download/v1.6.0/s3cmd-1.6.0.tar.gz s3cmd-source.tar.gz
     else
         fetch_dist s3cmd
@@ -34,7 +34,7 @@ fetch_s3cmd() {
 
 install_s3cmd() {
     title "Installing s3cmd"
-    if [ "$dep_source" == "fresh" ]; then
+    if fetch_handling_is_source; then
         doing 'Extract'
         tar -C "${dep_build}" -xzf "${dep_src}/s3cmd-source.tar.gz"
         say_done $?

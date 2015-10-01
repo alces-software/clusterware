@@ -19,6 +19,14 @@
 # For more information on the Alces Clusterware, please visit:
 # https://github.com/alces-software/clusterware
 #==============================================================================
+require xdg
+
+cw_VNC_SESSIONSDIR="$(xdg_cache)"/clusterware/sessions
+# XXX
+cw_VNC_VNCSERVER="${cw_ROOT}/libexec/session/share/vncserver"
+cw_VNC_BINDIR="${cw_ROOT}/opt/tigervnc/bin"
+cw_VNC_VNCPASSWD="${cw_VNC_BINDIR}/vncpasswd"
+
 vnc_create_password() {
     dd if=/dev/urandom bs=16 count=1 2>/dev/null | base64 | tr -d '/+' | cut -c1-8
 }
@@ -28,7 +36,7 @@ vnc_create_password_file() {
     password="$1"
     sessiondir="$2"
 
-    echo "${password}" | "${VNCPASSWD}" -f > "${sessiondir}/password.dat"
+    echo "${password}" | "${cw_VNC_VNCPASSWD}" -f > "${sessiondir}/password.dat"
     chmod 0600 "${sessiondir}/password.dat"
     files_mark_tempfile "${sessiondir}/password.dat"
 }
@@ -48,11 +56,11 @@ vnc_start_server() {
     sessiondir="$1"
     shift
 
-    $VNCSERVER -autokill \
+    $cw_VNC_VNCSERVER -autokill \
         -sessiondir "${sessiondir}" \
         -sessionscript "${sessiondir}/session.sh" \
         -vncpasswd "${sessiondir}/password.dat" \
-        -exedir "${VNCBIN}" \
+        -exedir "${cw_VNC_BINDIR}" \
         "$@" 2>"${sessiondir}/vncserver.err" > "${sessiondir}/vncserver.out"
 
     files_mark_tempfile "${sessiondir}/vncserver.out"
@@ -66,15 +74,15 @@ vnc_read_vars() {
 }
 
 vnc_write_vars_file() {
-    local sessiondir address display port password metadata_file
-    sessiondir="$1"
+    local sessionid address display port password metadata_file
+    sessionid="$1"
     address="$2"
     display="$3"
     port=$(($display+5900))
     password="$4"
     websocket="$5"
 
-    metadata_file="${sessiondir}/metadata.vars.sh"
+    metadata_file="${cw_VNC_SESSIONSDIR}/${sessionid}/metadata.vars.sh"
 
     files_mark_tempfile "${metadata_file}"
 
@@ -89,30 +97,31 @@ EOF
 }
 
 vnc_write_detail_file() {
-    local sessiondir address display password detail_file
-    sessiondir="$1"
+    local sessionid address display password detail_file
+    sessionid="$1"
     address="$2"
     display="$3"
     password="$4"
 
-    detail_file="${sessiondir}/details.txt"
+    detail_file="${cw_VNC_SESSIONSDIR}/${sessionid}/details.txt"
 
     files_mark_tempfile "${detail_file}"
 
-    vnc_emit_details "$address" "$display" "$password" > "${detail_file}"
+    vnc_emit_details "$sessionid" "$address" "$display" "$password" > "${detail_file}"
     chmod 0600 "${detail_file}"
 }
 
 vnc_emit_details() {
-    local address display password port
-    address="$1"
-    display="$2"
-    password="$3"
+    local sessionid address display password port
+    sessionid="$1"
+    address="$2"
+    display="$3"
+    password="$4"
 
     port=$(($display+5900))
     cat <<EOF
 VNC server started:
-Identifier: $SESSIONID
+Identifier: $sessionid
       Host: $address
       Port: $port
    Display: $display
@@ -132,7 +141,7 @@ EOF
 vnc_kill_server() {
     local sessiondir
     sessiondir="$1"
-    $VNCSERVER -kill -sessiondir ${sessiondir} &> "${sessiondir}/vncserver.kill.log"
+    $cw_VNC_VNCSERVER -kill -sessiondir ${sessiondir} &> "${sessiondir}/vncserver.kill.log"
 }
 
 vnc_cleanup() {
@@ -160,16 +169,16 @@ vnc_session_clean() {
 
         if [ -f "${sessiondir}/starting.txt" ]; then
             if [ ! "$skip_running" ]; then
-                say "session $shortid is starting up - use kill to terminate first!"
+                action_warn "session $shortid is starting up - use kill to terminate first!"
             fi
         elif ! pgrep -F $pidfile &>/dev/null; then
-            say "cleaned session $shortid"
+            action_warn "cleaned session $shortid"
             rm -rf "$sessiondir"
         elif [ ! "$skip_running" ]; then
-            say "session $shortid is still running - use kill to terminate first!"
+            action_warn "session $shortid is still running - use kill to terminate first!"
         fi
     else
-        say "no matching session could be found"
+        action_warn "no matching session could be found"
     fi
 }
 
@@ -182,16 +191,16 @@ vnc_session_kill() {
         pidfile="$sessiondir"/vncserver.pid
         if pgrep -F $pidfile &>/dev/null; then
             if vnc_kill_server "${sessiondir}" &>/dev/null; then
-                say "session ${shortid} has been terminated"
+                action_warn "session ${shortid} has been terminated"
             else
-                say "session ${shortid} could not be terminated"
+                action_warn "session ${shortid} could not be terminated"
                 bail 1
             fi
         else
-            say "session ${shortid} is already dead - use clean to cleanup"
+            action_warn "session ${shortid} is already dead - use clean to cleanup"
         fi
     else
-        say "no matching session could be found"
+        action_warn "no matching session could be found"
     fi
 }
 
@@ -202,24 +211,50 @@ vnc_session_wait() {
         sessionid=$(basename "$sessiondir")
         shortid=$(echo "$sessionid" | cut -f1 -d'-')
         pidfile="$sessiondir"/vncserver.pid
-        say "waiting for session ${shortid} to complete..."
+        action_warn "waiting for session ${shortid} to complete..."
         while pgrep -F $pidfile &>/dev/null; do
             sleep 1
         done
-        say "session ${shortid} completed at $(date "+%Y-%m-%d %H:%M:%S")"
+        action_warn "session ${shortid} completed at $(date "+%Y-%m-%d %H:%M:%S")"
     fi
 }
 
 vnc_find_sessiondir() {
     local sessionid sessiondir
     sessionid="$1"
-    sessiondir=$(echo "${SESSIONSDIR}"/${sessionid}-*)
+    sessiondir=$(echo "${cw_VNC_SESSIONSDIR}"/${sessionid}-*)
     if [ ! -d "${sessiondir}" ]; then
-        sessiondir=$(echo "${SESSIONSDIR}"/${sessionid})
+        sessiondir=$(echo "${cw_VNC_SESSIONSDIR}"/${sessionid})
     fi
     if [ ! -d "${sessiondir}" ]; then
         return 1
     else
         echo "${sessiondir}"
     fi
+}
+
+vnc_each_sessiondir() {
+    local callback sessiondir
+    callback="$1"
+    for sessiondir in "${cw_VNC_SESSIONSDIR}"/*; do
+        if [ -d "$sessiondir" ]; then
+            ${callback} "${sessiondir}"
+        fi
+    done
+}
+
+vnc_no_sessions() {
+    local sessiondir
+    for sessiondir in "${cw_VNC_SESSIONSDIR}"/*; do
+        if [ -d "$sessiondir" ]; then
+            break
+        else
+            return 0
+        fi
+    done
+    return 1
+}
+
+vnc_sessions_dir() {
+    echo "${cw_VNC_SESSIONSDIR}"
 }

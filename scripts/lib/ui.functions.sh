@@ -20,7 +20,7 @@
 # https://github.com/alces-software/clusterware
 #==============================================================================
 # ensure all children die when we do
-trap "/bin/kill -- -$BASHPID &>/dev/null" EXIT INT TERM
+trap "export PGID=\$BASHPID; ( /bin/kill -- -\$PGID &>/dev/null ) &" EXIT INT TERM
 
 toggle_spin() {
         if [ -z "$spin_pid" ]; then

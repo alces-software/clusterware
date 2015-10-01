@@ -4,9 +4,9 @@
 ## Copyright (c) 2008-2015 Alces Software Ltd
 ##
 ################################################################################
-if { [info exists ::env(ALCES_TRACE)] } {
+if { [info exists ::env(CW_TRACE)] } {
     puts stderr " -> $::ModulesCurrentModulefile"
 }
 
-catch {exec /opt/clusterware/bin/alces module aliases} alces_aliases
-eval $alces_aliases
+catch {exec /opt/clusterware/bin/alces module aliases} cw_aliases
+eval $cw_aliases

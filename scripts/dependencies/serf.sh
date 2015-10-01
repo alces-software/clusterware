@@ -25,7 +25,7 @@ detect_serf() {
 
 fetch_serf() {
     title "Fetching Serf"
-    if [ "$dep_source" == "fresh" ]; then
+    if fetch_handling_is_source; then
         fetch_source https://dl.bintray.com/mitchellh/serf/0.6.4_linux_amd64.zip serf-source.zip
     else
         fetch_dist serf
@@ -34,7 +34,7 @@ fetch_serf() {
 
 install_serf() {
     title "Installing Serf"
-    if [ "$dep_source" == "fresh" ]; then
+    if fetch_handling_is_source; then
         doing 'Extract'
         mkdir -p "${target}/opt/serf/bin"
         unzip -d "${target}/opt/serf/bin" "${dep_src}/serf-source.zip" &> "${dep_logs}/serf-install.log"

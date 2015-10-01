@@ -25,7 +25,7 @@ detect_pdsh() {
 
 fetch_pdsh() {
     title "Fetching pdsh"
-    if [ "$dep_source" == "fresh" ]; then
+    if fetch_handling_is_source; then
         fetch_source "https://pdsh.googlecode.com/files/pdsh-2.29.tar.bz2" "pdsh-source.tar.bz2"
     else
         fetch_dist pdsh
@@ -34,7 +34,7 @@ fetch_pdsh() {
 
 install_pdsh() {
     title "Installing pdsh"
-    if [ "$dep_source" == "fresh" ]; then
+    if fetch_handling_is_source; then
         doing 'Extract'
         tar -C "${dep_build}" -xjf "${dep_src}/pdsh-source.tar.bz2"
         say_done $?

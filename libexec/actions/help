@@ -1,0 +1,67 @@
+: '
+: NAME: help
+: SYNOPSIS: Display help and usage information
+: VERSION: 1.0.0
+: '
+#==============================================================================
+# Copyright (C) 2007-2015 Stephen F. Norledge and Alces Software Ltd.
+#
+# This file/package is part of Alces Clusterware.
+#
+# Alces Clusterware is free software: you can redistribute it and/or
+# modify it under the terms of the GNU Affero General Public License
+# as published by the Free Software Foundation, either version 3 of
+# the License, or (at your option) any later version.
+#
+# Alces Clusterware is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+# Affero General Public License for more details.
+#
+# You should have received a copy of the GNU Affero General Public License
+# along with this package.  If not, see <http://www.gnu.org/licenses/>.
+#
+# For more information on the Alces Clusterware, please visit:
+# https://github.com/alces-software/clusterware
+#==============================================================================
+action=$1
+shift
+
+case $action in
+    help|hel|he|h|--help|-h)
+	display_help $0
+	;;
+    ?*)
+	# provide a convenience for those who get "help ACTION" and
+	# "ACTION help" inverted :)
+	exec $cw_ROOT/bin/$cw_BINNAME $action help
+	;;
+    *)
+	cat <<EOF
+Usage: $cw_BINNAME COMMAND [[OPTION]... [ARGS]]
+Perform high performance computing software management activities.
+
+Commands:
+EOF
+	for a in $cw_CMDDIR/*; do
+	    extract_info $a
+	    if [ "$cmd_NAME" ]; then
+		printf "  %-20s  %s\n" "$cw_BINNAME $cmd_NAME" "$cmd_SYNOPSIS."
+	    fi
+	done
+	cat <<EOF
+
+For more help on a particular command run:
+  $cw_BINNAME COMMAND help
+
+Examples:
+  $cw_BINNAME gridware list  Display available HPC software packages.
+  $cw_BINNAME module avail   Display currently available HPC software packages.
+
+Report $cw_BINNAME bugs to support@alces-software.com
+Alces Software home page: <http://alces-software.com/>
+EOF
+#General help using this software: <http://alces-software.com/we/support/>
+#For complete documentation, run: 
+	;;
+esac

@@ -25,7 +25,7 @@ detect_genders() {
 
 fetch_genders() {
     title "Fetching Genders"
-    if [ "$dep_source" == "fresh" ]; then
+    if fetch_handling_is_source; then
         fetch_source "https://github.com/chaos/genders/releases/download/genders-1-22-1/genders-1.22.tar.gz" "genders-source.tar.gz"
     else
         fetch_dist genders
@@ -33,8 +33,8 @@ fetch_genders() {
 }
 
 install_genders() {
-    title "Installing genders"
-    if [ "$dep_source" == "fresh" ]; then
+    title "Installing Genders"
+    if fetch_handling_is_source; then
         doing 'Extract'
         tar -C "${dep_build}" -xzf "${dep_src}/genders-source.tar.gz"
         say_done $?

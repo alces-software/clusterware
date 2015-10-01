@@ -24,7 +24,7 @@ detect_bundler() {
 }
 
 fetch_bundler() {
-    if [ "$dep_source" == "fresh" ]; then
+    if fetch_handling_is_source; then
         title "Fetching Bundler"
         fetch_source https://rubygems.org/downloads/bundler-1.10.6.gem bundler.gem
     fi

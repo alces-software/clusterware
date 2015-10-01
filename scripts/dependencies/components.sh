@@ -20,11 +20,11 @@
 # https://github.com/alces-software/clusterware
 #==============================================================================
 detect_components() {
-    [ -d "${target}/lib/ruby/vendor/ruby" ]
+    [ -d "${target}/lib/ruby/.bundle" ]
 }
 
 fetch_components() {
-    if [ "$dep_source" == "dist" ]; then
+    if ! fetch_handling_is_source; then
         title "Fetching Ruby components"
         fetch_dist 'components'
     fi
@@ -32,7 +32,7 @@ fetch_components() {
 
 install_components() {
     title "Installing Ruby components"
-    if [ "$dep_source" == "fresh" ]; then
+    if fetch_handling_is_source; then
         cd "${target}/lib/ruby"
         doing 'Configure'
 	# XXX - path into opt/clusterware-bundle or something to allow

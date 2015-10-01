@@ -36,7 +36,7 @@ if ($?noglob) then
 endif
 set postfix = "set _exit="'$status'"; $postfix; test 0 = "'$_exit;'
 
-alias module $prefix'eval `'$exec_prefix'/modulecmd '$alces_SHELL' '$histchar'*`; '$postfix
+alias module $prefix'eval `'$exec_prefix'/modulecmd '$cw_SHELL' '$histchar'*`; '$postfix
 
 if (! $?MODULEPATH ) then
     setenv MODULEPATH `sed -n 's/[      #].*$//; /./H; $ { x; s/^\n//; s/\n/:/g; p; }' /opt/clusterware/etc/modulespath`
@@ -52,15 +52,15 @@ endif
 
 alias mod 'module'
 
-if (! $?alces_MODULES_RECORD ) then
-  setenv alces_MODULES_RECORD 0
+if (! $?cw_MODULES_RECORD ) then
+  setenv cw_MODULES_RECORD 0
 endif
 
-alias alces_silence_modules 'setenv alces_MODULES_VERBOSE_ORIGINAL "$alces_MODULES_VERBOSE"; setenv alces_MODULES_VERBOSE 0; setenv alces_MODULES_RECORD_ORIGINAL "$alces_MODULES_RECORD"; setenv alces_MODULES_RECORD 0'
-alias alces_desilence_modules 'setenv alces_MODULES_VERBOSE "$alces_MODULES_VERBOSE_ORIGINAL"; unsetenv alces_MODULES_VERBOSE_ORIGINAL; setenv alces_RECORD_VERBOSE "$alces_MODULES_RECORD_ORIGINAL"; unsetenv alces_MODULES_RECORD_ORIGINAL'
+alias cw_silence_modules 'setenv cw_MODULES_VERBOSE_ORIGINAL "$cw_MODULES_VERBOSE"; setenv cw_MODULES_VERBOSE 0; setenv cw_MODULES_RECORD_ORIGINAL "$cw_MODULES_RECORD"; setenv cw_MODULES_RECORD 0'
+alias cw_desilence_modules 'setenv cw_MODULES_VERBOSE "$cw_MODULES_VERBOSE_ORIGINAL"; unsetenv cw_MODULES_VERBOSE_ORIGINAL; setenv cw_RECORD_VERBOSE "$cw_MODULES_RECORD_ORIGINAL"; unsetenv cw_MODULES_RECORD_ORIGINAL'
 
-if (! $?alces_MODULES_VERBOSE ) then
-    setenv alces_MODULES_VERBOSE 1
+if (! $?cw_MODULES_VERBOSE ) then
+    setenv cw_MODULES_VERBOSE 1
 endif
 
 #source modules file from home dir

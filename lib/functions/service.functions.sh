@@ -35,7 +35,7 @@ service_cleanup() {
     # Terminate each service in SERVICES.
     for name in "${!SERVICES[@]}"; do
         pid=${SERVICES[$name]}
-        debug "Terminating ${name} process (${pid})"
+        action_debug "Terminating ${name} process (${pid})"
         kill ${pid} &> /dev/null
     done
 }

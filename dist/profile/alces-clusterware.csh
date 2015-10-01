@@ -19,11 +19,12 @@
 # For more information on the Alces Clusterware, please visit:
 # https://github.com/alces-software/clusterware
 #==============================================================================
-source /opt/clusterware/etc/distro.vars.csh
+source /etc/xdg/clusterware/config.vars.csh
+source "${cw_ROOT}"/etc/distro.vars.csh
 
-if ( -d /opt/clusterware/etc/profile.d ) then
+if ( -d "${cw_ROOT}"/etc/profile.d ) then
         set nonomatch
-        foreach i ( /opt/clusterware/etc/profile.d/*.csh )
+        foreach i ( "${cw_ROOT}"/etc/profile.d/*.csh )
                 if ( -r "$i" ) then
                                 if ($?prompt) then
                                       source "$i"
@@ -34,3 +35,5 @@ if ( -d /opt/clusterware/etc/profile.d ) then
         end
         unset i nonomatch
 endif
+
+unset cw_ROOT

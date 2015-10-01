@@ -25,7 +25,7 @@ detect_libyaml() {
 
 fetch_libyaml() {
     title "Fetching LibYAML"
-    if [ "$dep_source" == "fresh" ]; then
+    if fetch_handling_is_source; then
         fetch_source http://pyyaml.org/download/libyaml/yaml-0.1.5.tar.gz "yaml-source.tar.gz"
     else
         fetch_dist libyaml
@@ -34,7 +34,7 @@ fetch_libyaml() {
 
 install_libyaml() {
     title "Installing LibYAML"
-    if [ "$dep_source" == "fresh" ]; then
+    if fetch_handling_is_source; then
         doing 'Extract'
         tar -C "${dep_build}" -xzf "${dep_src}/yaml-source.tar.gz"
         say_done $?

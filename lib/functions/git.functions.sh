@@ -19,7 +19,7 @@
 # For more information on the Alces Clusterware, please visit:
 # https://github.com/alces-software/clusterware
 #==============================================================================
-GIT="${alces_BASE}/opt/git/bin/git"
+GIT="${cw_ROOT}/opt/git/bin/git"
 
 git_update() {
     local clonedir
@@ -30,8 +30,7 @@ git_update() {
 }
 
 git_clone() {
-    local repourl
-    local clonedir
+    local repourl clonedir
     repourl="$1"
     clonedir="$2"
     mkdir -p "$(dirname ${clonedir})" && \

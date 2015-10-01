@@ -25,7 +25,7 @@ detect_tigervnc() {
 
 fetch_tigervnc() {
     title "Fetching TigerVNC"
-    if [ "$dep_source" == "fresh" ]; then
+    if fetch_handling_is_source; then
         fetch_source https://github.com/TigerVNC/tigervnc/archive/v1.5.0.tar.gz tigervnc-source.tar.gz
     else
         fetch_dist tigervnc
@@ -34,7 +34,7 @@ fetch_tigervnc() {
 
 install_tigervnc() {
     title "Installing TigerVNC"
-    if [ "$dep_source" == "fresh" ]; then
+    if fetch_handling_is_source; then
         local topdir
 
         doing 'Extract'

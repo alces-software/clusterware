@@ -25,7 +25,7 @@ detect_git() {
 
 fetch_git() {
     title "Fetching Git"
-    if [ "$dep_source" == "fresh" ]; then
+    if fetch_handling_is_source; then
         fetch_source https://www.kernel.org/pub/software/scm/git/git-2.5.2.tar.gz git-source.tar.gz
     else
         fetch_dist git
@@ -34,7 +34,7 @@ fetch_git() {
 
 install_git() {
     title "Installing Git"
-    if [ "$dep_source" == "fresh" ]; then
+    if fetch_handling_is_source; then
         doing 'Extract'
         tar -C "${dep_build}" -xzf "${dep_src}/git-source.tar.gz"
         say_done $?

@@ -25,7 +25,7 @@ detect_modules() {
 
 fetch_modules() {
     title "Fetching Environment Modules"
-    if [ "$dep_source" == "fresh" ]; then
+    if fetch_handling_is_source; then
         fetch_source "http://downloads.sourceforge.net/project/modules/Modules/modules-3.2.10/modules-3.2.10.tar.gz?r=http%3A%2F%2Fsourceforge.net%2Fprojects%2Fmodules%2Ffiles%2FModules%2Fmodules-3.2.10%2F&ts=1415873248&use_mirror=switch" "modules-source.tar.gz"
     else
         fetch_dist modules
@@ -34,7 +34,7 @@ fetch_modules() {
 
 install_modules() {
     title "Installing Environment Modules"
-    if [ "$dep_source" == "fresh" ]; then
+    if fetch_handling_is_source; then
         doing 'Extract'
         tar -C "${dep_build}" -xzf "${dep_src}/modules-source.tar.gz"
         say_done $?

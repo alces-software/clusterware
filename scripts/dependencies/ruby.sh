@@ -28,7 +28,7 @@ detect_ruby() {
 
 fetch_ruby() {
     title "Fetching Ruby"
-    if [ "$dep_source" == "fresh" ]; then
+    if fetch_handling_is_source; then
         fetch_source https://cache.ruby-lang.org/pub/ruby/2.2/ruby-2.2.3.tar.gz ruby-source.tar.gz
     else
         fetch_dist ruby
@@ -37,7 +37,7 @@ fetch_ruby() {
 
 install_ruby() {
     title "Installing Ruby"
-    if [ "$dep_source" == "fresh" ]; then
+    if fetch_handling_is_source; then
         doing 'Extract'
         tar -C "${dep_build}" -xzf "${dep_src}/ruby-source.tar.gz"
         say_done $?

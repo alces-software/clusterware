@@ -4,4 +4,4 @@
 ## Copyright (c) 2008-2015 Alces Software Ltd
 ##
 ################################################################################
-setenv alces_OS "_OS_"
+setenv cw_DIST "_OS_"

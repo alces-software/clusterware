@@ -19,43 +19,43 @@
 # For more information on the Alces Clusterware, please visit:
 # https://github.com/alces-software/clusterware
 #==============================================================================
-HANDLER_PLUGINDIR="${alces_BASE}/etc/handlers"
-export PLUGIN_PATH="$HANDLER_PLUGINDIR"
-HOOK_RUNNER="${alces_BASE}/opt/pluginhook/bin/pluginhook"
-HANDLER_REPODIR="${alces_BASE}/var/lib/handler/repos"
-HANDLER_DEFAULT_REPO="base"
-HANDLER_DEFAULT_REPO_URL="${HANDLER_DEFAULT_REPO_URL:-https://:@github.com/alces-software/clusterware-handlers}"
+cw_HANDLER_PLUGINDIR="${cw_ROOT}/etc/handlers"
+export PLUGIN_PATH="$cw_HANDLER_PLUGINDIR"
+cw_HOOK_RUNNER="${cw_ROOT}/opt/pluginhook/bin/pluginhook"
+cw_HANDLER_REPODIR="${cw_ROOT}/var/lib/handler/repos"
+cw_HANDLER_DEFAULT_REPO="base"
+cw_HANDLER_DEFAULT_REPO_URL="${cw_HANDLER_DEFAULT_REPO_URL:-https://:@github.com/alces-software/clusterware-handlers}"
 
 hook_run() {
     local event
     event=$1
     shift
-    "$HOOK_RUNNER" $event "$@"
+    "$cw_HOOK_RUNNER" $event "$@"
 }
 
 handler_is_enabled() {
     local handler
     handler="$1"
-    [ -e "${HANDLER_PLUGINDIR}/${handler}" ]
+    [ -e "${cw_HANDLER_PLUGINDIR}/${handler}" ]
 }
 
 handler_repo_exists() {
-    [ -d "${HANDLER_REPODIR}/${repo}" ]
+    [ -d "${cw_HANDLER_REPODIR}/${repo}" ]
 }
 
 handler_exists() {
-    [ -d "${HANDLER_REPODIR}/${repo}/${handler}" ]
+    [ -d "${cw_HANDLER_REPODIR}/${repo}/${handler}" ]
 }
 
 handler_enable() {
     local handler
     handler="$1"
-    ln -s "${HANDLER_REPODIR}/${handler}" "${HANDLER_PLUGINDIR}/$(basename ${handler})"
+    ln -s "${cw_HANDLER_REPODIR}/${handler}" "${cw_HANDLER_PLUGINDIR}/$(basename ${handler})"
 }
 
 handler_disable() {
     local handler
     handler="$1"
-    [ -L "${HANDLER_PLUGINDIR}/${handler}" ] &&
-        rm -f "${HANDLER_PLUGINDIR}/${handler}"
+    [ -L "${cw_HANDLER_PLUGINDIR}/${handler}" ] &&
+        rm -f "${cw_HANDLER_PLUGINDIR}/${handler}"
 }

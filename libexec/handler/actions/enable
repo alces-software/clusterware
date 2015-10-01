@@ -1,0 +1,51 @@
+#!/bin/bash
+#==============================================================================
+# Copyright (C) 2015 Stephen F. Norledge and Alces Software Ltd.
+#
+# This file/package is part of Alces Clusterware.
+#
+# Alces Clusterware is free software: you can redistribute it and/or
+# modify it under the terms of the GNU Affero General Public License
+# as published by the Free Software Foundation, either version 3 of
+# the License, or (at your option) any later version.
+#
+# Alces Clusterware is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+# Affero General Public License for more details.
+#
+# You should have received a copy of the GNU Affero General Public License
+# along with this package.  If not, see <http://www.gnu.org/licenses/>.
+#
+# For more information on the Alces Clusterware, please visit:
+# https://github.com/alces-software/clusterware
+#==============================================================================
+require action
+require hook
+require process
+
+main() {
+    local handler repo
+    handler="$1"
+    if [[ $handler == *"/"* ]]; then
+        repo="${handler%%/*}"
+        handler="${handler#*/}"
+    else
+        repo="${cw_HANDLER_DEFAULT_REPO}"
+    fi
+
+    if [ -z "$handler" ]; then
+        action_die "handler not specified"
+    elif ! handler_repo_exists "${repo}"; then
+        action_die "handler repository was not found: $repo"
+    elif ! handler_exists "${repo}/${handler}"; then
+        action_die "handler not found: $repo/$handler"
+    elif handler_is_enabled "${handler}"; then
+        action_die "handler already enabled: ${handler}"
+    fi
+    handler_enable "${repo}/${handler}"
+    action_die "enabled handler: ${repo}/${handler} -> ${handler}" 0
+}
+
+process_reexec_sudo "$@"
+main "$@"

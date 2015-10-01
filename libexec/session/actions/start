@@ -1,0 +1,150 @@
+#!/bin/bash
+#==============================================================================
+# Copyright (C) 2015 Stephen F. Norledge and Alces Software Ltd.
+#
+# This file/package is part of Alces Clusterware.
+#
+# Alces Clusterware is free software: you can redistribute it and/or
+# modify it under the terms of the GNU Affero General Public License
+# as published by the Free Software Foundation, either version 3 of
+# the License, or (at your option) any later version.
+#
+# Alces Clusterware is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+# Affero General Public License for more details.
+#
+# You should have received a copy of the GNU Affero General Public License
+# along with this package.  If not, see <http://www.gnu.org/licenses/>.
+#
+# For more information on the Alces Clusterware, please visit:
+# https://github.com/alces-software/clusterware
+#==============================================================================
+require action
+require files
+require network
+require service
+require vnc
+require hook
+require process
+
+action_cleanup() {
+    if [ "$_CLEANED" ]; then return; fi
+    _CLEANED=true
+    if [ "${_VNC_DISPLAY}" ]; then
+        vnc_cleanup "${_VNC_DISPLAY}" "${_SESSIONDIR}"
+    fi
+    service_cleanup
+    files_cleanup
+}
+
+_start_grabber() {
+    local display log sessionid
+    display=$1
+    sessionid=$2
+
+    log=${_SESSIONDIR}/grabber.log
+    files_mark_tempfile "$log"
+
+    PATH="${_XWDBIN}:$PATH" $_GRABBER $display $sessionid >$log 2>&1 &
+    service_add 'grabber' $!
+}
+
+_start_websocket() {
+    local address port websockify_log
+    address="$1"
+    port="$2"
+    vncport="$3"
+
+    websockify_log="$_SESSIONDIR/websockify.log"
+    files_mark_tempfile "$websockify_log"
+
+    $_WEBSOCKIFY $address:$port localhost:$vncport > "${websockify_log}" 2>&1 &
+    service_add 'websockify' $!
+}
+
+main() {
+    local sessionscript password vnc_vars address terse
+    local -A vnc
+    if [ "$1" == "--terse" ]; then
+        terse=true
+        shift
+    fi
+    sessionscript="$1"
+
+    files_mktempdir "${_SESSIONDIR}"
+    touch "${_SESSIONDIR}/starting.txt"
+    files_mark_tempfile "${_SESSIONDIR}/starting.txt"
+
+    if [ "$sessionscript" == "-" ]; then
+        cat > "${_SESSIONDIR}/session.sh"
+    elif [ -f "$sessionscript" ]; then
+        cp "$sessionscript" "${_SESSIONDIR}/session.sh"
+    elif [ -f "${cw_ROOT}/etc/sessions/${sessionscript}.sh" ]; then
+        cp "${cw_ROOT}/etc/sessions/${sessionscript}.sh" "${_SESSIONDIR}/session.sh"
+    elif [ "$sessionscript" ]; then
+        action_die "unable to locate session script: $sessionscript"
+    else
+        for a in "${cw_ROOT}/etc/sessions"/*.sh; do
+            sessionscripts="$sessionscripts, $(basename $a .sh)"
+        done
+        sessionscripts="${sessionscripts:2}"
+        action_die "no session script provided - specify path or specify one of: $sessionscripts"
+    fi
+
+    files_mark_tempfile "${_SESSIONDIR}/session.sh"
+
+    password=$(vnc_create_password)
+    vnc_session_start "${password}" "${_SESSIONDIR}"
+
+    if ! vnc_vars="$(vnc_read_vars "${_SESSIONDIR}")"; then
+        action_die "VNC server could not be started, unable to locate configuration file."
+    fi
+
+    eval "$vnc_vars"
+    if [ -z "${vnc[HOST]}" ]; then
+	action_die "VNC server could not be started, unable to determine host."
+    fi
+    _VNC_DISPLAY="${vnc[DISPLAY]}"
+    files_mark_tempfile "${vnc[LOG]}"
+    files_mark_tempfile "${vnc[PIDFILE]}"
+
+    address=$(network_get_public_address)
+    vnc[WEBSOCKET]=$(network_get_free_port 41361)
+    _start_websocket "$address" "${vnc[WEBSOCKET]}" "$((5900+${_VNC_DISPLAY}))"
+
+    if [ ! -f "${vnc[PIDFILE]}" ]; then
+        action_die "VNC server did not start successfully, unable to locate process file."
+    fi
+
+    vnc_write_detail_file "${_SESSIONID}" "${address}" "${vnc[DISPLAY]}" "${password}"
+    vnc_write_vars_file "${_SESSIONID}" "${address}" "${vnc[DISPLAY]}" "${password}" "${vnc[WEBSOCKET]}"
+    if [ "$terse" ]; then
+        echo "$_SESSIONID"
+    else
+        vnc_emit_details "${_SESSIONID}" "${address}" "${vnc[DISPLAY]}" "${password}"
+    fi
+
+    hook_run session-start "$_SESSIONID"
+    _start_grabber "${vnc[DISPLAY]}" "$_SESSIONID"
+
+    rm -f "${_SESSIONDIR}/starting.txt"
+    {
+        process_wait_for_pid $(cat "${vnc[PIDFILE]}")
+        hook_run session-end "$_SESSIONID"
+        action_cleanup
+    } &>/dev/null &
+}
+
+_GRABBER="${cw_ROOT}/libexec/session/share/grabber"
+_WEBSOCKIFY="${cw_ROOT}/opt/websockify/websockify"
+_XWDBIN="${cw_ROOT}/opt/xwd/bin"
+
+# XXX cw!
+action_check_progs "${cw_VNCSERVER}" "${cw_VNCPASSWD}" "${_WEBSOCKIFY}" "${_GRABBER}" "${_XWDBIN}/xwd" uuid
+
+_SESSIONID="$(uuid)"
+_SESSIONDIR="$(vnc_sessions_dir)/${_SESSIONID}"
+_VNC_DISPLAY=""
+
+main "$@"

@@ -41,17 +41,17 @@ files_mark_tempfile() {
 
 files_cleanup() {
     for file in "${TEMPFILES[@]}" ; do
-	if [ -z "$alces_DEBUG" ]; then
+	if [ -z "$cw_DEBUG" ]; then
             rm $file 2>/dev/null
 	else
-	    debug "rm $file"
+	    action_debug "rm $file"
 	fi
     done
     for dir in "${TEMPDIRS[@]}" ; do
-	if [ -z "$alces_DEBUG" ]; then
+	if [ -z "$cw_DEBUG" ]; then
             rmdir $dir 2>/dev/null
 	else
-	    debug "rmdir $dir"
+	    action_debug "rmdir $dir"
 	fi
     done
 }
