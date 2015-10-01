@@ -159,16 +159,6 @@ else
 fi
 say_done $?
 
-title "Installing default handlers"
-if [ -d "${target}/etc/handlers/instance" ]; then
-    doing 'Detect'
-else
-    doing 'Configure'
-    "${target}/bin/alces" handler enable instance > "${dep_logs}/handler-enable.log" 2>&1 &&
-      "${target}/bin/alces" handler enable cluster >> "${dep_logs}/handler-enable.log" 2>&1
-fi
-say_done $?
-
 title "Installing Clusterware base configuration"
 doing 'Install'
 mkdir -p /etc/xdg/clusterware
