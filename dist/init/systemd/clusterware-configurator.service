@@ -12,7 +12,7 @@ After=network.target
 [Service]
 Type=oneshot
 EnvironmentFile=/etc/xdg/clusterware/config.vars.sh
-ExecStart=$cw_ROOT/libexec/share/configurator
+ExecStart=/opt/clusterware/libexec/share/configurator
 RemainAfterExit=yes
 TimeoutSec=0
 
