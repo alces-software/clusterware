@@ -35,8 +35,8 @@ setup() {
 
 main() {
     if files_wait_for_file "${cw_ROOT}/etc/config.yml" 300; then
-        run_hook configure "$@"
-        run_hook node-started "$@"
+        hook_run configure "$@"
+        hook_run node-started "$@"
     else
         action_die "unable to load configuration: ${cw_ROOT}/etc/config.yml"
     fi
