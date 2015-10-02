@@ -60,6 +60,7 @@ files_wait_for_file() {
     local file tmout tmr
     file="$1"
     tmout="$2"
+    tmr=0
     while true; do
         if [ -f "$file" ]; then
             break
