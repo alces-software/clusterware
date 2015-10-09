@@ -19,6 +19,56 @@
 # For more information on the Alces Clusterware, please visit:
 # https://github.com/alces-software/clusterware
 #==============================================================================
-xdg_cache() {
+xdg_cache_home() {
     echo "${XDG_CACHE_HOME:-$HOME/.cache}"
+}
+
+xdg_config_home() {
+    echo "${XDG_CONFIG_HOME:-$HOME/.config}"
+}
+
+xdg_config_dirs() {
+    echo "${XDG_CONFIG_DIRS:-/etc/xdg}"
+}
+
+xdg_config_search() {
+    xdg_search "$(xdg_config_home):$(xdg_config_dirs)" "$@"
+}
+
+xdg_data_home() {
+    echo "${XDG_DATA_HOME:-$HOME/.local/share}"
+}
+
+xdg_data_dirs() {
+    echo "${XDG_DATA_DIRS:-/usr/local/share/:/usr/share/}"
+}
+
+xdg_data_search() {
+    xdg_search "$(xdg_data_home):$(xdg_data_dirs)" "$@"
+}
+
+xdg_search() {
+    local haystack_paths xdg_dirs
+    haystack_paths="$1"
+    shift
+    IFS=: read -a xdg_dirs <<< "${haystack_paths}"
+    xdg_find_needle "$@" "${xdg_dirs[@]}"
+}
+
+xdg_find_needle() {
+    local a needle fn
+    needle="$1"
+    fn="$2"
+    shift 2
+    for a in "$@"; do
+        if [ -e "${a}"/"${needle}" ]; then
+            if [ "$fn" ]; then
+                $fn "${a}"/"${needle}"
+            else
+                echo "${a}"/"${needle}"
+            fi
+            return 0
+        fi
+    done
+    return 1
 }

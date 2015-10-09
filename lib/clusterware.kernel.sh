@@ -1,4 +1,3 @@
-#!/bin/bash
 #==============================================================================
 # Copyright (C) 2015 Stephen F. Norledge and Alces Software Ltd.
 #
@@ -20,44 +19,14 @@
 # For more information on the Alces Clusterware, please visit:
 # https://github.com/alces-software/clusterware
 #==============================================================================
-setup() {
-    local a xdg_config
-    IFS=: read -a xdg_config <<< "${XDG_CONFIG_HOME:-$HOME/.config}:${XDG_CONFIG_DIRS:-/etc/xdg}"
-    for a in "${xdg_config[@]}"; do
-        if [ -e "${a}"/clusterware/config.vars.sh ]; then
-            source "${a}"/clusterware/config.vars.sh
-            break
-        fi
-    done
-    if [ -z "${cw_ROOT}" ]; then
-        echo "$0: unable to locate clusterware configuration"
-        exit 1
+function require() {
+    local name
+    declare -A -g cw_LOADED_LIBS
+    name="$1"
+    if [ -z ${cw_LOADED_LIBS[$name]} ]; then
+      source "${cw_ROOT}"/lib/functions/"${name}.functions.sh"
+      cw_LOADED_LIBS[$name]=true
     fi
-    kernel_load
 }
-
-require action
-require handler
-
-take_screenshot() {
-    local display
-    display=$1
-    xwd -root -silent -display :${display} | xwdtopnm | pnmtopng | base64
-}
-
-main() {
-    local display sessionid
-    display="$1"
-    sessionid="$2"
-    action_check_progs base64 xwd xwdtopnm pnmtopng
-    # Give the session a chance to start first.
-    sleep 10
-    while true; do
-        action_warn "$(date --rfc-3339=seconds): Taking screenshot"
-        take_screenshot $display | handler_run_hook session-screenshot "$sessionid"
-        sleep 60
-    done
-}
-
-setup
-main "$@"
+export -f require
+export cw_ROOT

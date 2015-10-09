@@ -29,14 +29,17 @@ setup() {
             break
         fi
     done
-    export cw_ROOT=${cw_ROOT:-/opt/clusterware}
-    source ${cw_ROOT}/lib/functions/core.functions.sh
+    if [ -z "${cw_ROOT}" ]; then
+        echo "$0: unable to locate clusterware configuration"
+        exit 1
+    fi
+    kernel_load
 }
 
 main() {
     if files_wait_for_file "${cw_ROOT}/etc/config.yml" 300; then
-        hook_run configure "$@"
-        hook_run node-started "$@"
+        handler_run_hook configure "$@"
+        handler_run_hook node-started "$@"
     else
         action_die "unable to load configuration: ${cw_ROOT}/etc/config.yml"
     fi
@@ -45,7 +48,7 @@ main() {
 setup
 
 require action
-require hook
+require handler
 require files
 
 main "$@"

@@ -40,12 +40,12 @@ main() {
             else
                 . "${sessiondir}"/metadata.vars.sh
                 cat <<EOF
-Identifier: ${sessionid}
-Display:    ${vnc[DISPLAY]}
-Port:       ${vnc[PORT]}
-Password:   ${vnc[PASSWORD]}
-Address:    ${vnc[ADDRESS]}
-Websocket:  ${vnc[WEBSOCKET]}
+Identity:  ${sessionid}
+Host:      ${vnc[HOST]}
+Port:      ${vnc[PORT]}
+Display:   ${vnc[DISPLAY]}
+Password:  ${vnc[PASSWORD]}
+Websocket: ${vnc[WEBSOCKET]}
 EOF
             fi
         else

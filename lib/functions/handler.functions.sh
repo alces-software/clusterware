@@ -1,4 +1,3 @@
-#!/bin/bash
 #==============================================================================
 # Copyright (C) 2015 Stephen F. Norledge and Alces Software Ltd.
 #
@@ -20,44 +19,43 @@
 # For more information on the Alces Clusterware, please visit:
 # https://github.com/alces-software/clusterware
 #==============================================================================
-setup() {
-    local a xdg_config
-    IFS=: read -a xdg_config <<< "${XDG_CONFIG_HOME:-$HOME/.config}:${XDG_CONFIG_DIRS:-/etc/xdg}"
-    for a in "${xdg_config[@]}"; do
-        if [ -e "${a}"/clusterware/config.vars.sh ]; then
-            source "${a}"/clusterware/config.vars.sh
-            break
-        fi
-    done
-    if [ -z "${cw_ROOT}" ]; then
-        echo "$0: unable to locate clusterware configuration"
-        exit 1
-    fi
-    kernel_load
+require ruby
+require repo
+
+cw_HANDLER_PLUGINDIR="${cw_ROOT}/etc/handlers"
+export PLUGIN_PATH="$cw_HANDLER_PLUGINDIR"
+cw_HANDLER_HOOK_RUNNER="${cw_ROOT}/opt/pluginhook/bin/pluginhook"
+cw_HANDLER_REPODIR="${cw_ROOT}/var/lib/handler/repos"
+cw_HANDLER_DEFAULT_REPO="base"
+cw_HANDLER_DEFAULT_REPO_URL="${cw_HANDLER_DEFAULT_REPO_URL:-https://:@github.com/alces-software/clusterware-handlers}"
+
+handler_run_hook() {
+    local event
+    event="$1"
+    shift
+    "$cw_HANDLER_HOOK_RUNNER" "$event" "$@"
 }
 
-require action
-require handler
-
-take_screenshot() {
-    local display
-    display=$1
-    xwd -root -silent -display :${display} | xwdtopnm | pnmtopng | base64
+handler_is_enabled() {
+    repo_plugin_is_enabled "${cw_HANDLER_PLUGINDIR}" "$@"
 }
 
-main() {
-    local display sessionid
-    display="$1"
-    sessionid="$2"
-    action_check_progs base64 xwd xwdtopnm pnmtopng
-    # Give the session a chance to start first.
-    sleep 10
-    while true; do
-        action_warn "$(date --rfc-3339=seconds): Taking screenshot"
-        take_screenshot $display | handler_run_hook session-screenshot "$sessionid"
-        sleep 60
-    done
+handler_repo_exists() {
+    repo_exists "${cw_HANDLER_REPODIR}" "$@"
 }
 
-setup
-main "$@"
+handler_exists() {
+    repo_plugin_exists "${cw_HANDLER_REPODIR}" "$@"
+}
+
+handler_preinstall() {
+    repo_plugin_preinstall "${cw_HANDLER_REPODIR}" "$@"
+}
+
+handler_enable() {
+    repo_plugin_enable "${cw_HANDLER_REPODIR}" "${cw_HANDLER_PLUGINDIR}" "$@"
+}
+
+handler_disable() {
+    repo_plugin_disable "${cw_HANDLER_PLUGINDIR}" "$@"
+}

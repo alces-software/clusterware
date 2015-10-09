@@ -21,7 +21,7 @@
 # https://github.com/alces-software/clusterware
 #==============================================================================
 require action
-require hook
+require handler
 require process
 
 main() {
@@ -43,6 +43,7 @@ main() {
     elif handler_is_enabled "${handler}"; then
         action_die "handler already enabled: ${handler}"
     fi
+    handler_preinstall "${repo}/${handler}" "${cw_DIST}"
     handler_enable "${repo}/${handler}"
     action_die "enabled handler: ${repo}/${handler} -> ${handler}" 0
 }

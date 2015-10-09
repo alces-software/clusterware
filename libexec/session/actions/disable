@@ -1,3 +1,4 @@
+#!/bin/bash
 #==============================================================================
 # Copyright (C) 2015 Stephen F. Norledge and Alces Software Ltd.
 #
@@ -19,43 +20,22 @@
 # For more information on the Alces Clusterware, please visit:
 # https://github.com/alces-software/clusterware
 #==============================================================================
-cw_HANDLER_PLUGINDIR="${cw_ROOT}/etc/handlers"
-export PLUGIN_PATH="$cw_HANDLER_PLUGINDIR"
-cw_HOOK_RUNNER="${cw_ROOT}/opt/pluginhook/bin/pluginhook"
-cw_HANDLER_REPODIR="${cw_ROOT}/var/lib/handler/repos"
-cw_HANDLER_DEFAULT_REPO="base"
-cw_HANDLER_DEFAULT_REPO_URL="${cw_HANDLER_DEFAULT_REPO_URL:-https://:@github.com/alces-software/clusterware-handlers}"
+require action
+require vnc
+require process
 
-hook_run() {
-    local event
-    event="$1"
-    shift
-    "$cw_HOOK_RUNNER" "$event" "$@"
+main() {
+    local session
+    session="$1"
+
+    if [ -z "$session" ]; then
+        action_die "session not specified"
+    elif ! session_is_enabled "${session}"; then
+        action_die "session is not enabled: ${session}"
+    fi
+    session_disable "${session}"
+    action_die "disabled session: ${session}" 0
 }
 
-handler_is_enabled() {
-    local handler
-    handler="$1"
-    [ -e "${cw_HANDLER_PLUGINDIR}/${handler}" ]
-}
-
-handler_repo_exists() {
-    [ -d "${cw_HANDLER_REPODIR}/${repo}" ]
-}
-
-handler_exists() {
-    [ -d "${cw_HANDLER_REPODIR}/${repo}/${handler}" ]
-}
-
-handler_enable() {
-    local handler
-    handler="$1"
-    ln -s "${cw_HANDLER_REPODIR}/${handler}" "${cw_HANDLER_PLUGINDIR}/$(basename ${handler})"
-}
-
-handler_disable() {
-    local handler
-    handler="$1"
-    [ -L "${cw_HANDLER_PLUGINDIR}/${handler}" ] &&
-        rm -f "${cw_HANDLER_PLUGINDIR}/${handler}"
-}
+process_reexec_sudo "$@"
+main "$@"

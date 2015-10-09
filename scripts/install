@@ -77,7 +77,20 @@ if [ ! -d "{target}/etc" ]; then
     cp -R "${source}/etc" "${target}"
     sed -e "s/_OS_/${os}/g" -i "${target}/etc/packager.yml" "${target}/etc"/distro.vars.*
     rm -f "${target}"/etc/handlers/.gitkeep
+    rm -f "${target}"/etc/session/.gitkeep
 fi
+say_done $?
+
+title "Installing Clusterware base configuration"
+doing 'Install'
+mkdir -p /etc/xdg/clusterware
+cat <<EOF > /etc/xdg/clusterware/config.vars.sh
+cw_ROOT="${target}"
+kernel_load() { source "${target}/lib/clusterware.kernel.sh"; }
+EOF
+cat <<EOF > /etc/xdg/clusterware/config.vars.csh
+set cw_ROOT="${target}"
+EOF
 say_done $?
 
 title "Creating gridware directory structure"
@@ -154,20 +167,24 @@ else
         mkdir -p "${target}"/var/lib/handler/repos/base
         tar -C "${target}"/var/lib/handler/repos/base -xvzf "${source}"/clusterware-handlers.tar.gz &> "${dep_logs}/handler-init.log"
     else
-        "${target}/bin/alces" handler update  &> "${dep_logs}/handler-init.log"
+        "${target}/bin/alces" handler update &>> "${dep_logs}/handler-init.log"
     fi
 fi
 say_done $?
 
-title "Installing Clusterware base configuration"
-doing 'Install'
-mkdir -p /etc/xdg/clusterware
-cat <<EOF > /etc/xdg/clusterware/config.vars.sh
-cw_ROOT="${target}"
-EOF
-cat <<EOF > /etc/xdg/clusterware/config.vars.csh
-set cw_ROOT="${target}"
-EOF
+title "Setting up session base repository"
+if [ -d "${target}/var/lib/sessions/repos" ]; then
+    doing 'Detect'
+else
+    doing 'Initialize'
+    if [ "$alces_REPOS_URL" ]; then
+        mkdir -p "${target}"/var/lib/sessions/repos/base
+        tar -C "${target}"/var/lib/sessions/repos/base -xvzf "${source}"/clusterware-sessions.tar.gz &> "${dep_logs}/session-init.log"
+    else
+        "${target}/bin/alces" session update &> "${dep_logs}/session-init.log"
+    fi
+    "${target}/bin/alces" session enable default &>> "${dep_logs}/session-init.log"
+fi
 say_done $?
 
 title "Installing profile hooks"

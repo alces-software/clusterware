@@ -84,6 +84,10 @@ doing "Gridware"
 git clone https://github.com/alces-software/packager-base.git "${src_dir}"/tmp/repos/packager-base &>/dev/null
 tar -C "${src_dir}"/tmp/repos/packager-base -czf "${prop_dir}/packager-base.tar.gz" .
 say_done $?
+doing "Sessions"
+git clone https://github.com/alces-software/clusterware-sessions.git "${src_dir}"/tmp/repos/clusterware-sessions &>/dev/null
+tar -C "${src_dir}"/tmp/repos/clusterware-sessions -czf "${prop_dir}/clusterware-sessions.tar.gz" .
+say_done $?
 
 title "Preparing bootstrap script"
 doing "Install"

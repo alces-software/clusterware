@@ -30,10 +30,9 @@ if [ -z "$alces_OS" ]; then
   exit 1
 fi
 
-yum install -e0 -y git
-
 src_dir="${alces_SOURCE_DIR:-/root/clusterware}"
 if [ ! -d "${src_dir}"  ]; then
+    yum install -e0 -y git
     # clone the git tree to /root/clusterware
     git clone https://github.com/alces-software/clusterware $src_dir
 fi

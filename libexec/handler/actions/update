@@ -22,34 +22,34 @@
 #==============================================================================
 require action
 require git
-require hook
+require handler
 require ui
 require process
 
 main() {
     local repo url
     if [ "$1" ]; then
-	repo="$1"
-	url="$2"
+        repo="$1"
+        url="$2"
     else
-	repo="${cw_HANDLER_DEFAULT_REPO}"
-	url="${cw_HANDLER_DEFAULT_REPO_URL}"
+        repo="${cw_HANDLER_DEFAULT_REPO}"
+        url="${cw_HANDLER_DEFAULT_REPO_URL}"
     fi
 
     if [ ! -d "${cw_HANDLER_REPODIR}/${repo}" ]; then
-	if [ -z "$url" ]; then
-	    say "no repository URL was specified for repo: $1"
-	    bail 1
-	fi
-	echo "Initializing handlers: ${repo}"
-	doing 'Clone'
-	git_clone "${url}" "${cw_HANDLER_REPODIR}/${repo}"
-	say_done $?
+        if [ -z "$url" ]; then
+            say "no repository URL was specified for repo: $1"
+            bail 1
+        fi
+        echo "Initializing handlers: ${repo}"
+        doing 'Clone'
+        git_clone "${url}" "${cw_HANDLER_REPODIR}/${repo}"
+        say_done $?
     else
-	echo "Updating handlers: ${repo}"
-	doing 'Update'
-	git_update "${cw_HANDLER_REPODIR}/${repo}"
-	say_done $?
+        echo "Updating handlers: ${repo}"
+        doing 'Update'
+        git_update "${cw_HANDLER_REPODIR}/${repo}"
+        say_done $?
     fi
     action_cleanup
 }

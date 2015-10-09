@@ -20,12 +20,17 @@
 # https://github.com/alces-software/clusterware
 #==============================================================================
 require xdg
+require repo
 
-cw_VNC_SESSIONSDIR="$(xdg_cache)"/clusterware/sessions
+cw_VNC_SESSIONSDIR="$(xdg_cache_home)"/clusterware/sessions
 # XXX
 cw_VNC_VNCSERVER="${cw_ROOT}/libexec/session/share/vncserver"
 cw_VNC_BINDIR="${cw_ROOT}/opt/tigervnc/bin"
 cw_VNC_VNCPASSWD="${cw_VNC_BINDIR}/vncpasswd"
+cw_SESSION_PLUGINDIR="${cw_ROOT}/etc/sessions"
+cw_SESSION_DEFAULT_REPO="base"
+cw_SESSION_DEFAULT_REPO_URL="${cw_SESSION_DEFAULT_REPO_URL:-https://:@github.com/alces-software/clusterware-sessions}"
+cw_SESSION_REPODIR="${cw_ROOT}/var/lib/sessions/repos"
 
 vnc_create_password() {
     dd if=/dev/urandom bs=16 count=1 2>/dev/null | base64 | tr -d '/+' | cut -c1-8
@@ -74,9 +79,9 @@ vnc_read_vars() {
 }
 
 vnc_write_vars_file() {
-    local sessionid address display port password metadata_file
+    local sessionid host display port password websocket metadata_file
     sessionid="$1"
-    address="$2"
+    host="$2"
     display="$3"
     port=$(($display+5900))
     password="$4"
@@ -90,48 +95,45 @@ vnc_write_vars_file() {
 vnc[DISPLAY]="${display}"
 vnc[PORT]="${port}"
 vnc[PASSWORD]="${password}"
-vnc[ADDRESS]="${address}"
+vnc[HOST]="${host}"
 vnc[WEBSOCKET]="${websocket}"
 EOF
     chmod 0600 "${metadata_file}"
 }
 
 vnc_write_detail_file() {
-    local sessionid address display password detail_file
+    local sessionid detail_file
     sessionid="$1"
-    address="$2"
-    display="$3"
-    password="$4"
 
     detail_file="${cw_VNC_SESSIONSDIR}/${sessionid}/details.txt"
-
     files_mark_tempfile "${detail_file}"
-
-    vnc_emit_details "$sessionid" "$address" "$display" "$password" > "${detail_file}"
+    vnc_emit_details "$@" > "${detail_file}"
     chmod 0600 "${detail_file}"
 }
 
 vnc_emit_details() {
-    local sessionid address display password port
+    local sessionid host display password websocket port
     sessionid="$1"
-    address="$2"
+    host="$2"
     display="$3"
     password="$4"
-
+    websocket="$5"
     port=$(($display+5900))
+
     cat <<EOF
 VNC server started:
-Identifier: $sessionid
-      Host: $address
+  Identity: $sessionid
+      Host: $host
       Port: $port
    Display: $display
   Password: $password
+ Websocket: $websocket
 
 Depending on your client, you can connect to the session using:
 
-  vnc://${USER}:${password}@${address}:${port}
-  ${address}:${port}
-  ${address}:${display}
+  vnc://${USER}:${password}@${host}:${port}
+  ${host}:${port}
+  ${host}:${display}
 
 If prompted, you should supply the following password: ${password}
 
@@ -149,7 +151,7 @@ vnc_cleanup() {
     display="$1"
     sessiondir="$2"
 
-    debug "terminating VNC server process (:${display})"
+    action_debug "terminating VNC server process (:${display})"
     vnc_kill_server "${sessiondir}" &> "${sessiondir}/vncserver.kill.log"
     files_mark_tempfile "${sessiondir}/vncserver.kill.log"
 }
@@ -257,4 +259,28 @@ vnc_no_sessions() {
 
 vnc_sessions_dir() {
     echo "${cw_VNC_SESSIONSDIR}"
+}
+
+session_is_enabled() {
+    repo_plugin_is_enabled "${cw_SESSION_PLUGINDIR}" "$@"
+}
+
+session_repo_exists() {
+    repo_exists "${cw_SESSION_REPODIR}" "$@"
+}
+
+session_exists() {
+    repo_plugin_exists "${cw_SESSION_REPODIR}" "$@"
+}
+
+session_preinstall() {
+    repo_plugin_preinstall "${cw_SESSION_REPODIR}" "$@"
+}
+
+session_enable() {
+    repo_plugin_enable "${cw_SESSION_REPODIR}" "${cw_SESSION_PLUGINDIR}" "$@"
+}
+
+session_disable() {
+    repo_plugin_disable "${cw_SESSION_PLUGINDIR}" "$@"
 }

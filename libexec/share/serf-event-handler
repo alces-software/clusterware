@@ -29,8 +29,11 @@ setup() {
             break
         fi
     done
-    export cw_ROOT=${cw_ROOT:-/opt/clusterware}
-    source ${cw_ROOT}/lib/functions/core.functions.sh
+    if [ -z "${cw_ROOT}" ]; then
+        echo "$0: unable to locate clusterware configuration"
+        exit 1
+    fi
+    kernel_load
 }
 
 main() {
@@ -43,11 +46,11 @@ main() {
         event=$SERF_EVENT
     fi
 
-    hook_run "$event" "$@"
+    handler_run_hook "$event" "$@"
 }
 
 setup
 
-require hook
+require handler
 
 main "$@"

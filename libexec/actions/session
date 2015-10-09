@@ -50,6 +50,18 @@ case $action in
     i|in|inf|info)
         exec /bin/bash ${cw_ROOT}/libexec/session/actions/info "$@"
         ;;
+    e|en|ena|enab|enabl|enable)
+        exec /bin/bash $cw_ROOT/libexec/session/actions/enable "$@"
+        ;;
+    a|av|ava|avai|avail)
+        exec /bin/bash $cw_ROOT/libexec/session/actions/avail "$@"
+        ;;
+    d|di|dis|disa|disab|disabl|disable)
+        exec /bin/bash $cw_ROOT/libexec/session/actions/disable "$@"
+        ;;
+    u|up|upd|upda|updat|update)
+        exec /bin/bash $cw_ROOT/libexec/session/actions/update "$@"
+        ;;
     *)
         cat <<EOF
 Usage: $cw_BINNAME COMMAND [[OPTION]... [ARGS]]
@@ -64,6 +76,10 @@ printf "  %-20s  %s\n" "$cw_BINNAME start" "Start an interactive VNC session."
 printf "  %-20s  %s\n" "$cw_BINNAME kill" "Terminate an interactive VNC session."
 printf "  %-20s  %s\n" "$cw_BINNAME clean" "Clean inactive interactive VNC sessions."
 printf "  %-20s  %s\n" "$cw_BINNAME wait" "Wait for completion of an interactive VNC session."
+printf "  %-20s  %s\n" "$cw_BINNAME avail" "List installed/available sessions."
+printf "  %-20s  %s\n" "$cw_BINNAME enable" "Enable a session from a repository."
+printf "  %-20s  %s\n" "$cw_BINNAME disable" "Disable a session."
+printf "  %-20s  %s\n" "$cw_BINNAME update" "Update session repository."
 cat <<EOF
 
 Please report bugs to support@alces-software.com

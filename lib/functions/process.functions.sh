@@ -36,3 +36,30 @@ process_reexec_sudo() {
         exec sudo "$0" "$@"
     fi
 }
+
+process_reexec_su() {
+    local uname
+    uname="$1"
+    if [ "$UID" != "$(id -u ${uname})" ]; then
+        exec su ${uname} -c "$0" "$@"
+    fi
+}
+
+process_run() {
+    local name bin
+    name="$1"
+    shift
+    bin=$(type -P ${name})
+    if [ "${bin}" ]; then
+        ${bin} "$@"
+    fi
+}
+
+process_sh() {
+    local script
+    script="$1"
+    shift
+    if [ -f "${script}" ]; then
+        /bin/bash ${script} "$@"
+    fi
+}

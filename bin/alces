@@ -96,21 +96,25 @@ setup() {
     local a xdg_config
     IFS=: read -a xdg_config <<< "${XDG_CONFIG_HOME:-$HOME/.config}:${XDG_CONFIG_DIRS:-/etc/xdg}"
     for a in "${xdg_config[@]}"; do
-	if [ -e "${a}"/clusterware/config.vars.sh ]; then
+        if [ -e "${a}"/clusterware/config.vars.sh ]; then
             source "${a}"/clusterware/config.vars.sh
             break
-	fi
+        fi
     done
-    export cw_ROOT=${cw_ROOT:-/opt/clusterware}
+    if [ -z "${cw_ROOT}" ]; then
+        echo "$0: unable to locate clusterware configuration"
+        exit 1
+    fi
+    kernel_load
     export cw_BINNAME="alces"
     export cw_CMDDIR="$cw_ROOT/libexec/actions"
     if [ -t 2 ]; then
-	export cw_COLOUR=${cw_COLOUR:-1}
+        export cw_COLOUR=${cw_COLOUR:-1}
     else
-	export cw_COLOUR=${cw_COLOUR:-0}
+        export cw_COLOUR=${cw_COLOUR:-0}
     fi
     if [[ ":$cw_FLAGS:" =~ :nocolou?r: || "$TERM" == "linux" ]]; then
-	export cw_COLOUR=0
+        export cw_COLOUR=0
     fi
     ### RUBY
     export cw_RUBY="$cw_ROOT/opt/ruby/bin/ruby"
@@ -126,31 +130,31 @@ main() {
     shift
 
     if [ "$cmd" == '-h' -o "$cmd" == '--help' ]; then
-	usage
+        usage
     elif [ -f "$cw_CMDDIR/$cmd" ]; then
-	/bin/bash $cw_CMDDIR/$cmd "$@"
+        /bin/bash $cw_CMDDIR/$cmd "$@"
     elif [ "$cmd" ]; then
-	x=("$cw_CMDDIR/$cmd"*)
+        x=("$cw_CMDDIR/$cmd"*)
 
-	if [ $x = "$cw_CMDDIR/$cmd"'*' ]; then
+        if [ $x = "$cw_CMDDIR/$cmd"'*' ]; then
             # no match
             echo "$cw_BINNAME: '$cmd' is not a known command. See '$cw_BINNAME --help'."
-	    exit 1
-	elif [ ${#x[*]} = 1 ]; then
+            exit 1
+        elif [ ${#x[*]} = 1 ]; then
             # matched one
             exec /bin/bash "$cw_CMDDIR/$cmd"* "$@"
-	elif [ ${#x[*]} -gt 1 ]; then
+        elif [ ${#x[*]} -gt 1 ]; then
             # matched > 1
             echo "$cw_BINNAME: ambiguous command: $cmd"
             echo "Did you mean one of these?"
             for a in ${x[*]}; do
-		echo "        `basename $a`"
+                echo "        `basename $a`"
             done
             echo ""
             exit 1
-	fi
+        fi
     else
-	usage
+        usage
     fi
 }
 
@@ -158,5 +162,5 @@ if [ "$cw_DEBUG" ]; then
     set -x
 fi
 setup
-source ${cw_ROOT}/lib/functions/core.functions.sh
+
 main "$@"

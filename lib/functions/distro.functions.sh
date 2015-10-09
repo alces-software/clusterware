@@ -44,3 +44,9 @@ distro_start_service() {
         service ${service} start
     fi
 }
+
+distro_is() {
+    local dist
+    dist="$1"
+    [ "${cw_DIST}" == "${dist}" ]
+}

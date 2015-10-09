@@ -20,44 +20,33 @@
 # For more information on the Alces Clusterware, please visit:
 # https://github.com/alces-software/clusterware
 #==============================================================================
-setup() {
-    local a xdg_config
-    IFS=: read -a xdg_config <<< "${XDG_CONFIG_HOME:-$HOME/.config}:${XDG_CONFIG_DIRS:-/etc/xdg}"
-    for a in "${xdg_config[@]}"; do
-        if [ -e "${a}"/clusterware/config.vars.sh ]; then
-            source "${a}"/clusterware/config.vars.sh
-            break
-        fi
-    done
-    if [ -z "${cw_ROOT}" ]; then
-        echo "$0: unable to locate clusterware configuration"
-        exit 1
-    fi
-    kernel_load
-}
-
 require action
-require handler
-
-take_screenshot() {
-    local display
-    display=$1
-    xwd -root -silent -display :${display} | xwdtopnm | pnmtopng | base64
-}
+require vnc
+require process
 
 main() {
-    local display sessionid
-    display="$1"
-    sessionid="$2"
-    action_check_progs base64 xwd xwdtopnm pnmtopng
-    # Give the session a chance to start first.
-    sleep 10
-    while true; do
-        action_warn "$(date --rfc-3339=seconds): Taking screenshot"
-        take_screenshot $display | handler_run_hook session-screenshot "$sessionid"
-        sleep 60
-    done
+    local session repo
+    session="$1"
+    if [[ $session == *"/"* ]]; then
+        repo="${session%%/*}"
+        session="${session#*/}"
+    else
+        repo="${cw_SESSION_DEFAULT_REPO}"
+    fi
+
+    if [ -z "$session" ]; then
+        action_die "session not specified"
+    elif ! session_repo_exists "${repo}"; then
+        action_die "session repository was not found: $repo"
+    elif ! session_exists "${repo}/${session}"; then
+        action_die "session not found: $repo/$session"
+    elif session_is_enabled "${session}"; then
+        action_die "session already enabled: ${session}"
+    fi
+    session_preinstall "${repo}/${session}" "${cw_DIST}"
+    session_enable "${repo}/${session}"
+    action_die "enabled session: ${repo}/${session} -> ${session}" 0
 }
 
-setup
+process_reexec_sudo "$@"
 main "$@"

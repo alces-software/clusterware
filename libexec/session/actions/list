@@ -42,7 +42,7 @@ main() {
                 echo "| ${shortid} | $(printf %7s 'STARTUP') |    - |        - | -                                                     |"
             elif pgrep -F $pidfile &>/dev/null; then
                 . "${sessiondir}"/metadata.vars.sh
-                echo "| ${shortid} | $(printf "%7s" :${vnc[DISPLAY]}) | ${vnc[PORT]} | ${vnc[PASSWORD]} | $(printf %-53s "vnc://${USER}:${vnc[PASSWORD]}@${vnc[ADDRESS]}:${vnc[PORT]}") |"
+                echo "| ${shortid} | $(printf "%7s" :${vnc[DISPLAY]}) | ${vnc[PORT]} | ${vnc[PASSWORD]} | $(printf %-53s "vnc://${USER}:${vnc[PASSWORD]}@${vnc[HOST]}:${vnc[PORT]}") |"
             else
                 echo "| ${shortid} | $(printf %7s '-DEAD-') |    - |        - | -                                                     |"
             fi

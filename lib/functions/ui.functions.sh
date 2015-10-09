@@ -19,8 +19,7 @@
 # For more information on the Alces Clusterware, please visit:
 # https://github.com/alces-software/clusterware
 #==============================================================================
-# ensure all children die when we do
-trap "/bin/kill -- -$BASHPID &>/dev/null" EXIT INT TERM
+require action
 
 toggle_spin() {
         if [ -z "$spin_pid" ]; then
@@ -65,7 +64,7 @@ say_done () {
     toggle_spin
     if [ $1 -gt 0 ]; then
         echo '[31mFAIL[0m'
-        bail 1
+        action_exit 1
     else
         echo '[32mOK[0m '
     fi

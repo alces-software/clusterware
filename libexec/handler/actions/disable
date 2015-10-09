@@ -21,7 +21,7 @@
 # https://github.com/alces-software/clusterware
 #==============================================================================
 require action
-require hook
+require handler
 require process
 
 main() {
@@ -29,9 +29,9 @@ main() {
     handler="$1"
 
     if [ -z "$handler" ]; then
-	action_die "handler not specified"
+        action_die "handler not specified"
     elif ! handler_is_enabled "${handler}"; then
-	action_die "handler is not enabled: ${handler}"
+        action_die "handler is not enabled: ${handler}"
     fi
     handler_disable "${handler}"
     action_die "disabled handler: ${handler}" 0

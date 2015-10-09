@@ -25,7 +25,7 @@ require files
 require network
 require service
 require vnc
-require hook
+require handler
 require process
 
 action_cleanup() {
@@ -51,27 +51,30 @@ _start_grabber() {
 }
 
 _start_websocket() {
-    local address port websockify_log
-    address="$1"
+    local host port websockify_log
+    host="$1"
     port="$2"
     vncport="$3"
 
     websockify_log="$_SESSIONDIR/websockify.log"
     files_mark_tempfile "$websockify_log"
 
-    $_WEBSOCKIFY $address:$port localhost:$vncport > "${websockify_log}" 2>&1 &
+    $_WEBSOCKIFY $host:$port localhost:$vncport > "${websockify_log}" 2>&1 &
     service_add 'websockify' $!
 }
 
 main() {
-    local sessionscript password vnc_vars address terse
+    local sessionscript password vnc_vars host_address terse params sessionvars
     local -A vnc
     if [ "$1" == "--terse" ]; then
         terse=true
         shift
     fi
     sessionscript="$1"
-
+    shift
+    if [ "$1" ]; then
+        have_params=true
+    fi
     files_mktempdir "${_SESSIONDIR}"
     touch "${_SESSIONDIR}/starting.txt"
     files_mark_tempfile "${_SESSIONDIR}/starting.txt"
@@ -80,19 +83,33 @@ main() {
         cat > "${_SESSIONDIR}/session.sh"
     elif [ -f "$sessionscript" ]; then
         cp "$sessionscript" "${_SESSIONDIR}/session.sh"
-    elif [ -f "${cw_ROOT}/etc/sessions/${sessionscript}.sh" ]; then
-        cp "${cw_ROOT}/etc/sessions/${sessionscript}.sh" "${_SESSIONDIR}/session.sh"
+    elif [ -f "${cw_ROOT}/etc/sessions/${sessionscript}/session.sh" ]; then
+        cp "${cw_ROOT}/etc/sessions/${sessionscript}/session.sh" "${_SESSIONDIR}/session.sh"
     elif [ "$sessionscript" ]; then
         action_die "unable to locate session script: $sessionscript"
     else
-        for a in "${cw_ROOT}/etc/sessions"/*.sh; do
-            sessionscripts="$sessionscripts, $(basename $a .sh)"
+        for a in "${cw_ROOT}/etc/sessions"/*; do
+            sessionscripts="$sessionscripts, $(basename $a)"
         done
         sessionscripts="${sessionscripts:2}"
         action_die "no session script provided - specify path or specify one of: $sessionscripts"
     fi
-
     files_mark_tempfile "${_SESSIONDIR}/session.sh"
+
+    if [ "$1" ]; then
+        # we have parameters, so need to pass them into the session script
+        mv "${_SESSIONDIR}/session.sh" "${_SESSIONDIR}/session-runner.sh"
+        chmod 755 ${_SESSIONDIR}/session-runner.sh
+        files_mark_tempfile "${_SESSIONDIR}/session-runner.sh"
+        params=()
+        for a in "$@"; do
+            params+="\"$a\""
+        done
+        cat <<EOF | tee -a /tmp/session.sh.$$ > "${_SESSIONDIR}/session.sh"
+#!/bin/bash
+exec ${_SESSIONDIR}/session-runner.sh ${params}
+EOF
+    fi
 
     password=$(vnc_create_password)
     vnc_session_start "${password}" "${_SESSIONDIR}"
@@ -103,35 +120,36 @@ main() {
 
     eval "$vnc_vars"
     if [ -z "${vnc[HOST]}" ]; then
-	action_die "VNC server could not be started, unable to determine host."
+        action_die "VNC server could not be started, unable to determine host."
     fi
     _VNC_DISPLAY="${vnc[DISPLAY]}"
     files_mark_tempfile "${vnc[LOG]}"
     files_mark_tempfile "${vnc[PIDFILE]}"
 
-    address=$(network_get_public_address)
+    host_address=$(network_get_public_address)
     vnc[WEBSOCKET]=$(network_get_free_port 41361)
-    _start_websocket "$address" "${vnc[WEBSOCKET]}" "$((5900+${_VNC_DISPLAY}))"
+    _start_websocket "$host_address" "${vnc[WEBSOCKET]}" "$((5900+${_VNC_DISPLAY}))"
 
     if [ ! -f "${vnc[PIDFILE]}" ]; then
         action_die "VNC server did not start successfully, unable to locate process file."
     fi
 
-    vnc_write_detail_file "${_SESSIONID}" "${address}" "${vnc[DISPLAY]}" "${password}"
-    vnc_write_vars_file "${_SESSIONID}" "${address}" "${vnc[DISPLAY]}" "${password}" "${vnc[WEBSOCKET]}"
+    sessionvars=("${_SESSIONID}" "${host_address}" "${vnc[DISPLAY]}" "${password}" "${vnc[WEBSOCKET]}")
+    vnc_write_detail_file "${sessionvars[@]}"
+    vnc_write_vars_file "${sessionvars[@]}"
     if [ "$terse" ]; then
         echo "$_SESSIONID"
     else
-        vnc_emit_details "${_SESSIONID}" "${address}" "${vnc[DISPLAY]}" "${password}"
+        vnc_emit_details "${sessionvars[@]}"
     fi
 
-    hook_run session-start "$_SESSIONID"
+    handler_run_hook session-start "$_SESSIONID"
     _start_grabber "${vnc[DISPLAY]}" "$_SESSIONID"
 
     rm -f "${_SESSIONDIR}/starting.txt"
     {
         process_wait_for_pid $(cat "${vnc[PIDFILE]}")
-        hook_run session-end "$_SESSIONID"
+        handler_run_hook session-end "$_SESSIONID"
         action_cleanup
     } &>/dev/null &
 }

@@ -30,7 +30,8 @@ install_runtime_prerequisites() {
         yum -e0 -y install tcl && \
         yum -e0 -y install openssl readline zlib libffi && \
         yum -e0 -y install mesa-libGL libXdmcp pixman xorg-x11-fonts-misc && \
-        yum -e0 -y install uuid netpbm-progs iproute xauth xkeyboard-config xorg-x11-xkb-utils xterm && \
+        yum -e0 -y install uuid netpbm-progs iproute xauth \
+          xkeyboard-config xorg-x11-xkb-utils xorg-x11-server-utils xterm && \
         yum -e0 -y install python-dateutil
 }
 

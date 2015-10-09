@@ -1,4 +1,3 @@
-#!/bin/bash
 #==============================================================================
 # Copyright (C) 2015 Stephen F. Norledge and Alces Software Ltd.
 #
@@ -20,44 +19,31 @@
 # For more information on the Alces Clusterware, please visit:
 # https://github.com/alces-software/clusterware
 #==============================================================================
-setup() {
-    local a xdg_config
-    IFS=: read -a xdg_config <<< "${XDG_CONFIG_HOME:-$HOME/.config}:${XDG_CONFIG_DIRS:-/etc/xdg}"
-    for a in "${xdg_config[@]}"; do
-        if [ -e "${a}"/clusterware/config.vars.sh ]; then
-            source "${a}"/clusterware/config.vars.sh
-            break
-        fi
-    done
-    if [ -z "${cw_ROOT}" ]; then
-        echo "$0: unable to locate clusterware configuration"
-        exit 1
-    fi
-    kernel_load
+webapi_curl() {
+    local url mimetype
+    url="$1"
+    mimetype="$2"
+    shift 2
+
+    curl "$@" -H "Accept: $mimetype" $url
 }
 
-require action
-require handler
+webapi_post() {
+    local url mimetype params
+    url="$1"
+    mimetype="${2:-application/vnd.api+json}"
+    shift 2
 
-take_screenshot() {
-    local display
-    display=$1
-    xwd -root -silent -display :${display} | xwdtopnm | pnmtopng | base64
+    params=(-s -d @- -X POST "$@" -H "Content-Type: $mimetype")
+    webapi_curl "${url}" "${mimetype}" "${params[@]}"
 }
 
-main() {
-    local display sessionid
-    display="$1"
-    sessionid="$2"
-    action_check_progs base64 xwd xwdtopnm pnmtopng
-    # Give the session a chance to start first.
-    sleep 10
-    while true; do
-        action_warn "$(date --rfc-3339=seconds): Taking screenshot"
-        take_screenshot $display | handler_run_hook session-screenshot "$sessionid"
-        sleep 60
-    done
-}
+webapi_delete() {
+    local url mimetype params
+    url="$1"
+    mimetype="${2:-application/vnd.api+json}"
+    shift 2
 
-setup
-main "$@"
+    params=(-s -X DELETE "$@")
+    webapi_curl "${url}" "${mimetype}" "${params[@]}"
+}
