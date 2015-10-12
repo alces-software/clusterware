@@ -61,7 +61,7 @@ if [ "$BASH_VERSION" ]; then
 
         COMPREPLY=()
 
-        cmds=$(ls /opt/clusterware/lib/actions)
+        cmds=$(ls /opt/clusterware/libexec/actions)
 
         if ((COMP_CWORD == 1)); then
             COMPREPLY=( $(compgen -W "$cmds" -- "$cur") )
