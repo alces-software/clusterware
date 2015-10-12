@@ -1,0 +1,111 @@
+#!/bin/bash
+#==============================================================================
+# Copyright (C) 2015 Stephen F. Norledge and Alces Software Ltd.
+#
+# This file/package is part of Alces Clusterware.
+#
+# Alces Clusterware is free software: you can redistribute it and/or
+# modify it under the terms of the GNU Affero General Public License
+# as published by the Free Software Foundation, either version 3 of
+# the License, or (at your option) any later version.
+#
+# Alces Clusterware is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+# Affero General Public License for more details.
+#
+# You should have received a copy of the GNU Affero General Public License
+# along with this package.  If not, see <http://www.gnu.org/licenses/>.
+#
+# For more information on the Alces Clusterware, please visit:
+# https://github.com/alces-software/clusterware
+#==============================================================================
+setup() {
+    local a xdg_config
+    IFS=: read -a xdg_config <<< "${XDG_CONFIG_HOME:-$HOME/.config}:${XDG_CONFIG_DIRS:-/etc/xdg}"
+    for a in "${xdg_config[@]}"; do
+        if [ -e "${a}"/clusterware/config.vars.sh ]; then
+            source "${a}"/clusterware/config.vars.sh
+            break
+        fi
+    done
+    if [ -z "${cw_ROOT}" ]; then
+        echo "$0: unable to locate clusterware configuration"
+        exit 1
+    fi
+    kernel_load
+}
+
+is_target_user() {
+    if [ ${cw_SSH_LOWEST_UID} -gt ${UID} ]; then
+        return 1
+    fi
+    for u in ${cw_SSH_SKIP_USERS}; do
+        if [ "$(id -un)" ==  "${u}" ]; then
+            return 1
+        fi
+    done
+}
+
+has_existing_key() {
+    if ! [ -f "${cw_SSH_DIR}"/"${cw_SSH_KEYNAME}.pub" -a -f "${cw_SSH_DIR}"/"${cw_SSH_KEYNAME}" ]; then
+        return 1
+    fi
+}
+
+create_key() {
+    echo "GENERATING SSH KEYPAIR - $(date)"
+    /usr/bin/ssh-keygen -q -t rsa \
+        -f "${cw_SSH_DIR}"/"${cw_SSH_KEYNAME}" \
+        -C "Alces Clusterware HPC Cluster Key" \
+        -N '' < /dev/null
+}
+
+enable_key() {
+    echo "AUTHORIZING KEYS - $(date)"
+    cat "${cw_SSH_DIR}"/"${cw_SSH_KEYNAME}".pub >> "${cw_SSH_DIR}"/authorized_keys
+    chmod 600 "${cw_SSH_DIR}"/authorized_keys
+}
+
+new_config() {
+    echo "CREATING CONFIG"
+    cat << EOF >> "${cw_SSH_DIR}"/config
+Host *
+  IdentityFile ${cw_SSH_DIR}/${cw_SSH_KEYNAME}
+  StrictHostKeyChecking  no
+EOF
+    chmod 600 "${cw_SSH_DIR}"/config
+}
+
+main() {
+    if is_target_user && ! has_existing_key; then
+        echo -n "Generating SSH keypair: "
+        if create_key >> "${cw_SSH_LOG}"; then
+            echo 'OK'
+            echo -n "Authorizing key: "
+            if enable_key >> "${cw_SSH_LOG}"; then
+                echo 'OK'
+                new_config >> "${cw_SSH_LOG}"
+            else
+                echo 'FAIL'
+            fi
+        else
+            echo 'FAIL'
+        fi
+    fi
+}
+
+
+setup
+
+if [ -f "${cw_ROOT}"/etc/ssh-keygen.vars.sh ]; then
+    . "${cw_ROOT}"/etc/ssh-keygen.vars.sh
+fi
+
+cw_SSH_LOWEST_UID=${cw_SSH_LOWEST_UID:-500}
+cw_SSH_SKIP_USERS="${cw_SSH_SKIP_USERS:-root alces}"
+cw_SSH_KEYNAME="${cw_SSH_KEYNAME:-id_alcescluster}"
+cw_SSH_DIR="${cw_SSH_DIR:-$HOME/.ssh}"
+cw_SSH_LOG="${cw_SSH_LOG:-$HOME/clusterware-ssh-keygen.log}"
+
+main
