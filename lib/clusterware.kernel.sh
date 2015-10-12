@@ -21,11 +21,15 @@
 #==============================================================================
 function require() {
     local name
-    declare -A -g cw_LOADED_LIBS
     name="$1"
+    if [ "${BASH_VERSINFO[0]}" == "4" -a "${BASH_VERSINFO[1]}" == "2" ]; then
+        declare -A -g cw_LOADED_LIBS
+    elif [ -z "$cw_LOADED_LIBS" ]; then
+        cw_LOADED_LIBS="" declare -A cw_LOADED_LIBS
+    fi
     if [ -z ${cw_LOADED_LIBS[$name]} ]; then
-      source "${cw_ROOT}"/lib/functions/"${name}.functions.sh"
-      cw_LOADED_LIBS[$name]=true
+        source "${cw_ROOT}"/lib/functions/"${name}.functions.sh"
+        cw_LOADED_LIBS[$name]=true
     fi
 }
 export -f require
