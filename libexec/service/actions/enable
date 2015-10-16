@@ -50,8 +50,11 @@ main() {
     elif ! serviceware_has_component "${repo}/${service}" "${component}"; then
         action_die "service does not provide component: ${service}/${component}"
     fi
-    serviceware_enable_component "${repo}/${service}" "${component}" "${cw_DIST}"
-    action_die "enabled service: ${repo}/${service}/${component} -> ${service}-${component}" 0
+    if serviceware_enable_component "${repo}/${service}" "${component}" "${cw_DIST}"; then
+        action_die "enabled service: ${repo}/${service}/${component} -> ${service}-${component}" 0
+    else
+        action_die "service could not be enabled: ${repo}/${service}/${component}" 1
+    fi
 }
 
 process_reexec_sudo "$@"

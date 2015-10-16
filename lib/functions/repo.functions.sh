@@ -44,7 +44,7 @@ repo_plugin_exists() {
 }
 
 repo_plugin_install() {
-    local repodir plugin distro installer
+    local repodir plugin distro installer exitcode
     repodir="$1"
     plugin="$2"
     distro="$3"
@@ -53,7 +53,9 @@ repo_plugin_install() {
         repo_generate_script "${repodir}/${plugin}" "${installer}" "${distro}" "install"
         cd "${cw_ROOT}"
         /bin/bash "${installer}" 2>&1 | sed 's/^/  >>> /g'
+        exitcode=$?
         rm -f "${installer}"
+        return $exitcode
     fi
 }
 

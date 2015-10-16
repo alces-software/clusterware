@@ -67,8 +67,13 @@ serviceware_enable_component() {
         repo_generate_script "${cw_SERVICEWARE_REPODIR}/${repodir}/${service}" "${installer}" "${distro}" "component-${component}"
         cd "${cw_ROOT}"
         /bin/bash "${installer}" 2>&1 | sed 's/^/  >>> /g'
+        exitcode=$?
         rm -f "${installer}"
-        touch "${cw_SERVICEWARE_PLUGINDIR}/$(basename ${service})-${component}"
+        if [ $exitcode -gt 0 ]; then
+            return $exitcode
+        else
+            touch "${cw_SERVICEWARE_PLUGINDIR}/$(basename ${service})-${component}"
+        fi
     fi
 }
 
