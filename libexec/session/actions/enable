@@ -43,7 +43,7 @@ main() {
     elif session_is_enabled "${session}"; then
         action_die "session already enabled: ${session}"
     fi
-    session_preinstall "${repo}/${session}" "${cw_DIST}"
+    session_install "${repo}/${session}" "${cw_DIST}"
     session_enable "${repo}/${session}"
     action_die "enabled session: ${repo}/${session} -> ${session}" 0
 }

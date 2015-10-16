@@ -19,3 +19,4 @@
 #     limited by the maximum variable size of your shell.
 #
 /opt/gridware/etc/$cw_DIST/modules
+/opt/clusterware/etc/modules

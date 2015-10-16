@@ -78,6 +78,7 @@ if [ ! -d "{target}/etc" ]; then
     sed -e "s/_OS_/${os}/g" -i "${target}/etc/packager.yml" "${target}/etc"/distro.vars.*
     rm -f "${target}"/etc/handlers/.gitkeep
     rm -f "${target}"/etc/session/.gitkeep
+    rm -f "${target}"/etc/services/.gitkeep
 fi
 say_done $?
 
@@ -184,6 +185,20 @@ else
         "${target}/bin/alces" session update &> "${dep_logs}/session-init.log"
     fi
     "${target}/bin/alces" session enable default &>> "${dep_logs}/session-init.log"
+fi
+say_done $?
+
+title "Setting up services base repository"
+if [ -d "${target}/var/lib/services/repos" ]; then
+    doing 'Detect'
+else
+    doing 'Initialize'
+    if [ "$alces_REPOS_URL" ]; then
+        mkdir -p "${target}"/var/lib/services/repos/base
+        tar -C "${target}"/var/lib/services/repos/base -xvzf "${source}"/clusterware-services.tar.gz &> "${dep_logs}/services-init.log"
+    else
+        "${target}/bin/alces" service update &> "${dep_logs}/services-init.log"
+    fi
 fi
 say_done $?
 

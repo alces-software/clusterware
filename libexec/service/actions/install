@@ -21,31 +21,30 @@
 # https://github.com/alces-software/clusterware
 #==============================================================================
 require action
-require handler
+require serviceware
 require process
 
 main() {
-    local handler repo
-    handler="$1"
-    if [[ $handler == *"/"* ]]; then
-        repo="${handler%%/*}"
-        handler="${handler#*/}"
+    local service repo
+    service="$1"
+    if [[ $service == *"/"* ]]; then
+        repo="${service%%/*}"
+        service="${service#*/}"
     else
-        repo="${cw_HANDLER_DEFAULT_REPO}"
+        repo="${cw_SERVICEWARE_DEFAULT_REPO}"
     fi
 
-    if [ -z "$handler" ]; then
-        action_die "handler not specified"
-    elif ! handler_repo_exists "${repo}"; then
-        action_die "handler repository was not found: $repo"
-    elif ! handler_exists "${repo}/${handler}"; then
-        action_die "handler not found: $repo/$handler"
-    elif handler_is_enabled "${handler}"; then
-        action_die "handler already enabled: ${handler}"
+    if [ -z "$service" ]; then
+        action_die "service not specified"
+    elif ! serviceware_repo_exists "${repo}"; then
+        action_die "serviceware repository was not found: $repo"
+    elif ! serviceware_exists "${repo}/${service}"; then
+        action_die "service not found: $repo/$service"
+    elif serviceware_is_installed "${service}"; then
+        action_die "service already installed: ${service}"
     fi
-    handler_install "${repo}/${handler}" "${cw_DIST}"
-    handler_enable "${repo}/${handler}"
-    action_die "enabled handler: ${repo}/${handler} -> ${handler}" 0
+    serviceware_install "${repo}/${service}" "${cw_DIST}"
+    action_die "installed serviceware: ${repo}/${service} -> ${service}" 0
 }
 
 process_reexec_sudo "$@"

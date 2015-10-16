@@ -71,6 +71,7 @@ EOF
     if [ "$alces_REPOS_URL" ]; then
         curl -# -L "${alces_REPOS_URL}/clusterware-handlers.tar.gz" > "${src_dir}/clusterware-handlers.tar.gz"
         curl -# -L "${alces_REPOS_URL}/clusterware-sessions.tar.gz" > "${src_dir}/clusterware-sessions.tar.gz"
+        curl -# -L "${alces_REPOS_URL}/clusterware-services.tar.gz" > "${src_dir}/clusterware-services.tar.gz"
         curl -# -L "${alces_REPOS_URL}/packager-base.tar.gz" > "${src_dir}/packager-base.tar.gz"
     fi
 fi

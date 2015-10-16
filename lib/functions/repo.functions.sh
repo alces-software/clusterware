@@ -43,27 +43,17 @@ repo_plugin_exists() {
     [ -d "${repodir}/${repo}/${plugin}" ]
 }
 
-repo_plugin_preinstall() {
-    local repodir plugin distro preinstall
+repo_plugin_install() {
+    local repodir plugin distro installer
     repodir="$1"
     plugin="$2"
     distro="$3"
     if [ -f "${repodir}/${plugin}/metadata.yml" ]; then
-        preinstall="$(mktemp /tmp/clusterware-preinstall.XXXXXXXX.sh)"
-        ruby_run <<RUBY
-require 'yaml'
-
-config = YAML.load_file('${repodir}/${plugin}/metadata.yml')
-preinstall = ""
-if config.key?('preinstall')
-  preinstall << (config['preinstall']['${cw_DIST}'] || '')
-  preinstall << "\n" << (config['preinstall']['_'] || '')
-end
-File.write('${preinstall}', preinstall)
-RUBY
+        installer="$(mktemp /tmp/clusterware-installer.XXXXXXXX.sh)"
+        repo_generate_script "${repodir}/${plugin}" "${installer}" "${distro}" "install"
         cd "${cw_ROOT}"
-        /bin/bash "${preinstall}"
-        rm -f "${preinstall}"
+        /bin/bash "${installer}" 2>&1 | sed 's/^/  >>> /g'
+        rm -f "${installer}"
     fi
 }
 
@@ -81,4 +71,37 @@ repo_plugin_disable() {
     plugin="$2"
     [ -L "${plugindir}/${plugin}" ] &&
         rm -f "${plugindir}/${plugin}"
+}
+
+repo_generate_script() {
+    local metadata_path script distro key
+    metadata_path="$1"
+    script="$2"
+    distro="$3"
+    key="$4"
+    ruby_run <<RUBY
+require 'yaml'
+
+config = YAML.load_file('${metadata_path}/metadata.yml')
+installer = ". /etc/profile.d/alces-clusterware.sh"
+installer << "\n" << 'cw_ROOT=${cw_ROOT}'
+installer << "\n" << 'cd ${metadata_path}'
+if config.key?('${key}')
+  install_meta = config['${key}']
+  installer << "\n" << (config['${key}']['${distro}'] || '')
+  installer << "\n" << (config['${key}']['_'] || '')
+end
+File.write('${script}', installer)
+RUBY
+}
+
+repo_has_script() {
+    local metadata_path key
+    metadata_path="$1"
+    key="$2"
+    ruby_run <<RUBY
+require 'yaml'
+config = YAML.load_file('${metadata_path}/metadata.yml')
+exit(1) unless config.key?('${key}')
+RUBY
 }

@@ -273,8 +273,8 @@ session_exists() {
     repo_plugin_exists "${cw_SESSION_REPODIR}" "$@"
 }
 
-session_preinstall() {
-    repo_plugin_preinstall "${cw_SESSION_REPODIR}" "$@"
+session_install() {
+    repo_plugin_install "${cw_SESSION_REPODIR}" "$@"
 }
 
 session_enable() {

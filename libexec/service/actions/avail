@@ -21,32 +21,23 @@
 # https://github.com/alces-software/clusterware
 #==============================================================================
 require action
-require handler
-require process
+require serviceware
 
 main() {
-    local handler repo
-    handler="$1"
-    if [[ $handler == *"/"* ]]; then
-        repo="${handler%%/*}"
-        handler="${handler#*/}"
-    else
-        repo="${cw_HANDLER_DEFAULT_REPO}"
-    fi
-
-    if [ -z "$handler" ]; then
-        action_die "handler not specified"
-    elif ! handler_repo_exists "${repo}"; then
-        action_die "handler repository was not found: $repo"
-    elif ! handler_exists "${repo}/${handler}"; then
-        action_die "handler not found: $repo/$handler"
-    elif handler_is_enabled "${handler}"; then
-        action_die "handler already enabled: ${handler}"
-    fi
-    handler_install "${repo}/${handler}" "${cw_DIST}"
-    handler_enable "${repo}/${handler}"
-    action_die "enabled handler: ${repo}/${handler} -> ${handler}" 0
+    local a b c service reponame enabled installed
+    for a in "${cw_SERVICEWARE_REPODIR}"/*; do
+        reponame=$(basename "$a")
+        for b in "${a}"/*; do
+            service="$(basename "$b")"
+            if serviceware_is_installed "${service}"; then
+                installed='*'
+            else
+                installed=' '
+            fi
+            echo -e "[${installed}] \e[38;5;68m${reponame}\e[0m/\e[38;5;221m$(basename "$b")\e[0m"
+        done
+    done
+    action_cleanup
 }
 
-process_reexec_sudo "$@"
 main "$@"

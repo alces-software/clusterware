@@ -48,8 +48,8 @@ handler_exists() {
     repo_plugin_exists "${cw_HANDLER_REPODIR}" "$@"
 }
 
-handler_preinstall() {
-    repo_plugin_preinstall "${cw_HANDLER_REPODIR}" "$@"
+handler_install() {
+    repo_plugin_install "${cw_HANDLER_REPODIR}" "$@"
 }
 
 handler_enable() {

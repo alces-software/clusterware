@@ -21,31 +21,37 @@
 # https://github.com/alces-software/clusterware
 #==============================================================================
 require action
-require handler
+require git
+require serviceware
+require ui
 require process
 
 main() {
-    local handler repo
-    handler="$1"
-    if [[ $handler == *"/"* ]]; then
-        repo="${handler%%/*}"
-        handler="${handler#*/}"
+    local repo url
+    if [ "$1" ]; then
+        repo="$1"
+        url="$2"
     else
-        repo="${cw_HANDLER_DEFAULT_REPO}"
+        repo="${cw_SERVICEWARE_DEFAULT_REPO}"
+        url="${cw_SERVICEWARE_DEFAULT_REPO_URL}"
     fi
 
-    if [ -z "$handler" ]; then
-        action_die "handler not specified"
-    elif ! handler_repo_exists "${repo}"; then
-        action_die "handler repository was not found: $repo"
-    elif ! handler_exists "${repo}/${handler}"; then
-        action_die "handler not found: $repo/$handler"
-    elif handler_is_enabled "${handler}"; then
-        action_die "handler already enabled: ${handler}"
+    if [ ! -d "${cw_SERVICEWARE_REPODIR}/${repo}" ]; then
+        if [ -z "$url" ]; then
+            say "no repository URL was specified for repo: $1"
+            bail 1
+        fi
+        echo "Initializing serviceware: ${repo}"
+        doing 'Clone'
+        git_clone "${url}" "${cw_SERVICEWARE_REPODIR}/${repo}"
+        say_done $?
+    else
+        echo "Updating serviceware: ${repo}"
+        doing 'Update'
+        git_update "${cw_SERVICEWARE_REPODIR}/${repo}"
+        say_done $?
     fi
-    handler_install "${repo}/${handler}" "${cw_DIST}"
-    handler_enable "${repo}/${handler}"
-    action_die "enabled handler: ${repo}/${handler} -> ${handler}" 0
+    action_cleanup
 }
 
 process_reexec_sudo "$@"
