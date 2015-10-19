@@ -44,7 +44,8 @@ install_pdsh() {
         doing 'Configure'
         ./configure --prefix="${target}/opt/pdsh" --with-ssh \
             --with-rcmd-rank-list=ssh,rsh,exec \
-	    --with-genders \
+            --with-genders \
+            --with-readline \
             CPPFLAGS="-I${target}/opt/genders/include" \
             LDFLAGS="-L${target}/opt/genders/lib" \
             &> "${dep_logs}/pdsh-configure.log"
