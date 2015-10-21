@@ -28,7 +28,7 @@ namespace eval ::alces {
     }
 
     proc pretty {module} {
-        if {[alces getenv alces_COLOUR 0]} {
+        if {[alces getenv cw_COLOUR 0]} {
             set p [split $module "/"]
             set reset {[0m}
             set s ""
@@ -90,7 +90,7 @@ namespace eval ::alces {
 
 interp hide {} conflict module-conflict
 interp hide {} prereq module-prereq
-if {[alces getenv alces_COLOUR 0]} {
+if {[alces getenv cw_COLOUR 0]} {
     set ok {[0;32mOK[0m}
     set skipped {[0;33mSKIPPED[0m}
     set failed {[0;31mFAILED[0m}
@@ -112,8 +112,8 @@ proc ::conflict {module} {
             # query LOADEDMODULES environment variable for the precise module that conflicts
             set existing [extract-current ${module}]
             set msg "alternative module ([alces pretty $existing]) already loaded"
-            if { [alces getenv alces_INTERNAL] != "" } {
-                set ::env(alces_INTERNAL_RESULT) $msg
+            if { [alces getenv cw_INTERNAL] != "" } {
+                set ::env(cw_INTERNAL_RESULT) $msg
             } {
                 puts stderr "Unable to load [alces pretty [module-info name]] -- ${msg}."
             }
@@ -129,7 +129,7 @@ proc ::prereq {module} {
         ::module-log error null
         if { [catch {interp invokehidden {} -global module-prereq $module}] } {
             ::module-log error stderr
-            if { [alces getenv alces_INTERNAL 0] == 0 } {
+            if { [alces getenv cw_INTERNAL 0] == 0 } {
                 puts stderr "Required module ($module) could not be loaded."
             }
             exit 1
@@ -139,41 +139,41 @@ proc ::prereq {module} {
 
 proc ::process {body} {
     set original_processing 0
-    if { [alces getenv alces_MODULES_VERBOSE 0] } {
+    if { [alces getenv cw_MODULES_VERBOSE 0] } {
 	variable ok
-	set original_branch [alces getenv alces_INTERNAL_BRANCH]
-	set original_trunk [alces getenv alces_INTERNAL_TRUNK]
+	set original_branch [alces getenv cw_INTERNAL_BRANCH]
+	set original_trunk [alces getenv cw_INTERNAL_TRUNK]
 	processing
-	if { [info exists ::env(alces_INTERNAL_PROCESSING)] == 0 } {
-	    set ::env(alces_INTERNAL_PROCESSING) true
+	if { [info exists ::env(cw_INTERNAL_PROCESSING)] == 0 } {
+	    set ::env(cw_INTERNAL_PROCESSING) true
 	    set original_processing 1
 	}
-	set ::env(alces_INTERNAL_BRANCH) "[alces getenv alces_INTERNAL_TRUNK] | -- "
-	set ::env(alces_INTERNAL_TRUNK) "[alces getenv alces_INTERNAL_TRUNK] |   "
+	set ::env(cw_INTERNAL_BRANCH) "[alces getenv cw_INTERNAL_TRUNK] | -- "
+	set ::env(cw_INTERNAL_TRUNK) "[alces getenv cw_INTERNAL_TRUNK] |   "
 	eval $body
-	set ::env(alces_INTERNAL_BRANCH) $original_branch
-	set ::env(alces_INTERNAL_TRUNK) $original_trunk
+	set ::env(cw_INTERNAL_BRANCH) $original_branch
+	set ::env(cw_INTERNAL_TRUNK) $original_trunk
 	if { [module-info mode load] && $original_processing == 1 } {
-	    puts stderr "[alces getenv alces_INTERNAL_TRUNK] |\n[alces getenv alces_INTERNAL_TRUNK] $ok"
-	    unset ::env(alces_INTERNAL_PROCESSING)
+	    puts stderr "[alces getenv cw_INTERNAL_TRUNK] |\n[alces getenv cw_INTERNAL_TRUNK] $ok"
+	    unset ::env(cw_INTERNAL_PROCESSING)
 	}
     } {
-	if { [info exists ::env(alces_INTERNAL_PROCESSING)] == 0 } {
-	    set ::env(alces_INTERNAL_PROCESSING) true
+	if { [info exists ::env(cw_INTERNAL_PROCESSING)] == 0 } {
+	    set ::env(cw_INTERNAL_PROCESSING) true
 	    set original_processing 1
 	}
 	eval $body
 	if { [module-info mode load] && $original_processing == 1 } {
-	    unset ::env(alces_INTERNAL_PROCESSING)
+	    unset ::env(cw_INTERNAL_PROCESSING)
 	}
     }
 
-    if { [module-info mode load] && ( [info exists ::env(alces_MODULES_RECORD)] == 0 || $::env(alces_MODULES_RECORD) != 0 ) } {
+    if { [module-info mode load] && ( [info exists ::env(cw_MODULES_RECORD)] == 0 || $::env(cw_MODULES_RECORD) != 0 ) } {
 	set m [module-info name]
-	if { [info exists ::env(alces_LOADED_MODULES)] == 0 } {
-	    set ::env(alces_LOADED_MODULES) $m
+	if { [info exists ::env(cw_LOADED_MODULES)] == 0 } {
+	    set ::env(cw_LOADED_MODULES) $m
 	} else {
-	    set ::env(alces_LOADED_MODULES) $::env(alces_LOADED_MODULES):$m
+	    set ::env(cw_LOADED_MODULES) $::env(cw_LOADED_MODULES):$m
 	}
 
 	if { [info exists original_processing] && $original_processing == 1 } {
@@ -181,10 +181,10 @@ proc ::process {body} {
 		set t [clock clicks -milliseconds]
 		set filename /opt/gridware/etc/.access/$t.$::env(USER).[pid].txt
 		set fileId [open $filename "w"]
-		puts $fileId "$t [pid] $::env(USER) $::env(alces_LOADED_MODULES)"
+		puts $fileId "$t [pid] $::env(USER) $::env(cw_LOADED_MODULES)"
 		close $fileId
 	    }
-	    unset ::env(alces_LOADED_MODULES)
+	    unset ::env(cw_LOADED_MODULES)
 	}
     }
 }
@@ -202,7 +202,7 @@ proc ::alt-is-loaded {module} {
     for { set i [expr [llength $p] - 2] } { $i >= 1 } { incr i -1 } {
         set m [join [lrange $p 0 $i] "/"]
         if { [is-loaded ${m}] == 1 } {
-            set ::env(alces_INTERNAL_ALT) [extract-current ${m}]
+            set ::env(cw_INTERNAL_ALT) [extract-current ${m}]
             return 1
         }
     }
@@ -217,14 +217,14 @@ proc ::processing {} {
     set m [module-info name]
 
     if { [module-info mode load] } {
-        if { [info exists ::env(alces_INTERNAL_PROCESSING)] == 0 } {
-            puts -nonewline stderr "[alces getenv alces_INTERNAL_BRANCH][alces pretty ${m}]"
+        if { [info exists ::env(cw_INTERNAL_PROCESSING)] == 0 } {
+            puts -nonewline stderr "[alces getenv cw_INTERNAL_BRANCH][alces pretty ${m}]"
         }
         if { [is-loaded ${m}] == 1 } {
             puts stderr " ... $skipped (already loaded)"
             break
         } elseif { [alt-is-loaded ${m}] == 1 } {
-            puts stderr " ... $alt (have alternative: [alces pretty $::env(alces_INTERNAL_ALT)])"
+            puts stderr " ... $alt (have alternative: [alces pretty $::env(cw_INTERNAL_ALT)])"
             break
         } else {
             puts stderr ""
@@ -246,7 +246,7 @@ proc ::search {module version specific {internal 0}} {
     set m [module-info alias ${module}-${specific}]
     if { ${m} == "*undef*" } {
         if { $internal } {
-            set ::env(alces_INTERNAL_FELLBACK) 1
+            set ::env(cw_INTERNAL_FELLBACK) 1
         }
         # couldn't locate specific version we were compiled against,
         # let's try something a little less specific
@@ -277,17 +277,17 @@ proc ::depend {module {version ""} {specific ""}} {
             set using_alt 0
             set using_fallback 0
             set m [search ${module} ${version} ${specific} 1]
-            if { [alces getenv alces_INTERNAL_FELLBACK 0] } {
-                set ::env(alces_INTERNAL_FELLBACK) 0
+            if { [alces getenv cw_INTERNAL_FELLBACK 0] } {
+                set ::env(cw_INTERNAL_FELLBACK) 0
                 set using_fallback 1
             }
             if { ${m} == "*undef*" } {
-                puts stderr "[alces getenv alces_INTERNAL_BRANCH][alces pretty ${module}] ... $failed -- unable to resolve alias"
+                puts stderr "[alces getenv cw_INTERNAL_BRANCH][alces pretty ${module}] ... $failed -- unable to resolve alias"
                 exit 1
             }
 
-	    if { [alces getenv alces_MODULES_VERBOSE 0] } {
-		puts -nonewline stderr "[alces getenv alces_INTERNAL_BRANCH]"
+	    if { [alces getenv cw_MODULES_VERBOSE 0] } {
+		puts -nonewline stderr "[alces getenv cw_INTERNAL_BRANCH]"
 		if { $using_fallback } {
 		    puts -nonewline stderr "$alt "
 		}
@@ -295,23 +295,23 @@ proc ::depend {module {version ""} {specific ""}} {
 	    }
 
             if { [is-loaded ${m}] == 0 && [alt-is-loaded ${m}] == 1 } {
-                set msg " ... $alt (have alternative: [alces pretty $::env(alces_INTERNAL_ALT)])"
+                set msg " ... $alt (have alternative: [alces pretty $::env(cw_INTERNAL_ALT)])"
                 set using_alt 1
             } elseif { [is-loaded ${m}] == 0 } {
-                set ::env(alces_INTERNAL) 1
+                set ::env(cw_INTERNAL) 1
                 module-log error null
                 module load $m
                 module-log error stderr
-                set msg "[alces getenv alces_INTERNAL_TRUNK] * --> $ok"
+                set msg "[alces getenv cw_INTERNAL_TRUNK] * --> $ok"
             } else {
                 set msg " ... $skipped (already loaded)"
             }
             if { $using_alt == 0 && [catch {prereq $m}] } {
-                puts stderr "[alces getenv alces_INTERNAL_TRUNK] * --> $failed $m -- [alces getenv alces_INTERNAL_RESULT]"
-                set ::env(alces_INTERNAL_RESULT) "prerequisite not met ($m)"
+                puts stderr "[alces getenv cw_INTERNAL_TRUNK] * --> $failed $m -- [alces getenv cw_INTERNAL_RESULT]"
+                set ::env(cw_INTERNAL_RESULT) "prerequisite not met ($m)"
                 exit 1
             }
-	    if { [alces getenv alces_MODULES_VERBOSE 0] } {
+	    if { [alces getenv cw_MODULES_VERBOSE 0] } {
 		puts stderr "${msg}"
 	    }
         }

@@ -95,7 +95,7 @@ module Alces
 
         alias :original_enable_paging :enable_paging
         def enable_paging
-          original_enable_paging unless ":#{ENV['alces_FLAGS']}:" =~ /nopager/
+          original_enable_paging unless ":#{ENV['cw_FLAGS']}:" =~ /nopager/
         end
       end
 

@@ -61,7 +61,7 @@ module Alces
       def initialize(*)
         super
         options.default(compiler: :first)
-        Rainbow.enabled = false if ":#{ENV['alces_FLAGS']}:" =~ /nocolou?r/ || ENV['alces_COLOUR'] == '0'
+        Rainbow.enabled = false if ":#{ENV['cw_FLAGS']}:" =~ /nocolou?r/ || ENV['cw_COLOUR'] == '0'
       end
 
       def list
