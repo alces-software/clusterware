@@ -39,7 +39,9 @@ module Alces
     class HandlerProxy
       def method_missing(s,*a,&b)
         if Handler.instance_methods.include?(s)
-          Handler.new(*a).send(s)
+          Bundler.with_clean_env do
+            Handler.new(*a).send(s)
+          end
         else
           super
         end
