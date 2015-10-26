@@ -73,13 +73,18 @@ title "Creating clusterware directory structure"
 doing 'Create'
 [[ -d "${target}" ]] || mkdir -p "${target}"
 cp -R "${source}/bin" "${source}/lib" "${source}/libexec" "${target}"
-if [ ! -d "{target}/etc" ]; then
+if [ ! -d "${target}/etc" ]; then
     cp -R "${source}/etc" "${target}"
     sed -e "s/_OS_/${os}/g" -i "${target}/etc/packager.yml" "${target}/etc"/distro.vars.*
+    sed -e "s/_ROOT_/${target}/g" -i "${target}/etc/modulespath"
+    if [ "$alces_DIST_URL" ]; then
+        sed -e "s,^cw_DIST_URL=.*,cw_DIST_URL=${alces_DIST_URL}/,g" -i "${target}/etc"/serviceware.vars.*
+    fi
     rm -f "${target}"/etc/handlers/.gitkeep
     rm -f "${target}"/etc/session/.gitkeep
     rm -f "${target}"/etc/services/.gitkeep
 fi
+mkdir -p /var/log/clusterware
 say_done $?
 
 title "Installing Clusterware base configuration"
