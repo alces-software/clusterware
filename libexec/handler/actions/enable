@@ -27,6 +27,7 @@ require process
 main() {
     local handler repo
     handler="$1"
+    shift
     if [[ $handler == *"/"* ]]; then
         repo="${handler%%/*}"
         handler="${handler#*/}"
@@ -43,9 +44,12 @@ main() {
     elif handler_is_enabled "${handler}"; then
         action_die "handler already enabled: ${handler}"
     fi
-    handler_install "${repo}/${handler}" "${cw_DIST}"
-    handler_enable "${repo}/${handler}"
-    action_die "enabled handler: ${repo}/${handler} -> ${handler}" 0
+    if handler_install "${repo}/${handler}" "${cw_DIST}" "$@"; then
+        handler_enable "${repo}/${handler}"
+        action_die "enabled handler: ${repo}/${handler} -> ${handler}" 0
+    else
+        action_die "unable to enable handler: ${repo}/${handler}" 1
+    fi
 }
 
 process_reexec_sudo "$@"
