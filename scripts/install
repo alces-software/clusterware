@@ -123,10 +123,6 @@ if /usr/bin/getent group gridware >/dev/null; then
 else
     doing 'Configure'
     /usr/bin/getent group gridware >/dev/null || /usr/sbin/groupadd -g 341 gridware
-    access_targets=(/var/cache/gridware /var/log/gridware)
-    chmod -R g+rw "${access_targets[@]}"
-    find "${access_targets[@]}" -type d -exec chmod 2775 {} \;
-    chgrp -R gridware "${access_targets[@]}"
 fi
 say_done $?
 
@@ -138,9 +134,6 @@ else
     mkdir -p "${gridware_target}/pkg/${os}" "${gridware_target}/etc/${os}/modules"
     cp -R "${source}/dist/modules"/* "${gridware_target}"/etc/${os}/modules
     "$alces_RUBY" "${source}/scripts/init-gridware.rb"
-    chmod -R g+rw "${gridware_target}"/*
-    find "${gridware_target}"/* -type d -exec chmod 2775 {} \;
-    chgrp -R gridware "${gridware_target}"/*
 fi
 say_done $?
 
@@ -162,6 +155,17 @@ else
     find "${gridware_target}"/etc -type d -exec chmod 2775 {} \;
     chgrp -R gridware "${gridware_target}"/etc
 fi
+say_done $?
+
+title "Updating gridware permissions"
+doing 'Configure'
+access_targets=(/var/cache/gridware /var/log/gridware)
+chmod -R g+rw "${access_targets[@]}"
+find "${access_targets[@]}" -type d -exec chmod 2775 {} \;
+chgrp -R gridware "${access_targets[@]}"
+chmod -R g+rw "${gridware_target}"/*
+find "${gridware_target}"/* -type d -exec chmod 2775 {} \;
+chgrp -R gridware "${gridware_target}"/*
 say_done $?
 
 title "Setting up handler base repository"
