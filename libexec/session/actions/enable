@@ -27,6 +27,7 @@ require process
 main() {
     local session repo
     session="$1"
+    shift
     if [[ $session == *"/"* ]]; then
         repo="${session%%/*}"
         session="${session#*/}"
@@ -43,9 +44,12 @@ main() {
     elif session_is_enabled "${session}"; then
         action_die "session already enabled: ${session}"
     fi
-    session_install "${repo}/${session}" "${cw_DIST}"
-    session_enable "${repo}/${session}"
-    action_die "enabled session: ${repo}/${session} -> ${session}" 0
+    if session_install "${repo}/${session}" "${cw_DIST}" "$@"; then
+        session_enable "${repo}/${session}"
+        action_die "enabled session: ${repo}/${session} -> ${session}" 0
+    else
+        action_die "unable to enable session: ${repo}/${session}" 1
+    fi
 }
 
 process_reexec_sudo "$@"
