@@ -35,6 +35,24 @@ network_get_public_address() {
     fi
 }
 
+network_get_network_address() {
+    local target_ip
+    target_ip="$1"
+
+    ip route get "${target_ip}" \
+        | head -n 1 \
+        | cut -d ' ' -f 8
+}
+
+network_get_network_device() {
+    local target_ip
+    target_ip="$1"
+
+    ip route get "${target_ip}" \
+        | head -n 1 \
+        | cut -d ' ' -f 5
+}
+
 network_get_free_port() {
     local port
     port="$1"
