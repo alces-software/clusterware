@@ -4,15 +4,20 @@
 ## Copyright (c) 2008-2015 Alces Software Ltd
 ##
 ################################################################################
-if { [info exists ::env(ALCES_TRACE)] } {
+if { [info exists ::env(cw_TRACE)] } {
     puts stderr " -> $::ModulesCurrentModulefile"
 }
 
-if { [info exists ::env(MODULES_ALCES_TCL)] == 0 } { set ::env(MODULES_ALCES_TCL) /opt/clusterware/etc/modules-alces.tcl }
+if { [info exists ::env(cw_ROOT)] == 0 } {
+  set ::env(cw_ROOT) "/opt/clusterware"
+}
+if { [info exists ::env(MODULES_ALCES_TCL)] == 0 } {
+  set ::env(MODULES_ALCES_TCL) $::env(cw_ROOT)/etc/modules-alces.tcl
+}
 if { [file exists $::env(MODULES_ALCES_TCL)] } {
   if { [namespace exists alces] == 0 } { source $::env(MODULES_ALCES_TCL) }
-  if { [file exists /opt/clusterware/etc/moduleinit ] } {
-    alces once { source /opt/clusterware/etc/moduleinit }
+  if { [file exists $::env(cw_ROOT)/etc/moduleinit ] } {
+    alces once { source $::env(cw_ROOT)/etc/moduleinit }
   }
 } else {
   unset ::env(MODULES_ALCES_TCL)
