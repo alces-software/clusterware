@@ -28,6 +28,7 @@ cw_HANDLER_HOOK_RUNNER="${cw_ROOT}/opt/pluginhook/bin/pluginhook"
 cw_HANDLER_REPODIR="${cw_ROOT}/var/lib/handler/repos"
 cw_HANDLER_DEFAULT_REPO="base"
 cw_HANDLER_DEFAULT_REPO_URL="${cw_HANDLER_DEFAULT_REPO_URL:-https://:@github.com/alces-software/clusterware-handlers}"
+cw_HANDLER_BROADCASTER="${cw_ROOT}/opt/serf/bin/serf"
 
 handler_run_hook() {
     local event
@@ -58,4 +59,8 @@ handler_enable() {
 
 handler_disable() {
     repo_plugin_disable "${cw_HANDLER_PLUGINDIR}" "$@"
+}
+
+handler_broadcast() {
+    "${cw_HANDLER_BROADCASTER}" event -coalesce=false "${event}" "$*"
 }
