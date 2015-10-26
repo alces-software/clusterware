@@ -48,12 +48,15 @@ repo_plugin_install() {
     repodir="$1"
     plugin="$2"
     distro="$3"
+    shift 3
     if [ -f "${repodir}/${plugin}/metadata.yml" ]; then
         installer="$(mktemp /tmp/clusterware-installer.XXXXXXXX.sh)"
         repo_generate_script "${repodir}/${plugin}" "${installer}" "${distro}" "install"
         cd "${cw_ROOT}"
-        /bin/bash "${installer}" 2>&1 | sed 's/^/  >>> /g'
+        set -o pipefail
+        /bin/bash "${installer}" "$@" 2>&1 | sed 's/^/  >>> /g'
         exitcode=$?
+        set +o pipefail
         rm -f "${installer}"
         return $exitcode
     fi
