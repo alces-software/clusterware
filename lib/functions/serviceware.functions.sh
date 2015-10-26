@@ -61,13 +61,16 @@ serviceware_enable_component() {
     service="$1"
     component="$2"
     distro="$3"
+    shift 3
 
     if [ -f "${cw_SERVICEWARE_REPODIR}/${service}/metadata.yml" ]; then
         installer="$(mktemp /tmp/clusterware-installer.XXXXXXXX.sh)"
         repo_generate_script "${cw_SERVICEWARE_REPODIR}/${repodir}/${service}" "${installer}" "${distro}" "component-${component}"
         cd "${cw_ROOT}"
-        /bin/bash "${installer}" 2>&1 | sed 's/^/  >>> /g'
+        set -o pipefail
+        /bin/bash "${installer}" "$@" 2>&1 | sed 's/^/  >>> /g'
         exitcode=$?
+        set +o pipefail
         rm -f "${installer}"
         if [ $exitcode -gt 0 ]; then
             return $exitcode
