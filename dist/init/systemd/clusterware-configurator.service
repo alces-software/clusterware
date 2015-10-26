@@ -7,7 +7,7 @@
 # Alces Clusterware boot configurator (systemd service unit)
 [Unit]
 Description=Alces Clusterware boot configurator
-After=network.target
+After=network-online.target
 
 [Service]
 Type=oneshot
