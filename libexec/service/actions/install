@@ -27,6 +27,7 @@ require process
 main() {
     local service repo
     service="$1"
+    shift
     if [[ $service == *"/"* ]]; then
         repo="${service%%/*}"
         service="${service#*/}"
@@ -43,7 +44,7 @@ main() {
     elif serviceware_is_installed "${service}"; then
         action_die "service already installed: ${service}"
     fi
-    if serviceware_install "${repo}/${service}" "${cw_DIST}"; then
+    if serviceware_install "${repo}/${service}" "${cw_DIST}" "$@"; then
         action_die "installed serviceware: ${repo}/${service} -> ${service}" 0
     else
         action_die "serviceware could not be installed: ${repo}/${service}" 1
