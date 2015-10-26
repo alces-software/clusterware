@@ -34,7 +34,7 @@ case $action in
     ?*)
 	# provide a convenience for those who get "help ACTION" and
 	# "ACTION help" inverted :)
-	exec $cw_ROOT/bin/$cw_BINNAME $action help
+	exec $cw_ROOT/bin/$cw_BINNAME $action help "$@"
 	;;
     *)
 	cat <<EOF
@@ -46,7 +46,7 @@ EOF
 	for a in $cw_CMDDIR/*; do
 	    extract_info $a
 	    if [ "$cmd_NAME" ]; then
-		printf "  %-20s  %s\n" "$cw_BINNAME $cmd_NAME" "$cmd_SYNOPSIS."
+		printf "  %-22s  %s\n" "$cw_BINNAME $cmd_NAME" "$cmd_SYNOPSIS."
 	    fi
 	done
 	cat <<EOF

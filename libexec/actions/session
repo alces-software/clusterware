@@ -69,17 +69,17 @@ Perform interactive VNC management activities.
 
 Commands:
 EOF
-printf "  %-20s  %s\n" "$cw_BINNAME help" "More help about this command."
-printf "  %-20s  %s\n" "$cw_BINNAME list" "List running interactive VNC sessions."
-printf "  %-20s  %s\n" "$cw_BINNAME info" "Show information about a running session."
-printf "  %-20s  %s\n" "$cw_BINNAME start" "Start an interactive VNC session."
-printf "  %-20s  %s\n" "$cw_BINNAME kill" "Terminate an interactive VNC session."
-printf "  %-20s  %s\n" "$cw_BINNAME clean" "Clean inactive interactive VNC sessions."
-printf "  %-20s  %s\n" "$cw_BINNAME wait" "Wait for completion of an interactive VNC session."
-printf "  %-20s  %s\n" "$cw_BINNAME avail" "List installed/available sessions."
-printf "  %-20s  %s\n" "$cw_BINNAME enable" "Enable a session from a repository."
-printf "  %-20s  %s\n" "$cw_BINNAME disable" "Disable a session."
-printf "  %-20s  %s\n" "$cw_BINNAME update" "Update session repository."
+printf "  %-22s  %s\n" "$cw_BINNAME help" "More help about this command."
+printf "  %-22s  %s\n" "$cw_BINNAME list" "List running interactive VNC sessions."
+printf "  %-22s  %s\n" "$cw_BINNAME info" "Show information about a running session."
+printf "  %-22s  %s\n" "$cw_BINNAME start" "Start an interactive VNC session."
+printf "  %-22s  %s\n" "$cw_BINNAME kill" "Terminate an interactive VNC session."
+printf "  %-22s  %s\n" "$cw_BINNAME clean" "Clean inactive interactive VNC sessions."
+printf "  %-22s  %s\n" "$cw_BINNAME wait" "Wait for completion of an interactive VNC session."
+printf "  %-22s  %s\n" "$cw_BINNAME avail" "List installed/available sessions."
+printf "  %-22s  %s\n" "$cw_BINNAME enable" "Enable a session from a repository."
+printf "  %-22s  %s\n" "$cw_BINNAME disable" "Disable a session."
+printf "  %-22s  %s\n" "$cw_BINNAME update" "Update session repository."
 cat <<EOF
 
 Please report bugs to support@alces-software.com

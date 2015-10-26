@@ -51,12 +51,12 @@ Install and manage serviceware.
 
 Commands:
 EOF
-printf "  %-20s  %s\n" "$cw_BINNAME help" "More help about this command."
-printf "  %-20s  %s\n" "$cw_BINNAME avail" "List installed/available serviceware."
-printf "  %-20s  %s\n" "$cw_BINNAME enable" "Enable a serviceware component."
-printf "  %-20s  %s\n" "$cw_BINNAME install" "Install serviceware from a repository."
-#printf "  %-20s  %s\n" "$cw_BINNAME info" "Show information about serviceware."
-printf "  %-20s  %s\n" "$cw_BINNAME update" "Update serviceware repository."
+printf "  %-22s  %s\n" "$cw_BINNAME help" "More help about this command."
+printf "  %-22s  %s\n" "$cw_BINNAME avail" "List installed/available serviceware."
+printf "  %-22s  %s\n" "$cw_BINNAME enable" "Enable a serviceware component."
+printf "  %-22s  %s\n" "$cw_BINNAME install" "Install serviceware from a repository."
+#printf "  %-22s  %s\n" "$cw_BINNAME info" "Show information about serviceware."
+printf "  %-22s  %s\n" "$cw_BINNAME update" "Update serviceware repository."
 cat <<EOF
 
 Please report bugs to support@alces-software.com
