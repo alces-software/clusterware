@@ -41,7 +41,9 @@ main() {
             if [ "$with_hooks" ]; then
                 handlername="$(basename "$b")"
                 for c in "${b}"/*; do
-                    echo -e "[${enabled}] \e[38;5;68m${reponame}\e[0m/\e[38;5;221m${handlername}\e[0m/\e[35m$(basename "$c")\e[0m"
+                    if [ "$(basename "$c")" != "metadata.yml" ]; then
+                        echo -e "[${enabled}] \e[38;5;68m${reponame}\e[0m/\e[38;5;221m${handlername}\e[0m/\e[35m$(basename "$c")\e[0m"
+                    fi
                 done
             else
                 echo -e "[${enabled}] \e[38;5;68m${reponame}\e[0m/\e[38;5;221m$(basename "$b")\e[0m"
