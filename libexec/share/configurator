@@ -37,6 +37,7 @@ setup() {
 }
 
 main() {
+    handler_run_hook initialize "$@"
     if files_wait_for_file "${cw_ROOT}/etc/config.yml" 300; then
         "${cw_ROOT}"/libexec/share/fetch-config
         handler_run_hook configure "$@"
