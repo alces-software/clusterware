@@ -101,7 +101,7 @@ module Alces
 
       $terminal.wrap_at = HighLine::SystemExtensions.terminal_size.first - 5 rescue 80 if $stdin.tty?
 
-      program :name, 'alces packager'
+      program :name, 'alces gridware'
       program :version, '1.0.0'
       program :description, 'Compile and install gridware for local environment.'
 
