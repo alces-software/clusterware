@@ -173,7 +173,7 @@ vnc_session_clean() {
             if [ ! "$skip_running" ]; then
                 action_warn "session $shortid is starting up - use kill to terminate first!"
             fi
-        elif ! pgrep -F $pidfile &>/dev/null; then
+        elif [ -f "$pidfile" ] && ! pgrep -F $pidfile &>/dev/null; then
             action_warn "cleaned session $shortid"
             rm -rf "$sessiondir"
         elif [ ! "$skip_running" ]; then
@@ -191,7 +191,7 @@ vnc_session_kill() {
         sessionid=$(basename "$sessiondir")
         shortid=$(echo "$sessionid" | cut -f1 -d'-')
         pidfile="$sessiondir"/vncserver.pid
-        if pgrep -F $pidfile &>/dev/null; then
+        if [ -f "$pidfile" ] && pgrep -F $pidfile &>/dev/null; then
             if vnc_kill_server "${sessiondir}" &>/dev/null; then
                 action_warn "session ${shortid} has been terminated"
             else
@@ -214,7 +214,7 @@ vnc_session_wait() {
         shortid=$(echo "$sessionid" | cut -f1 -d'-')
         pidfile="$sessiondir"/vncserver.pid
         action_warn "waiting for session ${shortid} to complete..."
-        while pgrep -F $pidfile &>/dev/null; do
+        while [ -f "$pidfile" ] && pgrep -F $pidfile &>/dev/null; do
             sleep 1
         done
         action_warn "session ${shortid} completed at $(date "+%Y-%m-%d %H:%M:%S")"
