@@ -81,6 +81,15 @@ for os in $dists; do
     done
 done
 
+for os in $dists; do
+    title "Fetching Serviceware for distribution: $os"
+    dep_src="${prop_dir}/dist/${os}"
+    mkdir -p "${dep_src}"
+    for svc in ${serviceware}; do
+        fetch_dist "${svc}"
+    done
+done
+
 title "Preparing public repository contents"
 mkdir -p "${src_dir}/tmp/repos"
 doing "Handlers"
