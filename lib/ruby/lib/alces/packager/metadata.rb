@@ -164,8 +164,9 @@ module Alces
       end
 
       def fallback_source_url
-        # XXX - make configurable
-        "http://download.alces-software.com/upstream/gridware/#{name}/#{src}"
+        fallback_url = (Config.fallback_package_url rescue nil) ||
+          'https://s3-eu-west-1.amazonaws.com/packages.alces-software.com/gridware'
+        "#{fallback_url}/#{name}/#{src}"
       end
 
       def archive_dir
