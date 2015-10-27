@@ -76,7 +76,7 @@ cp -R "${source}/bin" "${source}/lib" "${source}/libexec" "${target}"
 if [ ! -d "${target}/etc" ]; then
     cp -R "${source}/etc" "${target}"
     sed -e "s/_OS_/${os}/g" -i "${target}/etc/packager.yml" "${target}/etc"/distro.vars.*
-    sed -e "s/_ROOT_/${target}/g" -i "${target}/etc/modulespath"
+    sed -e "s,_ROOT_,${target},g" -i "${target}/etc/modulespath"
     if [ "$alces_DIST_URL" ]; then
         sed -e "s,^cw_DIST_URL=.*,cw_DIST_URL=${alces_DIST_URL}/,g" -i "${target}/etc"/serviceware.vars.*
     fi
