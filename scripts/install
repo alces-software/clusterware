@@ -55,6 +55,12 @@ dep_logs="${source}/tmp/log"
 dep_build="${source}/tmp/build"
 dep_src="${source}/tmp/src"
 
+if [ -L "${gridware_root}"/local ]; then
+    gridware_target="$(readlink "${gridware_root}"/local)"
+else
+    gridware_target="${gridware_root}/depots/$(uuid -v4 | cut -f1 -d'-')"
+fi
+
 # Install pre-requisites
 title "Installing prerequisites"
 doing 'Base'
@@ -75,8 +81,13 @@ doing 'Create'
 cp -R "${source}/bin" "${source}/lib" "${source}/libexec" "${target}"
 if [ ! -d "${target}/etc" ]; then
     cp -R "${source}/etc" "${target}"
-    sed -e "s/_OS_/${os}/g" -i "${target}/etc/packager.yml" "${target}/etc"/distro.vars.*
-    sed -e "s,_ROOT_,${target},g" -i "${target}/etc/modulespath"
+    sed -e "s/_OS_/${os}/g" \
+        -e "s,_GRIDWARE-ROOT_,${gridware_root},g" \
+        -e "s,_GRIDWARE_,${gridware_target},g" \
+        -i "${target}/etc/packager.yml" "${target}/etc"/distro.vars.*
+    sed -e "s,_ROOT_,${target},g" \
+        -e "s,_GRIDWARE-ROOT_,${gridware_root},g" \
+        -i "${target}/etc/modulespath"
     if [ "$alces_DIST_URL" ]; then
         sed -e "s,^cw_DIST_URL=.*,cw_DIST_URL=${alces_DIST_URL}/,g" -i "${target}/etc"/serviceware.vars.*
     fi
@@ -101,7 +112,9 @@ say_done $?
 
 title "Creating gridware directory structure"
 doing 'Create'
-mkdir -p /var/cache/gridware/{archives,src} /var/log/gridware ${gridware_target}/etc
+mkdir -p /var/cache/gridware/{archives,src} /var/log/gridware \
+  ${gridware_target}/${os}/etc ${gridware_root}/etc
+ln -snf "${gridware_target}" "${gridware_root}/local"
 say_done $?
 
 for dep in ${deps}; do
@@ -127,33 +140,33 @@ fi
 say_done $?
 
 title "Setting up gridware package structure for '${os}'"
-if [ -d "${gridware_target}/pkg/${os}" ]; then
+if [ -d "${gridware_target}/${os}/pkg" ]; then
     doing 'Detect'
 else
     doing "Configure"
-    mkdir -p "${gridware_target}/pkg/${os}" "${gridware_target}/etc/${os}/modules"
-    cp -R "${source}/dist/modules"/* "${gridware_target}"/etc/${os}/modules
+    mkdir -p "${gridware_target}/${os}/pkg" "${gridware_target}/${os}/etc/modules"
+    cp -R "${source}/dist/modules"/* "${gridware_target}"/${os}/etc/modules
     "$alces_RUBY" "${source}/scripts/init-gridware.rb"
 fi
 say_done $?
 
 title "Setting up gridware base repository"
-if [ -d "${gridware_target}/etc/repos" ]; then
+if [ -d "${gridware_root}/etc/repos" ]; then
     doing 'Detect'
 else
     doing 'Configure'
-    cp -R "${source}/dist/repos" "${gridware_target}/etc"
+    cp -R "${source}/dist/repos" "${gridware_root}/etc"
     say_done $?
     doing 'Initialize'
     if [ "$alces_REPOS_URL" ]; then
-        mkdir -p "${gridware_target}"/etc/repos/base/pkg
-        tar -C "${gridware_target}"/etc/repos/base/pkg -xvzf "${source}"/packager-base.tar.gz &> "${dep_logs}/gridware-init.log"
+        mkdir -p "${gridware_root}"/etc/repos/base/pkg
+        tar -C "${gridware_root}"/etc/repos/base/pkg -xvzf "${source}"/packager-base.tar.gz &> "${dep_logs}/gridware-init.log"
     else
         "${target}/bin/alces" gridware update base &> "${dep_logs}/gridware-init.log"
     fi
-    chmod -R g+rw "${gridware_target}"/etc
-    find "${gridware_target}"/etc -type d -exec chmod 2775 {} \;
-    chgrp -R gridware "${gridware_target}"/etc
+    chmod -R g+rw "${gridware_root}"/etc
+    find "${gridware_root}"/etc -type d -exec chmod 2775 {} \;
+    chgrp -R gridware "${gridware_root}"/etc
 fi
 say_done $?
 

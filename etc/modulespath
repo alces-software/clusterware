@@ -18,5 +18,5 @@
 #     environment variable. You may add as many as you want - just
 #     limited by the maximum variable size of your shell.
 #
-/opt/gridware/etc/$cw_DIST/modules
+_GRIDWARE-ROOT_/local/$cw_DIST/etc/modules
 _ROOT_/etc/modules

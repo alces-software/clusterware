@@ -7,12 +7,14 @@
 ---
 :log_root: /var/log/gridware
 :repo_paths:
- - /opt/gridware/etc/repos/base
- - /opt/gridware/etc/repos/local
-:gridware: /opt/gridware
-:modules_dir: /opt/gridware/etc/_OS_/modules
-:packages_dir: /opt/gridware/pkg/_OS_
+ - _GRIDWARE-ROOT_/etc/repos/base
+ - _GRIDWARE-ROOT_/etc/repos/local
+:gridware: _GRIDWARE_/_OS_
+:modules_dir: _GRIDWARE_/_OS_/etc/modules
+:packages_dir: _GRIDWARE_/_OS_/pkg
 :archives_dir: /var/cache/gridware/archives
-:local_archives_dir: /opt/gridware/src
+:local_archives_dir: _GRIDWARE-ROOT_/src
 :buildroot: /var/cache/gridware/src
-:dbroot: /opt/gridware/etc/_OS_
+:dbroot: _GRIDWARE_/_OS_/etc
+:fallback_package_url: https://s3-eu-west-1.amazonaws.com/packages.alces-software.com/gridware
+:fetch_timeout: 10
