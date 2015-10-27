@@ -71,8 +71,8 @@ install_startup_hooks() {
     for a in "${source}/dist/init/sysv"/*.el6; do
         target_init_script="$(basename "$a" .el6)"
         if [ "${target_init_script##*.}" == 'inactive' ]; then
-            cp $a /etc/init.d/${target_init_script} $(basename "${target_init_script}" .inactive) && \
-                chmod 755 /etc/init.d/${target_init_script} || \
+            cp $a /etc/init.d/$(basename "${target_init_script}" .inactive) && \
+                chmod 755 /etc/init.d/$(basename "${target_init_script}" .inactive) || \
                 return 1
         else
             cp $a /etc/init.d/${target_init_script} && \
