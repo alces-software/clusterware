@@ -173,7 +173,7 @@ vnc_session_clean() {
             if [ ! "$skip_running" ]; then
                 action_warn "session $shortid is starting up - use kill to terminate first!"
             fi
-        elif [ -f "$pidfile" ] && ! pgrep -F $pidfile &>/dev/null; then
+        elif [ ! -f "$pidfile" ] || ! pgrep -F $pidfile &>/dev/null; then
             action_warn "cleaned session $shortid"
             rm -rf "$sessiondir"
         elif [ ! "$skip_running" ]; then
