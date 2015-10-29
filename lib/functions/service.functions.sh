@@ -19,23 +19,22 @@
 # For more information on the Alces Clusterware, please visit:
 # https://github.com/alces-software/clusterware
 #==============================================================================
-# An associative array of service descriptions to PIDs. Each service in this
-# associative array will be killed when this process cleans up.
-declare -A SERVICES
+# An array of service PIDs. Each service in this array will be killed
+# when this process cleans up.
+declare SERVICES
 
 service_add() {
     local name pid
     name="$1"
     pid="$2"
-    SERVICES[$name]=$pid
+    SERVICES+=($pid)
 }
 
 service_cleanup() {
     local name pid
     # Terminate each service in SERVICES.
-    for name in "${!SERVICES[@]}"; do
-        pid=${SERVICES[$name]}
-        action_debug "Terminating ${name} process (${pid})"
+    for pid in "${SERVICES[@]}"; do
+        action_debug "Terminating process (${pid})"
         kill ${pid} &> /dev/null
     done
 }
