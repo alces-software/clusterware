@@ -55,12 +55,6 @@ dep_logs="${source}/tmp/log"
 dep_build="${source}/tmp/build"
 dep_src="${source}/tmp/src"
 
-if [ -L "${gridware_root}"/local ]; then
-    gridware_target="$(readlink "${gridware_root}"/local)"
-else
-    gridware_target="${gridware_root}/depots/$(uuid -v4 | cut -f1 -d'-')"
-fi
-
 # Install pre-requisites
 title "Installing prerequisites"
 doing 'Base'
@@ -74,6 +68,12 @@ fi
 doing 'Runtime'
 install_runtime_prerequisites &> "${dep_logs}/runtime-prereqs.log"
 say_done $?
+
+if [ -L "${gridware_root}"/local ]; then
+    gridware_target="$(readlink "${gridware_root}"/local)"
+else
+    gridware_target="${gridware_root}/depots/$(uuid -v4 | cut -f1 -d'-')"
+fi
 
 title "Creating clusterware directory structure"
 doing 'Create'
