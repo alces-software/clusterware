@@ -39,7 +39,7 @@ setup() {
 main() {
     local event
     if [ "$SERF_EVENT" = "user" ]; then
-        event="user-$SERF_USER_EVENT"
+        event="event-$SERF_USER_EVENT"
     elif [ "$SERF_EVENT" = "query" ]; then
         event="query-$SERF_QUERY_NAME"
     else
