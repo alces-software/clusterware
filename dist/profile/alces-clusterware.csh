@@ -20,7 +20,7 @@
 # https://github.com/alces-software/clusterware
 #==============================================================================
 source /etc/xdg/clusterware/config.vars.csh
-source "${cw_ROOT}"/etc/distro.vars.csh
+source "${cw_ROOT}"/etc/distro.cshrc
 
 if ( -d "${cw_ROOT}"/etc/profile.d ) then
         set nonomatch

@@ -98,8 +98,8 @@ main() {
 
 setup
 
-if [ -f "${cw_ROOT}"/etc/ssh-keygen.vars.sh ]; then
-    . "${cw_ROOT}"/etc/ssh-keygen.vars.sh
+if [ -f "${cw_ROOT}"/etc/setup-sshkey.rc ]; then
+    . "${cw_ROOT}"/etc/setup-sshkey.rc
 fi
 
 cw_SSH_LOWEST_UID=${cw_SSH_LOWEST_UID:-500}

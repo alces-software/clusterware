@@ -20,7 +20,7 @@
 # https://github.com/alces-software/clusterware
 #==============================================================================
 if [ -z "${cw_DIST}" ]; then
-    source "${cw_ROOT}/etc/distro.vars.sh"
+    source "${cw_ROOT}/etc/distro.rc"
 fi
 
 distro_enable_service() {

@@ -84,12 +84,12 @@ if [ ! -d "${target}/etc" ]; then
     sed -e "s/_OS_/${os}/g" \
         -e "s,_GRIDWARE-ROOT_,${gridware_root},g" \
         -e "s,_GRIDWARE_,${gridware_target},g" \
-        -i "${target}/etc/packager.yml" "${target}/etc"/distro.vars.*
+        -i "${target}/etc/packager.yml" "${target}/etc"/distro.*
     sed -e "s,_ROOT_,${target},g" \
         -e "s,_GRIDWARE-ROOT_,${gridware_root},g" \
         -i "${target}/etc/modulespath"
     if [ "$alces_DIST_URL" ]; then
-        sed -e "s,^cw_DIST_URL=.*,cw_DIST_URL=${alces_DIST_URL}/,g" -i "${target}/etc"/serviceware.vars.*
+        sed -e "s,^cw_DIST_URL=.*,cw_DIST_URL=${alces_DIST_URL}/,g" -i "${target}/etc"/serviceware.rc
     fi
     rm -f "${target}"/etc/handlers/.gitkeep
     rm -f "${target}"/etc/session/.gitkeep

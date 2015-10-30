@@ -20,7 +20,7 @@
 # https://github.com/alces-software/clusterware
 #==============================================================================
 . /etc/xdg/clusterware/config.vars.sh
-. "${cw_ROOT}"/etc/distro.vars.sh
+. "${cw_ROOT}"/etc/distro.rc
 
 if [ -d "${cw_ROOT}"/etc/profile.d ]; then
     for i in "${cw_ROOT}"/etc/profile.d/*.sh ; do
