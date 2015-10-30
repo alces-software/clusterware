@@ -62,5 +62,7 @@ handler_disable() {
 }
 
 handler_broadcast() {
+    local event
+    event="$1"
     "${cw_HANDLER_BROADCASTER}" event -coalesce=false "${event}" "$*"
 }
