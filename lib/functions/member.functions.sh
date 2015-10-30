@@ -73,6 +73,6 @@ member_count() {
 }
 
 member_quorum() {
-    . "${cw_ROOT}"/etc/config/cluster.vars.sh
-    echo "${cw_CLUSTER_QUORUM}"
+    . "${cw_ROOT}"/etc/config/cluster/cluster.vars.sh
+    echo "${cw_CLUSTER_quorum}"
 }
