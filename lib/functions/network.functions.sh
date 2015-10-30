@@ -27,9 +27,9 @@ network_get_public_address() {
 
     if [ -z "$public_ipv4" ]; then
 	# Couldn't find it via EC2 API, use apparent public interface address.
-        ip route get 8.8.8.8 \
+        ip -o route get 8.8.8.8 \
             | head -n 1 \
-            | cut -d ' ' -f 8
+            | sed 's/.*src \(\S*\).*/\1/g'
     else
         echo "$public_ipv4"
     fi
@@ -39,18 +39,18 @@ network_get_network_address() {
     local target_ip
     target_ip="$1"
 
-    ip route get "${target_ip}" \
+    ip -o route get "${target_ip}" \
         | head -n 1 \
-        | cut -d ' ' -f 8
+        | sed 's/.*src \(\S*\).*/\1/g'
 }
 
 network_get_network_device() {
     local target_ip
     target_ip="$1"
 
-    ip route get "${target_ip}" \
+    ip -o route get "${target_ip}" \
         | head -n 1 \
-        | cut -d ' ' -f 5
+        | sed 's/.*dev \(\S*\).*/\1/g'
 }
 
 network_get_free_port() {
