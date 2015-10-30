@@ -41,6 +41,7 @@ main() {
     if files_wait_for_file "${cw_ROOT}/etc/config.yml" 300; then
         "${cw_ROOT}"/libexec/share/fetch-config
         handler_run_hook configure "$@"
+        handler_run_hook start "$@"
         handler_run_hook node-started "$@"
     else
         action_die "unable to load configuration: ${cw_ROOT}/etc/config.yml"
