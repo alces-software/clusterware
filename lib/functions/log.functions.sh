@@ -19,6 +19,8 @@
 # For more information on the Alces Clusterware, please visit:
 # https://github.com/alces-software/clusterware
 #==============================================================================
+cw_LOG_default_log="/var/log/clusterware/instance.log"
+
 log() {
     local message logfile
     message="$1"
