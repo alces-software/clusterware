@@ -6,6 +6,7 @@
 ################################################################################
 /var/log/gridware/packager.log
 {
+  su root gridware
   postrotate
     cd /var/log/gridware
     for a in 7 6 5 4 3 2 1 0; do
