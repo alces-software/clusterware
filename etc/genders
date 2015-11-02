@@ -5,7 +5,7 @@
 ##
 ################################################################################
 # MASTER
-master1 master,masters,cluster,all
+#master1 master,masters,cluster,all
 
 # SLAVES
-slave[01-10] nodes,slave,cluster,all
+#slave[01-10] nodes,slave,cluster,all
