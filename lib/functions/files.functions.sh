@@ -40,16 +40,23 @@ files_mark_tempfile() {
 }
 
 files_cleanup() {
+    local file dir tmr tmout
+    tmout="${1:-5}"
     for file in "${TEMPFILES[@]}" ; do
         if [ -z "$cw_DEBUG" ]; then
-            rm $file 2>/dev/null
+            rm "${file}" 2>/dev/null
         else
             action_debug "rm $file"
         fi
     done
     for dir in "${TEMPDIRS[@]}" ; do
         if [ -z "$cw_DEBUG" ]; then
-            rmdir $dir 2>/dev/null
+            tmr=0
+            while [ $tmr -lt $tmout ] && ! rmdir "${dir}" 2>/dev/null; do
+                # Wait a second in case file handles are still being cleaned up
+                tmr=$(($tmr+1))
+                sleep 1
+            done
         else
             action_debug "rmdir $dir"
         fi
