@@ -23,6 +23,7 @@
 require action
 require handler
 require process
+require distro
 
 main() {
     local handler repo

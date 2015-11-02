@@ -23,6 +23,7 @@
 require action
 require vnc
 require process
+require distro
 
 main() {
     local session repo

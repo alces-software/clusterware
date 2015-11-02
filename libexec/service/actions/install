@@ -23,6 +23,7 @@
 require action
 require serviceware
 require process
+require distro
 
 main() {
     local service repo
