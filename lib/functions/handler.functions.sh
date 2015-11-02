@@ -21,6 +21,7 @@
 #==============================================================================
 require ruby
 require repo
+require log
 
 cw_HANDLER_PLUGINDIR="${cw_ROOT}/etc/handlers"
 export PLUGIN_PATH="$cw_HANDLER_PLUGINDIR"
@@ -29,6 +30,7 @@ cw_HANDLER_REPODIR="${cw_ROOT}/var/lib/handler/repos"
 cw_HANDLER_DEFAULT_REPO="base"
 cw_HANDLER_DEFAULT_REPO_URL="${cw_HANDLER_DEFAULT_REPO_URL:-https://:@github.com/alces-software/clusterware-handlers}"
 cw_HANDLER_BROADCASTER="${cw_ROOT}/opt/serf/bin/serf"
+cw_HANDLER_name="$(cd "$(dirname "$0")" && basename "$(pwd)"):$(basename "$0")"
 
 handler_run_hook() {
     local event
@@ -65,4 +67,11 @@ handler_broadcast() {
     local event
     event="$1"
     "${cw_HANDLER_BROADCASTER}" event -coalesce=false "${event}" "$*"
+}
+
+handler_tee() {
+    local input
+    read input
+    "$@" <<< "${input}" 2>&1 | log_blob "${cw_LOG_default_log}" "${cw_HANDLER_name}"
+    echo -n "${input}"
 }
