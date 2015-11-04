@@ -45,10 +45,10 @@ log_blob() {
         prefix="${date}"
     fi
     if [ "$logfile" == '-' ]; then
-        cat | sed "s/^/${prefix} /g"
+        sed "s/^/${prefix} /g"
     elif [ "$logfile" ]; then
-        cat | sed "s/^/${prefix} /g" >> "$logfile"
+        sed "s/^/${prefix} /g" >> "$logfile"
     else
-        cat | sed "s/^/${prefix} /g" > /dev/stderr
+        sed "s/^/${prefix} /g" > /dev/stderr
     fi
 }
