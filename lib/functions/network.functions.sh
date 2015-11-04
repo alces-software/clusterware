@@ -23,15 +23,35 @@ network_get_public_address() {
     local public_ipv4
     # Attempt to determine our public IP address using the standard EC2
     # API.
-    public_ipv4=$(curl --connect-timeout 5 http://169.254.169.254/latest/meta-data/public-ipv4 2>/dev/null)
+    public_ipv4=$(curl -f --connect-timeout 5 http://169.254.169.254/latest/meta-data/public-ipv4 2>/dev/null)
 
     if [ -z "$public_ipv4" ]; then
-	# Couldn't find it via EC2 API, use apparent public interface address.
+        # Couldn't find it via EC2 API, use apparent public interface address.
         ip -o route get 8.8.8.8 \
             | head -n 1 \
             | sed 's/.*src \(\S*\).*/\1/g'
     else
         echo "$public_ipv4"
+    fi
+}
+
+network_get_mapped_address() {
+    local lookup lookup_type lookup_param mapping
+    lookup="${1:$(network_get_public_address)}"
+    lookup_type="${2:-table}"
+    # based on the given address, lookup an alternative
+    case "$lookup_type" in
+        table)
+            lookup_param=${3:-access}
+            if [ -f "${cw_ROOT}"/etc/mappingstab ]; then
+                mapping=$(sed -rn "s/^${lookup}\s+${lookup_param}\s+(.*)/\1/gp" "${cw_ROOT}"/etc/mappingstab | head -n1)
+            fi
+            ;;
+    esac
+    if [ "${mapping}" ]; then
+        echo "${mapping}"
+    else
+        echo "${lookup}"
     fi
 }
 
