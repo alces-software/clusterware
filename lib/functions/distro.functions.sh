@@ -26,7 +26,6 @@ fi
 distro_enable_service() {
     local service
     service="$1"
-    # Enable serf service for future boots and start it up
     if [ "${cw_DIST}" == "el7" ]; then
         systemctl enable ${service}
     elif [ "${cw_DIST}" == "el6" ]; then
@@ -37,11 +36,20 @@ distro_enable_service() {
 distro_start_service() {
     local service
     service="$1"
-    # Enable serf service for future boots and start it up
     if [ "${cw_DIST}" == "el7" ]; then
         systemctl start ${service}
     elif [ "${cw_DIST}" == "el6" ]; then
         service ${service} start
+    fi
+}
+
+distro_restart_service() {
+    local service
+    service="$1"
+    if [ "${cw_DIST}" == "el7" ]; then
+        systemctl restart ${service}
+    elif [ "${cw_DIST}" == "el6" ]; then
+        service ${service} restart
     fi
 }
 
