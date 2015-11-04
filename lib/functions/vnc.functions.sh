@@ -79,13 +79,14 @@ vnc_read_vars() {
 }
 
 vnc_write_vars_file() {
-    local sessionid host display port password websocket metadata_file
+    local sessionid host access_host display port password websocket metadata_file
     sessionid="$1"
     host="$2"
-    display="$3"
+    access_host="$3"
+    display="$4"
     port=$(($display+5900))
-    password="$4"
-    websocket="$5"
+    password="$5"
+    websocket="$6"
 
     metadata_file="${cw_VNC_SESSIONSDIR}/${sessionid}/metadata.vars.sh"
 
@@ -96,6 +97,7 @@ vnc[DISPLAY]="${display}"
 vnc[PORT]="${port}"
 vnc[PASSWORD]="${password}"
 vnc[HOST]="${host}"
+vnc[ACCESS_HOST]="${access_host}"
 vnc[WEBSOCKET]="${websocket}"
 EOF
     chmod 0600 "${metadata_file}"
@@ -112,28 +114,35 @@ vnc_write_detail_file() {
 }
 
 vnc_emit_details() {
-    local sessionid host display password websocket port
+    local sessionid host access_host display password websocket port
     sessionid="$1"
     host="$2"
-    display="$3"
-    password="$4"
-    websocket="$5"
+    access_host="$3"
+    display="$4"
+    password="$5"
+    websocket="$6"
     port=$(($display+5900))
+
+    host_str="Host:      ${access_host}"
+    if [ "${access_host}" != "${host}" ]; then
+        host_str="$host_str
+Service host: ${host}"
+    fi
 
     cat <<EOF
 VNC server started:
-  Identity: $sessionid
-      Host: $host
-      Port: $port
-   Display: $display
-  Password: $password
- Websocket: $websocket
+    Identity: $sessionid
+$host_str
+        Port: $port
+     Display: $display
+    Password: $password
+   Websocket: $websocket
 
 Depending on your client, you can connect to the session using:
 
-  vnc://${USER}:${password}@${host}:${port}
-  ${host}:${port}
-  ${host}:${display}
+  vnc://${USER}:${password}@${access_host}:${port}
+  ${access_host}:${port}
+  ${access_host}:${display}
 
 If prompted, you should supply the following password: ${password}
 

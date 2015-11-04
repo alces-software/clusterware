@@ -127,6 +127,7 @@ EOF
     files_mark_tempfile "${vnc[PIDFILE]}"
 
     host_address=$(network_get_public_address)
+    access_address=$(network_get_mapped_address "${host_address}" table access)
     vnc[WEBSOCKET]=$(network_get_free_port 41361)
     _start_websocket "$host_address" "${vnc[WEBSOCKET]}" "$((5900+${_VNC_DISPLAY}))"
 
@@ -134,7 +135,7 @@ EOF
         action_die "VNC server did not start successfully, unable to locate process file."
     fi
 
-    sessionvars=("${_SESSIONID}" "${host_address}" "${vnc[DISPLAY]}" "${password}" "${vnc[WEBSOCKET]}")
+    sessionvars=("${_SESSIONID}" "${host_address}" "${access_address}" "${vnc[DISPLAY]}" "${password}" "${vnc[WEBSOCKET]}")
     vnc_write_detail_file "${sessionvars[@]}"
     vnc_write_vars_file "${sessionvars[@]}"
     if [ "$terse" ]; then

@@ -39,13 +39,18 @@ main() {
                 cat "${sessiondir}"/metadata.vars.sh
             else
                 . "${sessiondir}"/metadata.vars.sh
+                host="Host:      ${vnc[ACCESS_HOST]}"
+                if [ "${vnc[ACCESS_HOST]}" != "${vnc[HOST]}" ]; then
+                    host="$host
+Service host: ${vnc[HOST]}"
+                fi
                 cat <<EOF
-Identity:  ${sessionid}
-Host:      ${vnc[HOST]}
-Port:      ${vnc[PORT]}
-Display:   ${vnc[DISPLAY]}
-Password:  ${vnc[PASSWORD]}
-Websocket: ${vnc[WEBSOCKET]}
+Identity:     ${sessionid}
+$host
+Port:         ${vnc[PORT]}
+Display:      ${vnc[DISPLAY]}
+Password:     ${vnc[PASSWORD]}
+Websocket:    ${vnc[WEBSOCKET]}
 EOF
             fi
         else
