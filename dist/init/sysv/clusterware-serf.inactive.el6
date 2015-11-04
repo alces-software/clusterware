@@ -30,7 +30,7 @@ SERF_LOG_FILE="/var/log/serf.log"
 
 start() {
     echo -n $"Starting $prog: "
-    daemon --pidfile=$pidfile "${cmd} -config-dir=$SERF_CONFIG_DIR >> $SERF_LOG_FILE &"
+    daemon --pidfile=$pidfile "${cmd} -config-dir=$SERF_CONFIG_DIR >> $SERF_LOG_FILE 2>&1 &"
     retval=$?
     ps -ef | grep -F "${cmd}" | grep -v 'grep' | awk '{print $2}' > ${pidfile}
     [ $retval -eq 0 ] && touch $lockfile && success
@@ -40,7 +40,7 @@ start() {
 
 stop() {
     echo -n $"Stopping $prog: "
-    killproc -p $pidfile $prog
+    killproc -p $pidfile $prog -INT
     retval=$?
     echo
     [ $retval -eq 0 ] && rm -f $lockfile
