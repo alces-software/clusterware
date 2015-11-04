@@ -50,10 +50,11 @@ EOF
 
 source "${source}/scripts/os/${os}.sh"
 
-mkdir -p ${source}/tmp/log ${source}/tmp/src ${source}/tmp/build
-dep_logs="${source}/tmp/log"
-dep_build="${source}/tmp/build"
-dep_src="${source}/tmp/src"
+alces_BUILD_TMP="${alces_BUILD_TMP:-tmp}"
+mkdir -p ${source}/${alces_BUILD_TMP}/log ${source}/${alces_BUILD_TMP}/src ${source}/${alces_BUILD_TMP}/build
+dep_logs="${source}/${alces_BUILD_TMP}/log"
+dep_build="${source}/${alces_BUILD_TMP}/build"
+dep_src="${source}/${alces_BUILD_TMP}/src"
 
 # Install pre-requisites
 title "Installing prerequisites"
