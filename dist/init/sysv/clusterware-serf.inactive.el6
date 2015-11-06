@@ -5,6 +5,12 @@
 ## Copyright (c) 2015 Alces Software Ltd
 ##
 ################################################################################
+### BEGIN INIT INFO
+# Required-Start: $network
+# Required-Stop: $network
+# Default-Start: 2 3 4 5
+# Default-Stop: 0 1 6
+### END INIT INFO
 #
 # serf - this script starts and stops the serf service daemon
 #
