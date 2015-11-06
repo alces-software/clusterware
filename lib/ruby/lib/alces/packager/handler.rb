@@ -22,6 +22,7 @@
 require 'alces/tools/logging'
 require 'alces/tools/execution'
 require 'alces/packager/config'
+require 'alces/packager/depot'
 require 'alces/packager/repository'
 require 'alces/packager/actions'
 require 'alces/packager/errors'
@@ -226,6 +227,44 @@ module Alces
           modules: []
         }
         ModuleTree.set(metadata, module_opts)
+      end
+
+      def depot
+        $terminal.instance_variable_set :@output, STDERR
+        operation = args[0]
+        raise MissingArgumentError, 'Please supply the depot operation' if operation.nil?
+        case operation
+        when 'fetch'
+          source_url = args[1]
+          name = args[2]
+          raise MissingArgumentError, 'Please supply a depot source URL' if source_url.nil?
+          depot = Depot.new(source_url: source_url, name: name)
+          if depot.fetch
+            say "Depot '#{depot.name}' fetched successfully."
+          else
+            raise InvalidSelectionError, "Depot could not be fetched from: #{source_url}"
+          end
+        when 'enable'
+          target = args[1]
+          raise MissingArgumentError, 'Please supply a depot name' if target.nil?
+          if depot = Depot.find(target)
+            depot.enable
+          else
+            raise InvalidSelectionError, "No such depot: #{target}"
+          end
+        when 'disable'
+          target = args[1]
+          raise MissingArgumentError, 'Please supply a depot name' if target.nil?
+          if depot = Depot.find(target)
+            depot.disable
+          else
+            raise InvalidSelectionError, "No such depot: #{target}"
+          end
+        when 'list'
+          Depot.list
+        else
+          raise InvalidSelectionError, "No such depot operation: #{operation}"
+        end
       end
 
       private

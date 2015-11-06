@@ -25,6 +25,8 @@ module Alces
   module Packager
     class PackageError < Alces::Tools::CLI::BadOutcome
     end
+    class DepotError < Alces::Tools::CLI::BadOutcome
+    end
     class InvalidParameterError < Alces::Tools::CLI::BadOutcome
     end
     class MissingArgumentError < Alces::Tools::CLI::BadOutcome

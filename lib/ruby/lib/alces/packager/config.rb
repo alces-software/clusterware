@@ -26,7 +26,8 @@ module Alces
     module Config
       DEFAULT_CONFIG = {
         buildroot: '/usr/src/alces',
-        gridware: '/opt/gridware'
+        gridware: '/opt/gridware',
+        depotroot: '/opt/gridware',
       }
 
       class << self

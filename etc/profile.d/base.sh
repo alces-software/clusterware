@@ -38,6 +38,23 @@ alces() {
                     ;;
             esac
             ;;
+        gr*)
+            case $2 in
+                dep*)
+                    case $3 in
+                        e*|d*)
+                            eval $(/opt/clusterware/bin/alces "$@") 2>&1
+                            ;;
+                        *)
+                            "/opt/clusterware/bin/alces" "$@"
+                            ;;
+                    esac
+                    ;;
+                *)
+                    "/opt/clusterware/bin/alces" "$@"
+                    ;;
+            esac
+            ;;
         *)
             "/opt/clusterware/bin/alces" "$@"
             ;;

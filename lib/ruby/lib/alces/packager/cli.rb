@@ -110,7 +110,7 @@ module Alces
       global_option '--verbose', 'Be verbose'
 
       command :list do |c|
-        c.syntax = 'alces packager list'
+        c.syntax = 'alces gridware list'
         c.description = 'Lists available packages'
         c.action HandlerProxy, :list
         c.option '-f', '--full', 'list full details'
@@ -119,14 +119,14 @@ module Alces
       set_aliases(:list, extra: :ls)
 
       command :info do |c|
-        c.syntax = 'alces packager info <package>'
+        c.syntax = 'alces gridware info <package>'
         c.description = 'Display information about <package>'
         c.action HandlerProxy, :info
       end
       set_aliases(:info)
 
       command :install do |c|
-        c.syntax = 'alces packager install <package> [<param>=<value> [...]]'
+        c.syntax = 'alces gridware install <package> [<param>=<value> [...]]'
         c.description = 'Install <package> with optional parameters'
         c.action HandlerProxy, :install
         add_package_options(c)
@@ -135,7 +135,7 @@ module Alces
       set_aliases(:install, min: 4)
 
       command :purge do |c|
-        c.syntax = 'alces packager purge <package>'
+        c.syntax = 'alces gridware purge <package>'
         c.description = 'Purge installation and remove build directory for <package>'
         c.action HandlerProxy, :purge
         add_package_options(c)
@@ -143,7 +143,7 @@ module Alces
       set_aliases(:purge, extra: :rm)
 
       command :clean do |c|
-        c.syntax = 'alces packager clean <package>'
+        c.syntax = 'alces gridware clean <package>'
         c.description = 'Remove build directory for <package>'
         c.action HandlerProxy, :clean
         add_package_options(c)
@@ -151,21 +151,28 @@ module Alces
       set_aliases(:clean)
 
       command :update do |c|
-        c.syntax = 'alces packager update [REPO]'
+        c.syntax = 'alces gridware update [REPO]'
         c.description = "Update repository cache for REPO (defaults to 'base')"
         c.action HandlerProxy, :update
       end
       set_aliases(:update)
 
       command :default do |c|
-        c.syntax = 'alces packager default <package path>'
+        c.syntax = 'alces gridware default <package path>'
         c.description = "Set package at <package path> as default"
         c.action HandlerProxy, :default
       end
-      set_aliases(:default)
+      set_aliases(:default, min: 3)
+
+      command :depot do |c|
+        c.syntax = 'alces gridware depot <fetch|list|enable|disable> [<param>]'
+        c.description = "Perform depot operations"
+        c.action HandlerProxy, :depot
+      end
+      set_aliases(:depot, min: 3)
 
       command :register do |c|
-        c.syntax = 'alces packager register <directory> <package path>'
+        c.syntax = 'alces gridware register <directory> <package path>'
         c.description = "Register manually installed package in <directory> as <package path>"
         c.action HandlerProxy, :register
       end
