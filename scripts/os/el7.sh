@@ -26,7 +26,7 @@ install_runtime_prerequisites() {
     # tigervnc
     # alces session
     # s3cmd
-    yum -e0 -y install wget sqlite3 && \
+    yum -e0 -y install wget sqlite3 patch && \
         yum -e0 -y install tcl && \
         yum -e0 -y install openssl readline zlib libffi gmp && \
         yum -e0 -y install mesa-libGL libXdmcp pixman xorg-x11-fonts-misc && \
