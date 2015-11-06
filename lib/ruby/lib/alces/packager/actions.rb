@@ -491,7 +491,7 @@ EOF
             timeout = (Config.fetch_timeout rescue nil) || 10
             with_spinner do
               # XXX - replace this with something neater
-              run(['wget',u,'-T',timeout.to_s,'-O',"#{target}.alcesdownload"]) do |r|
+              run(['wget',u,'-T',timeout.to_s,'-t','1','-O',"#{target}.alcesdownload"]) do |r|
                 raise PackageError, "Unable to download source." unless r.success?
               end
               FileUtils.mv("#{target}.alcesdownload",target)

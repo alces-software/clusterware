@@ -69,7 +69,7 @@ module Alces
         doing 'Metadata'
         mkdir_p(target)
         with_spinner do
-          run(['wget',"#{source_url}/metadata.yml",'-T',timeout.to_s,'-O',"#{target}/metadata.yml"]) do |r|
+          run(['wget',"#{source_url}/metadata.yml",'-T',timeout.to_s,'-t','1','-O',"#{target}/metadata.yml"]) do |r|
             raise DepotError, "Unable to download metadata." unless r.success?
           end
         end
