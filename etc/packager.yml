@@ -9,6 +9,7 @@
 :repo_paths:
  - _GRIDWARE-ROOT_/etc/repos/base
  - _GRIDWARE-ROOT_/etc/repos/local
+:depotroot: _GRIDWARE-ROOT_
 :gridware: _GRIDWARE_/_OS_
 :modules_dir: _GRIDWARE_/_OS_/etc/modules
 :packages_dir: _GRIDWARE_/_OS_/pkg
