@@ -37,7 +37,7 @@ network_get_public_address() {
 
 network_get_mapped_address() {
     local lookup lookup_type lookup_param mapping
-    lookup="${1:$(network_get_public_address)}"
+    lookup="${1:-$(network_get_public_address)}"
     lookup_type="${2:-table}"
     # based on the given address, lookup an alternative
     case "$lookup_type" in
