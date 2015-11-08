@@ -123,7 +123,7 @@ vnc_emit_details() {
     websocket="$6"
     port=$(($display+5900))
 
-    host_str="Host:      ${access_host}"
+    host_str="        Host:      ${access_host}"
     if [ "${access_host}" != "${host}" ]; then
         host_str="$host_str
 Service host: ${host}"
