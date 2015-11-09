@@ -1,0 +1,7 @@
+TIPS:
+
+'module avail'            - show available application environments
+'module add <modulename>' - add a module to your current environment
+
+'alces session'           - start and manage interactive sessions
+'alces gridware'          - manage software for your environment
