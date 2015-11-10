@@ -36,6 +36,9 @@ main() {
         action_warn "no sessions found in $cw_VNC_SESSIONSDIR"
     else
         if [ "$identities" ]; then
+            _divider() {
+                :
+            }
             _row() {
                 echo $(basename "$1")
             }
@@ -87,7 +90,6 @@ main() {
                 else
                     _emit "${shortid}" '-DEAD-' '-' '-' '-' '-'
                 fi
-                _divider
             }
             _divider
             if [ "$url" ]; then
@@ -98,6 +100,7 @@ main() {
             _divider
         fi
         vnc_each_sessiondir _row
+        _divider
     fi
     action_cleanup
 }
