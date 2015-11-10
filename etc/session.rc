@@ -1,0 +1,36 @@
+################################################################################
+##
+## Alces Clusterware - Shell configuration
+## Copyright (c) 2015 Alces Software Ltd
+##
+################################################################################
+# Set maximum number of sessions a user can have active on a node at
+# any one time, set to 0 to disable (default: 0).
+#cw_SESSION_quota=0
+
+# Set timeouts for warnings and session termination
+# Times are specified in minutes. Set to 0 to disable.
+
+# Terminate session after specified number of minutes. Set to 0 to
+# disable termination entirely (default: 0).
+#cw_SESSION_timeout=0
+
+# First warning after specified number of minutes (default: 690).
+#cw_SESSION_warn_primary_time=690
+# Second warning after specified number of minutes (default: 0).
+#cw_SESSION_warn_secondary_time=720
+
+# Override default messages for the primary and secondary warnings.
+# Include "\${runtime}" and "\${remain}" if you want to include either
+# the total number of minutes and remaining number of minutes until
+# termination.
+#cw_SESSION_warn_primary_message="WARNING!\n\nThis session will reach its maximum permitted runtime (\${runtime} minutes)\nand be automatically terminated in \${remain} minutes.\n\nPlease complete or save your work as soon as possible."
+#cw_SESSION_warn_secondary_message=""
+
+# Override default message given prior to the grace period before
+# termination.
+#cw_SESSION_timeout_message="Your session has reached its maximum permitted runtime (\${runtime} minutes)\nand will now be automatically terminated."
+
+# Time in seconds between showing session timeout message and
+# performing the termination (default: 30).
+#cw_SESSION_termination_grace=30

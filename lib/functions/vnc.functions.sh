@@ -32,6 +32,10 @@ cw_SESSION_DEFAULT_REPO="base"
 cw_SESSION_DEFAULT_REPO_URL="${cw_SESSION_DEFAULT_REPO_URL:-https://:@github.com/alces-software/clusterware-sessions}"
 cw_SESSION_REPODIR="${cw_ROOT}/var/lib/sessions/repos"
 
+if [ -f "${cw_ROOT}/etc/session.rc" ]; then
+    . "${cw_ROOT}/etc/session.rc"
+fi
+
 vnc_create_password() {
     dd if=/dev/urandom bs=16 count=1 2>/dev/null | base64 | tr -d '/+' | cut -c1-8
 }
@@ -332,4 +336,25 @@ session_enable() {
 
 session_disable() {
     repo_plugin_disable "${cw_SESSION_PLUGINDIR}" "$@"
+}
+
+session_check_quota() {
+    local active sessiondir
+    local -A vnc
+    if [ "${cw_SESSION_quota:-0}" == "0" ]; then
+        return 0
+    else
+        active=0
+        for sessiondir in "${cw_VNC_SESSIONSDIR}"/*; do
+            if [ -d "$sessiondir" ]; then
+                if [ -f "${sessiondir}"/metadata.vars.sh ]; then
+                    . "${sessiondir}"/metadata.vars.sh
+                    if [ "$(hostname -s)" == "${vnc[HOSTNAME]}" ]; then
+                        active=$(($active+1))
+                    fi
+                fi
+            fi
+        done
+        [ "${active}" -lt "${cw_SESSION_quota}" ]
+    fi
 }

@@ -50,6 +50,17 @@ _start_grabber() {
     service_add 'grabber' $!
 }
 
+_start_timer() {
+    local display log
+    display=$1
+
+    log=${_SESSIONDIR}/timer.log
+    files_mark_tempfile "$log"
+
+    $_TIMER "${_SESSIONDIR}" "${display}" >$log 2>&1 &
+    service_add 'timer' $!
+}
+
 _start_websocket() {
     local host port websockify_log
     host="$1"
@@ -64,6 +75,9 @@ _start_websocket() {
 }
 
 main() {
+    if ! session_check_quota; then
+        action_die "sorry, your session quota has been reached on this host (${cw_SESSION_quota})."
+    fi
     local sessionscript password vnc_vars host_address terse params sessionvars sessiontype
     local -A vnc
     if [ "$1" == "--terse" ]; then
@@ -149,6 +163,9 @@ EOF
 
     handler_run_hook session-start "$_SESSIONID"
     _start_grabber "${vnc[DISPLAY]}" "$_SESSIONID"
+    if [ "${cw_SESSION_timeout:-0}" -gt 0 ]; then
+        _start_timer "${vnc[DISPLAY]}"
+    fi
 
     rm -f "${_SESSIONDIR}/starting.txt"
     {
@@ -159,6 +176,7 @@ EOF
 }
 
 _GRABBER="${cw_ROOT}/libexec/session/share/grabber"
+_TIMER="${cw_ROOT}/libexec/session/share/timer"
 _WEBSOCKIFY="${cw_ROOT}/opt/websockify/websockify"
 _XWDBIN="${cw_ROOT}/opt/xwd/bin"
 
@@ -168,5 +186,9 @@ action_check_progs "${cw_VNCSERVER}" "${cw_VNCPASSWD}" "${_WEBSOCKIFY}" "${_GRAB
 _SESSIONID="$(uuid)"
 _SESSIONDIR="$(vnc_sessions_dir)/${_SESSIONID}"
 _VNC_DISPLAY=""
+
+if [ -f "${cw_ROOT}/etc/session.rc" ]; then
+    . "${cw_ROOT}/etc/session.rc"
+fi
 
 main "$@"
