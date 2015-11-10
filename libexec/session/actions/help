@@ -175,6 +175,32 @@ help_for_kill() {
 EOF
 }
 
+help_for_list() {
+    cat <<EOF
+  SYNOPSIS:
+
+    alces session list [OPTIONS]
+
+  DESCRIPTION:
+
+    List currently active sessions.
+
+    Active sessions are sessions which are starting, currently running
+    or have finished but have not yet been cleaned up.
+
+  OPTIONS:
+
+    --url
+      Show a vnc:// scheme URL for each session instead of the IP,
+      display, port and password fields.
+
+    --identities
+      Emit session identities only, useful for looping over the list
+      and executing other commands.
+
+EOF
+}
+
 help_for_start() {
     cat <<EOF
   SYNOPSIS:
