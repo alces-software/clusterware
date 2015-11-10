@@ -24,37 +24,82 @@ require action
 require vnc
 
 main() {
+    local url identities
+    if [ "$1" == "--url" ]; then
+        url=true
+        shift
+    elif [ "$1" == '--identities' ]; then
+        identities=true
+        shift
+    fi
     if vnc_no_sessions; then
         action_warn "no sessions found in $cw_VNC_SESSIONSDIR"
     else
-        echo "+----------+---------+------+----------+-------------------------------------------------------+"
-        echo "| Identity | Display | Port | Password | URL                                                   |"
-        echo "+----------+---------+------+----------+-------------------------------------------------------+"
-	row() {
-	    local pidfile sessionid shortid
-	    local -A vnc
-	    sessiondir="$1"
-            pidfile="$sessiondir"/vncserver.pid
-            sessionid=$(basename "$sessiondir")
-            shortid=$(echo "$sessionid" | cut -f1 -d'-')
-
-            if [ -f "${sessiondir}/starting.txt" ]; then
-                echo "| ${shortid} | $(printf %7s 'STARTUP') |    - |        - | -                                                     |"
-            elif [ -f "$pidfile" ] && pgrep -F $pidfile &>/dev/null; then
-                if [ -f "${sessiondir}"/metadata.vars.sh ]; then
-                    . "${sessiondir}"/metadata.vars.sh
-                    echo "| ${shortid} | $(printf "%7s" :${vnc[DISPLAY]}) | ${vnc[PORT]} | ${vnc[PASSWORD]} | $(printf %-53s "vnc://${USER}:${vnc[PASSWORD]}@${vnc[HOST]}:${vnc[PORT]}") |"
-                else
-                    echo "| ${shortid} | $(printf %7s '-GONE-') |    - |        - | -                                                     |"
-                fi
+        if [ "$identities" ]; then
+            _row() {
+                echo $(basename "$1")
+            }
+        else
+            if [ "$url" ]; then
+                _divider() {
+                    printf '+%*s+%*s+%*s+%*s+\n' 10 '' 12 '' 22 '' 50 '' | tr ' ' '-'
+                }
+                _emit() {
+                    printf "| %8s | %-10s | %-20s | %-48s |\n" "$1" "$2" "$3" "$4"
+                }
             else
-                echo "| ${shortid} | $(printf %7s '-DEAD-') |    - |        - | -                                                     |"
+                _divider() {
+                    printf '+%*s+%*s+%*s+%*s+%*s+%*s+%*s+\n' 10 '' 12 '' 22 '' 17 '' 9 '' 6 '' 10 '' | tr ' ' '-'
+                }
+                _emit() {
+                    printf "| %8s | %-10s | %-20s | %-15s | %7s | %4s | %8s |\n" "$1" "$2" "$3" "$4" "$5" "$6" "$7"
+                }
             fi
-	}
-	vnc_each_sessiondir row
-        echo "+----------+---------+------+----------+-------------------------------------------------------+"
+            _row() {
+                local pidfile sessionid shortid
+                local -A vnc
+                sessiondir="$1"
+                pidfile="$sessiondir"/vncserver.pid
+                sessionid=$(basename "$sessiondir")
+                shortid=$(echo "$sessionid" | cut -f1 -d'-')
+
+                if [ -f "${sessiondir}/starting.txt" ]; then
+                    _emit "${shortid}" '-STARTUP-' '-' '-' '-' '-'
+                elif [ -f "$pidfile" ]; then
+                    if [ -f "${sessiondir}"/metadata.vars.sh ]; then
+                        . "${sessiondir}"/metadata.vars.sh
+                        # check if current host
+                        if [ "${#vnc[HOSTNAME]}" -gt 20 ]; then
+                            vnc[HOSTNAME]="${vnc[HOSTNAME]:0:17}..."
+                        fi
+                        if [ "$(hostname -s)" == "${vnc[HOSTNAME]}" ] && ! pgrep -F $pidfile &>/dev/null; then
+                            _emit "${shortid}" '-DEAD-' "${vnc[HOSTNAME]}" '-' '-' '-'
+                        else
+                            if [ "$url" ]; then
+                                _emit "${shortid}" "${vnc[TYPE]}" "${vnc[HOSTNAME]}" "vnc://${USER}:${vnc[PASSWORD]}@${vnc[HOST]}:${vnc[PORT]}"
+                            else
+                                _emit "${shortid}" "${vnc[TYPE]}" "${vnc[HOSTNAME]}" "${vnc[HOST]}" ":${vnc[DISPLAY]}" "${vnc[PORT]}" "${vnc[PASSWORD]}"
+                            fi
+                        fi
+                    else
+                        _emit "${shortid}" '-GONE-' '-' '-' '-' '-'
+                    fi
+                else
+                    _emit "${shortid}" '-DEAD-' '-' '-' '-' '-'
+                fi
+                _divider
+            }
+            _divider
+            if [ "$url" ]; then
+                _emit 'Identity' 'Type' 'Host name' 'URL'
+            else
+                _emit 'Identity' 'Type' 'Host name' 'Host address' 'Display' 'Port' 'Password'
+            fi
+            _divider
+        fi
+        vnc_each_sessiondir _row
     fi
     action_cleanup
 }
 
-main
+main "$@"

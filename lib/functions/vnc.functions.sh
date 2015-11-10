@@ -79,7 +79,7 @@ vnc_read_vars() {
 }
 
 vnc_write_vars_file() {
-    local sessionid host access_host display port password websocket metadata_file
+    local sessionid host access_host display port password websocket metadata_file sessiontype
     sessionid="$1"
     host="$2"
     access_host="$3"
@@ -87,6 +87,7 @@ vnc_write_vars_file() {
     port=$(($display+5900))
     password="$5"
     websocket="$6"
+    sessiontype="$7"
 
     metadata_file="${cw_VNC_SESSIONSDIR}/${sessionid}/metadata.vars.sh"
 
@@ -97,8 +98,10 @@ vnc[DISPLAY]="${display}"
 vnc[PORT]="${port}"
 vnc[PASSWORD]="${password}"
 vnc[HOST]="${host}"
+vnc[HOSTNAME]="$(hostname -s)"
 vnc[ACCESS_HOST]="${access_host}"
 vnc[WEBSOCKET]="${websocket}"
+vnc[TYPE]="${sessiontype}"
 EOF
     chmod 0600 "${metadata_file}"
 }
@@ -114,7 +117,7 @@ vnc_write_detail_file() {
 }
 
 vnc_emit_details() {
-    local sessionid host access_host display password websocket port
+    local sessionid host access_host display password websocket port sessiontype
     sessionid="$1"
     host="$2"
     access_host="$3"
@@ -122,8 +125,9 @@ vnc_emit_details() {
     password="$5"
     websocket="$6"
     port=$(($display+5900))
+    sessiontype="$7"
 
-    host_str="        Host:      ${access_host}"
+    host_str="        Host: ${access_host}"
     if [ "${access_host}" != "${host}" ]; then
         host_str="$host_str
 Service host: ${host}"
@@ -132,6 +136,7 @@ Service host: ${host}"
     cat <<EOF
 VNC server started:
     Identity: $sessionid
+        Type: $sessiontype
 $host_str
         Port: $port
      Display: $display
@@ -167,6 +172,7 @@ vnc_cleanup() {
 
 vnc_session_clean() {
     local sessiondir skip_running sessionid shortid pidfile
+    local -A vnc
     if [ "$1" == "--skip-running" ]; then
         skip_running=true
         shift
@@ -182,6 +188,25 @@ vnc_session_clean() {
             if [ ! "$skip_running" ]; then
                 action_warn "session $shortid is starting up - use kill to terminate first!"
             fi
+        elif [ -f "$pidfile" ]; then
+            if [ -f "${sessiondir}"/metadata.vars.sh ]; then
+                . "${sessiondir}"/metadata.vars.sh
+                # check if current host
+                if [ "$(hostname -s)" == "${vnc[HOSTNAME]}" ]; then
+                    if ! pgrep -F $pidfile &>/dev/null; then
+                        # not running; clean
+                        action_warn "cleaned session $shortid"
+                        rm -rf "$sessiondir"
+                    elif [ ! "$skip_running" ]; then
+                        action_warn "session $shortid is still running - use kill to terminate first!"
+                    fi
+                elif [ ! "$skip_running" ]; then
+                    action_warn "session ${shortid} is running on remote host ${vnc[HOSTNAME]}"
+                fi
+            else
+                action_warn "cleaned session $shortid"
+                rm -rf "$sessiondir"
+            fi
         elif [ ! -f "$pidfile" ] || ! pgrep -F $pidfile &>/dev/null; then
             action_warn "cleaned session $shortid"
             rm -rf "$sessiondir"
@@ -195,17 +220,32 @@ vnc_session_clean() {
 
 vnc_session_kill() {
     local sessiondir sessionid shortid pidfile
+    local -A vnc
     sessiondir="$1"
     if [ -d "$sessiondir" ]; then
         sessionid=$(basename "$sessiondir")
         shortid=$(echo "$sessionid" | cut -f1 -d'-')
         pidfile="$sessiondir"/vncserver.pid
-        if [ -f "$pidfile" ] && pgrep -F $pidfile &>/dev/null; then
-            if vnc_kill_server "${sessiondir}" &>/dev/null; then
-                action_warn "session ${shortid} has been terminated"
+        if [ -f "$pidfile" ]; then
+            if [ -f "${sessiondir}"/metadata.vars.sh ]; then
+                . "${sessiondir}"/metadata.vars.sh
+                # check if current host
+                if [ "$(hostname -s)" == "${vnc[HOSTNAME]}" ]; then
+                    if ! pgrep -F $pidfile &>/dev/null; then
+                        action_warn "session ${shortid} is already dead - use clean to cleanup"
+                    else
+                        if vnc_kill_server "${sessiondir}" &>/dev/null; then
+                            action_warn "session ${shortid} has been terminated"
+                        else
+                            action_warn "session ${shortid} could not be terminated"
+                            bail 1
+                        fi
+                    fi
+                else
+                    action_warn "session ${shortid} is running on remote host ${vnc[HOSTNAME]}"
+                fi
             else
-                action_warn "session ${shortid} could not be terminated"
-                bail 1
+                action_warn "session ${shortid} is already dead - use clean to cleanup"
             fi
         else
             action_warn "session ${shortid} is already dead - use clean to cleanup"
