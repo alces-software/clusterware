@@ -36,9 +36,6 @@ setup() {
     kernel_load
 }
 
-require action
-require handler
-
 take_screenshot() {
     local display
     display=$1
@@ -61,4 +58,7 @@ main() {
 }
 
 setup
+require action
+require handler
+
 main "$@"
