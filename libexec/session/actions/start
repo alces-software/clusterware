@@ -64,7 +64,7 @@ _start_websocket() {
 }
 
 main() {
-    local sessionscript password vnc_vars host_address terse params sessionvars
+    local sessionscript password vnc_vars host_address terse params sessionvars sessiontype
     local -A vnc
     if [ "$1" == "--terse" ]; then
         terse=true
@@ -81,10 +81,13 @@ main() {
 
     if [ "$sessionscript" == "-" ]; then
         cat > "${_SESSIONDIR}/session.sh"
+        sessiontype='custom (stdin)'
     elif [ -f "$sessionscript" ]; then
         cp "$sessionscript" "${_SESSIONDIR}/session.sh"
+        sessiontype="custom ($sessionscript)"
     elif [ -f "${cw_ROOT}/etc/sessions/${sessionscript}/session.sh" ]; then
         cp "${cw_ROOT}/etc/sessions/${sessionscript}/session.sh" "${_SESSIONDIR}/session.sh"
+        sessiontype="${sessionscript}"
     elif [ "$sessionscript" ]; then
         action_die "unable to locate session script: $sessionscript"
     else
@@ -135,7 +138,7 @@ EOF
         action_die "VNC server did not start successfully, unable to locate process file."
     fi
 
-    sessionvars=("${_SESSIONID}" "${host_address}" "${access_address}" "${vnc[DISPLAY]}" "${password}" "${vnc[WEBSOCKET]}")
+    sessionvars=("${_SESSIONID}" "${host_address}" "${access_address}" "${vnc[DISPLAY]}" "${password}" "${vnc[WEBSOCKET]}" "${sessiontype}")
     vnc_write_detail_file "${sessionvars[@]}"
     vnc_write_vars_file "${sessionvars[@]}"
     if [ "$terse" ]; then
