@@ -49,7 +49,7 @@ _warning_message() {
 WARNING!
 
 This session will reach its maximum permitted runtime (${runtime} minutes)
-and be automatically terminated in ${remain} minutes.
+and be automatically terminated in ${remain} minute(s).
 
 Please complete or save your work as soon as possible.
 EOF
@@ -79,18 +79,35 @@ _show_message() {
 }
 
 main() {
-    local sessiondir display warn_secs warn_mins final_secs final_mins tmr warn_message terminate_message
+    local sessiondir display primary_mins primary_secs secondary_mins secondary_secs
+    local timeout_mins timeout_secs tmr
+
     sessiondir="$1"
     display="$2"
-
-    primary_mins="${cw_SESSION_warn_primary_time:-690}"
+    timeout_mins="${3:-${cw_SESSION_timeout:-720}}"
+    primary_mins="${cw_SESSION_warn_primary_time:-30}"
     secondary_mins="${cw_SESSION_warn_secondary_time:-0}"
-    timeout_mins="${cw_SESSION_timeout:-720}"
-    primary_secs=$((${primary_mins}*60))
-    secondary_secs=$((${secondary_mins}*60))
     timeout_secs=$((${timeout_mins}*60))
+    primary_secs=$((${timeout_secs}-${primary_mins}*60))
+    if [ "$primary_secs" -lt "0" ]; then
+        # if the calculated warning time is before the beginning, then
+        # we'll use a fixed 5 minute period before the end of the
+        # session for the warning.  If the session is less than 5
+        # minutes long, then we'll use a 1 minute period before the
+        # end of the session.
+        if [ "$timeout_mins" -le "5" ]; then
+            primary_secs=$((${timeout_secs}-60))
+        else
+            primary_secs=$((${timeout_secs}-300))
+        fi
+    fi
+    if [ "${secondary_mins}" -gt "0" ]; then
+        secondary_secs=$((${timeout_secs}-${secondary_mins}*60))
+    else
+        secondary_secs=0
+    fi
 
-    echo "Managing session timeouts (${primary_mins}, ${secondary_mins}, ${timeout_mins}) for session: ${sessiondir}"
+    echo "Managing session timeouts (timeout: ${timeout_mins} [${timeout_secs}], warn after: ${primary_mins} [${primary_secs}], final warn after: ${secondary_mins} [${secondary_secs}]) for session: ${sessiondir}"
 
     tmr=0
     while [ "$tmr" -lt "$timeout_secs" ]; do

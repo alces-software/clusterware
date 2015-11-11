@@ -223,6 +223,13 @@ help_for_start() {
     --terse
       Once started, output session identity only.
 
+    --runtime <minutes>
+      Optionally specify the required execution time for the session
+      in minutes.  If this is not specified the default session length
+      configured for this system will apply.  If specified as '0' then
+      the session will run up to the maximum runtime configured for
+      this system (or forever if no maximum is configured).
+
 EOF
 }
 

@@ -51,13 +51,14 @@ _start_grabber() {
 }
 
 _start_timer() {
-    local display log
+    local display runtime log
     display=$1
+    runtime=$2
 
     log=${_SESSIONDIR}/timer.log
     files_mark_tempfile "$log"
 
-    $_TIMER "${_SESSIONDIR}" "${display}" >$log 2>&1 &
+    $_TIMER "${_SESSIONDIR}" "${display}" "${runtime}" >$log 2>&1 &
     service_add 'timer' $!
 }
 
@@ -78,12 +79,26 @@ main() {
     if ! session_check_quota; then
         action_die "sorry, your session quota has been reached on this host (${cw_SESSION_quota})."
     fi
-    local sessionscript password vnc_vars host_address terse params sessionvars sessiontype
+    local sessionscript password vnc_vars host_address terse params sessionvars sessiontype runtime
     local -A vnc
     if [ "$1" == "--terse" ]; then
         terse=true
         shift
     fi
+    if [ "$1" == "--runtime" ]; then
+        runtime=$2
+        shift 2
+    fi
+    runtime="${runtime:-${cw_SESSION_default_timeout:-0}}"
+    # ensure numericality
+    runtime=$(($runtime+0))
+    if [ "$runtime" == "0" ]; then
+        runtime="${cw_SESSION_timeout:-0}"
+    elif [ -n "${cw_SESSION_timeout}" -a "$runtime" -gt "${cw_SESSION_timeout:-0}" ]; then
+        # enforce specified maximum
+        runtime="${cw_SESSION_timeout}"
+    fi
+
     sessionscript="$1"
     shift
     if [ "$1" ]; then
@@ -163,8 +178,9 @@ EOF
 
     handler_run_hook session-start "$_SESSIONID"
     _start_grabber "${vnc[DISPLAY]}" "$_SESSIONID"
-    if [ "${cw_SESSION_timeout:-0}" -gt 0 ]; then
-        _start_timer "${vnc[DISPLAY]}"
+
+    if [ "${runtime}" -gt 0 ]; then
+        _start_timer "${vnc[DISPLAY]}" "${runtime}"
     fi
 
     rm -f "${_SESSIONDIR}/starting.txt"

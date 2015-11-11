@@ -15,17 +15,24 @@
 # disable termination entirely (default: 0).
 #cw_SESSION_timeout=0
 
-# First warning after specified number of minutes (default: 690).
-#cw_SESSION_warn_primary_time=690
-# Second warning after specified number of minutes (default: 0).
-#cw_SESSION_warn_secondary_time=720
+# Default session timeout if a user doesn't supply a runtime.  If set
+# to 0, this will use the same as the maximum specified above
+# (cw_SESSION_timeout). Default: 0.
+#cw_SESSION_default_timeout=0
+
+# First warning given specified number of minutes before termination
+# (default: 30).
+#cw_SESSION_warn_primary_time=30
+# Second warning gieven specified number of minutes before termination
+# (default: 0).
+#cw_SESSION_warn_secondary_time=15
 
 # Override default messages for the primary and secondary warnings.
 # Include "\${runtime}" and "\${remain}" if you want to include either
 # the total number of minutes and remaining number of minutes until
 # termination.
 #cw_SESSION_warn_primary_message="WARNING!\n\nThis session will reach its maximum permitted runtime (\${runtime} minutes)\nand be automatically terminated in \${remain} minutes.\n\nPlease complete or save your work as soon as possible."
-#cw_SESSION_warn_secondary_message=""
+#cw_SESSION_warn_secondary_message="WARNING!\n\nThis session will reach its maximum permitted runtime (\${runtime} minutes)\nand be automatically terminated in \${remain} minutes.\n\nPlease complete or save your work as soon as possible."
 
 # Override default message given prior to the grace period before
 # termination.
