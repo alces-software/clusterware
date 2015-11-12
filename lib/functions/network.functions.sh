@@ -73,6 +73,15 @@ network_get_network_device() {
         | sed 's/.*dev \(\S*\).*/\1/g'
 }
 
+network_get_device_address() {
+    local target_iface
+    target_iface="$1"
+
+    ip -o -4 address show dev ${target_iface} \
+        | head -n 1 \
+        | sed 's/.*inet \(\S*\)\/.*/\1/g'
+}
+
 network_get_free_port() {
     local port
     port="$1"
