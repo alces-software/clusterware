@@ -113,7 +113,7 @@ say_done $?
 
 title "Creating gridware directory structure"
 doing 'Create'
-mkdir -p /var/cache/gridware/{archives,src} /var/log/gridware \
+mkdir -p /var/cache/gridware/{archives,archives/depots,src} /var/log/gridware \
   ${gridware_target}/${os}/etc ${gridware_root}/etc
 ln -snf "${gridware_target}" "${gridware_root}/local"
 say_done $?
@@ -168,6 +168,8 @@ else
     chmod -R g+rw "${gridware_root}"/etc
     find "${gridware_root}"/etc -type d -exec chmod 2775 {} \;
     chgrp -R gridware "${gridware_root}"/etc
+    chgrp gridware "${gridware_root}"
+    chmod g+rws "${gridware_root}"
 fi
 say_done $?
 
@@ -177,9 +179,9 @@ access_targets=(/var/cache/gridware /var/log/gridware)
 chmod -R g+rw "${access_targets[@]}"
 find "${access_targets[@]}" -type d -exec chmod 2775 {} \;
 chgrp -R gridware "${access_targets[@]}"
-chmod -R g+rw "${gridware_target}"/*
-find "${gridware_target}"/* -type d -exec chmod 2775 {} \;
-chgrp -R gridware "${gridware_target}"/*
+chmod -R g+rw "${gridware_target}"
+find "${gridware_target}" -type d -exec chmod 2775 {} \;
+chgrp -R gridware "${gridware_target}"
 say_done $?
 
 title "Setting up handler base repository"
