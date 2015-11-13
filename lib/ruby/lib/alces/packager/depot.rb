@@ -90,7 +90,11 @@ module Alces
         say 'OK'.color(:green)
 
         doing 'Extract'
-        run(['tar',"-zxf","#{target}/content.tgz",'-C',depot_root])
+        with_spinner do
+          run(['tar',"-zxf","#{target}/content.tgz",'-C',depot_root]) do |r|
+            raise DepotError, "Unable to extract content." unless r.success?
+          end
+        end
         say 'OK'.color(:green)
 
         doing 'Link'
