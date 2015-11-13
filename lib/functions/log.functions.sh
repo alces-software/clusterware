@@ -33,10 +33,15 @@ log() {
     logfile="$2"
     if [ "$logfile" == '-' ]; then
         echo "$(date +"%b %e %H:%M:%S") ${message}"
-    elif [ -w "$logfile" ]; then
-        echo "$(date +"%b %e %H:%M:%S") ${message}" >> "$logfile"
     else
-        echo "$(date +"%b %e %H:%M:%S") ${message}" > /dev/stderr
+        if [ ! -f "$logfile" ]; then
+            touch "${logfile}" &>/dev/null
+        fi
+        if [ -w "$logfile" ]; then
+            echo "$(date +"%b %e %H:%M:%S") ${message}" >> "$logfile"
+        else
+            echo "$(date +"%b %e %H:%M:%S") ${message}" > /dev/stderr
+        fi
     fi
 }
 
@@ -52,9 +57,14 @@ log_blob() {
     fi
     if [ "$logfile" == '-' ]; then
         sed "s/^/${prefix} /g"
-    elif [ -w "$logfile" ]; then
-        sed "s/^/${prefix} /g" >> "$logfile"
     else
-        sed "s/^/${prefix} /g" > /dev/stderr
+        if [ ! -f "$logfile" ]; then
+            touch "${logfile}" &>/dev/null
+        fi
+        if [ -w "$logfile" ]; then
+            sed "s/^/${prefix} /g" >> "$logfile"
+        else
+            sed "s/^/${prefix} /g" > /dev/stderr
+        fi
     fi
 }
