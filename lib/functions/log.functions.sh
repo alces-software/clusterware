@@ -19,7 +19,13 @@
 # For more information on the Alces Clusterware, please visit:
 # https://github.com/alces-software/clusterware
 #==============================================================================
-cw_LOG_default_log="/var/log/clusterware/instance.log"
+if [ "$UID" == "0" ]; then
+    cw_LOG_default_log="/var/log/clusterware/instance.log"
+else
+    require xdg
+    cw_LOG_default_log="$(xdg_cache_home)/clusterware/log/instance.log"
+    mkdir -p "$(xdg_cache_home)/clusterware/log"
+fi
 
 log() {
     local message logfile
@@ -27,7 +33,7 @@ log() {
     logfile="$2"
     if [ "$logfile" == '-' ]; then
         echo "$(date +"%b %e %H:%M:%S") ${message}"
-    elif [ "$logfile" ]; then
+    elif [ -w "$logfile" ]; then
         echo "$(date +"%b %e %H:%M:%S") ${message}" >> "$logfile"
     else
         echo "$(date +"%b %e %H:%M:%S") ${message}" > /dev/stderr
@@ -46,7 +52,7 @@ log_blob() {
     fi
     if [ "$logfile" == '-' ]; then
         sed "s/^/${prefix} /g"
-    elif [ "$logfile" ]; then
+    elif [ -w "$logfile" ]; then
         sed "s/^/${prefix} /g" >> "$logfile"
     else
         sed "s/^/${prefix} /g" > /dev/stderr
