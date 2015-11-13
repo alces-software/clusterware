@@ -64,7 +64,7 @@ network_get_network_address() {
         | sed 's/.*src \(\S*\).*/\1/g'
 }
 
-network_get_network_device() {
+network_get_route_iface() {
     local target_ip
     target_ip="$1"
 
@@ -73,7 +73,14 @@ network_get_network_device() {
         | sed 's/.*dev \(\S*\).*/\1/g'
 }
 
-network_get_device_address() {
+network_get_first_iface() {
+    ip -o link show \
+        | grep -v 'lo:' \
+        | head -n1 \
+        | sed 's/^.: \(\S*\):.*/\1/g'
+}
+
+network_get_iface_address() {
     local target_iface
     target_iface="$1"
 
