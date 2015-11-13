@@ -79,3 +79,32 @@ files_wait_for_file() {
         fi
     done
 }
+
+files_load_config() {
+    local base name required path
+    if [ "$1" == "--optional" ]; then
+        optional=true
+        shift
+    fi
+    name=$1
+    base=$2
+
+    if [ "$base" ]; then
+        path="${cw_ROOT}/etc/${base}"
+    else
+        path="${cw_ROOT}/etc"
+    fi
+
+    if [ -f "${path}/${name}.vars.sh" ]; then
+        . "${path}/${name}.vars.sh"
+    elif [ -f "${path}/${name}.rc" ]; then
+        . "${path}/${name}.rc"
+    else
+        echo "Unable to locate ${name} configuration in given path: ${path}"
+        if [ "$optional" ]; then
+            return 1
+        else
+            exit 1
+        fi
+    fi
+}
