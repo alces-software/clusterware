@@ -168,8 +168,8 @@ else
     chmod -R g+rw "${gridware_root}"/etc
     find "${gridware_root}"/etc -type d -exec chmod 2775 {} \;
     chgrp -R gridware "${gridware_root}"/etc
-    chgrp gridware "${gridware_root}"
-    chmod g+rws "${gridware_root}"
+    chgrp gridware "${gridware_root}" "${gridware_root}"/depots
+    chmod g+rws "${gridware_root}" "${gridware_root}"/depots
 fi
 say_done $?
 
