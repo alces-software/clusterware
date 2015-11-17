@@ -24,7 +24,7 @@ require ruby
 cw_DOCUMENT_dir="${cw_ROOT}/var/lib/docs"
 
 document_show() {
-    local roff doc psdoc ronn
+    local roff doc psdoc ronn man_opts
     doc="$1"
     manual="${2:-Alces Clusterware}"
     ronn=( \
@@ -37,11 +37,14 @@ document_show() {
         psdoc="$(mktemp /tmp/$(basename "${doc}").XXXXXX.ps)"
         man -t /dev/stdin <<< "${roff}" > "${psdoc}"
         (
-            evince "${psdoc}"
+            evince "${psdoc}" &>/dev/null
             rm -f "${psdoc}"
         ) &
     else
-        man /dev/stdin <<< "${roff}"
+        if [ -z "$MANPAGER" ]; then
+            man_opts=(-P "less -F")
+        fi
+        man "${man_opts[@]}" /dev/stdin <<< "${roff}"
     fi
 }
 
@@ -64,14 +67,22 @@ document_get() {
     glob="$3"
     default_ext="${4:-$3}"
     case "$idx" in
-        ''|*[!0-9]*)
+        '')
+            return 3
+            ;;
+        *[!0-9]*)
             # try getting a doc by name instead
             doc=$(echo "${cw_DOCUMENT_dir}"/${type}/${idx}${default_ext})
-            if [ -f "${doc}" ]; then
-                echo "${doc}"
-            else
-                return 2
+            if [ ! -f "${doc}" ]; then
+                doc=$(echo "${cw_DOCUMENT_dir}"/${type}/[0-9]-${idx}${default_ext})
+                if [ ! -f "${doc}" ]; then
+                    doc=$(echo "${cw_DOCUMENT_dir}"/${type}/[0-9][0-9]-${idx}${default_ext})
+                    if [ ! -f "${doc}" ]; then
+                        return 2
+                    fi
+                fi
             fi
+            echo "${doc}"
             ;;
         *)
             if [ "$idx" == 0 ]; then
