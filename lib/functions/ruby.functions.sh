@@ -22,3 +22,11 @@
 ruby_run() {
     ${cw_ROOT}/opt/ruby/bin/ruby -se 'eval ARGF.read'
 }
+
+ruby_bundle_exec() {
+    PATH="${cw_ROOT}"/opt/ruby/bin
+    (
+        cd "${cw_ROOT}"/lib/ruby
+        ${cw_ROOT}/opt/ruby/bin/bundle exec "$@"
+    )
+}
