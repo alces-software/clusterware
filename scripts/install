@@ -233,6 +233,7 @@ if [ -d "${target}/var/lib/docs" ]; then
 else
     doing "Initialize"
     mkdir -p "${target}/var/lib/docs/guides" "${target}/var/lib/docs/templates"
+    cp "${source}/dist/guides"/* "${target}/var/lib/docs/guides"
 fi
 say_done $?
 
