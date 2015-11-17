@@ -227,6 +227,15 @@ else
 fi
 say_done $?
 
+title "Setting up documents area"
+if [ -d "${target}/var/lib/docs" ]; then
+    doing 'Detect'
+else
+    doing "Initialize"
+    mkdir -p "${target}/var/lib/docs/guides" "${target}/var/lib/docs/templates"
+fi
+say_done $?
+
 title "Installing profile hooks"
 doing 'Install'
 cp "${source}/dist/profile"/* /etc/profile.d
