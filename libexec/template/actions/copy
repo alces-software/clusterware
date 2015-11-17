@@ -30,7 +30,7 @@ main() {
     if [ -z "$target" ]; then
         action_die "no target supplied - please supply both template number and target file name."
     fi
-    if template="$(document_get $idx templates .tpl .sh.tpl)"; then
+    if template="$(document_get "$idx" templates .tpl .sh.tpl)"; then
         if [ -d "${target}" ]; then
             target="${target}/$(basename "${source}" .tpl)"
         fi
@@ -38,15 +38,18 @@ main() {
             action_die "file already exists at target location '${target}'"
         fi
         source_name="$(basename "${template}" .tpl)"
-        if cp "${template}" "${target}"; then
+        if grep -v '^#@ ' "${template}" > "${target}"; then
             chmod 755 "${target}"
             action_die "template '$(basename "${source_name}" .sh)' copied to '${target}'" 0
         else
             action_die "failed to copy template '$(basename "${source_name}" .sh)' to '${target}'"
         fi
     else
-        if [ $? == 1 ]; then
+        errlvl=$?
+        if [ $errlvl == 1 ]; then
             action_die "no templates found"
+        elif [ $errlvl == 3 ]; then
+            action_die "please specify a template index or name"
         else
             action_die "invalid template number requested: ${idx}"
         fi

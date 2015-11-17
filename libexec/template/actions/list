@@ -24,13 +24,29 @@ require action
 require document
 
 main() {
-    local a c tmpls tmpl
-    if tmpls=($(document_list templates *.tpl)); then
+    local a c tmpls tmpl vars namepart w
+    if tmpls=($(document_list templates .tpl)); then
         c=0
+        w=0
+        for a in "${tmpls[@]}"; do
+            tmpl="$(basename "$(basename "${a}" .tpl)" .sh | sed 's/^[0-9]*-\(.*\)/\1/g')"
+            if [ "${#tmpl}" -gt "${w}" ]; then
+                w="${#tmpl}"
+            fi
+        done
         for a in "${tmpls[@]}"; do
             c=$(($c+1))
-            tmpl="$(basename "$(basename "${a}" .tpl)" .sh)"
-            echo -e "\e[38;5;68m$(printf "%2d" ${c})\e[0m -> \e[38;5;221m${tmpl}\e[0m"
+            tmpl="$(basename "$(basename "${a}" .tpl)" .sh | sed 's/^[0-9]*-\(.*\)/\1/g')"
+            vars=$(grep '^#@ ' "${a}" | cut -c4-)
+            if [ "$vars" ]; then
+                declare -A cw_TEMPLATE
+                eval "$vars"
+            fi
+            if [ "${cw_TEMPLATE[name]}" ]; then
+                namepart=" ... \e[35m${cw_TEMPLATE[name]}\e[0m"
+            fi
+            echo -e "\e[38;5;68m$(printf "%2d" ${c})\e[0m -> \e[38;5;221m$(printf "%-${w}s" ${tmpl})\e[0m${namepart}"
+            unset cw_TEMPLATE namepart
         done
     else
         action_die "no templates found"

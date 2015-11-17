@@ -26,14 +26,14 @@ require document
 main() {
     local idx template
     idx="$1"
-    if template="$(document_get $idx templates .tpl .sh.tpl)"; then
-        less "${template}"
+    if template="$(document_get "$idx" templates .tpl .sh.tpl)"; then
+        grep -v '^#@ ' "${template}" | less -F
     else
         errlvl=$?
         if [ $errlvl == 1 ]; then
             action_die "no templates found"
         elif [ $errlvl == 3 ]; then
-            action_die "multiple templates found"
+            action_die "please specify a template index or name"
         else
             action_die "invalid template requested: ${idx}"
         fi

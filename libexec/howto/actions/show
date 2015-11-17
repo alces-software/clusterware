@@ -26,11 +26,14 @@ require document
 main() {
     local idx guide
     idx="$1"
-    if guide="$(document_get $idx guides .md)"; then
+    if guide="$(document_get "$idx" guides .md)"; then
         document_show "${guide}" "Alces Clusterware Guides"
     else
-        if [ $? == 1 ]; then
+        errlvl=$?
+        if [ $errlvl == 1 ]; then
             action_die "no guides found"
+        elif [ $errlvl == 3 ]; then
+            action_die "please specify a guide index or name"
         else
             action_die "invalid guide requested: ${idx}"
         fi

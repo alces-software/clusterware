@@ -24,18 +24,52 @@ require action
 require document
 
 main() {
-    local idx template source_name
+    local idx template source_name vars license
     idx="$1"
-    if template="$(document_get $idx templates .tpl .sh.tpl)"; then
+    if template="$(document_get "$idx" templates .tpl .sh.tpl)"; then
         source_name="$(basename "${template}" .tpl)"
         if [ -f "$(dirname "${template}")/${source_name}.md" ]; then
             document_show "$(dirname "${template}")/${source_name}.md" "Alces Clusterware Templates"
         else
-            action_die "no information available for template '$(basename "${source_name}" .sh)'"
+            vars=$(grep '^#@ ' "${template}" | cut -c4-)
+            if [ "$vars" ]; then
+                declare -A cw_TEMPLATE
+                eval "$vars"
+                if [ "${cw_TEMPLATE[license]}" ]; then
+                    license=$(cat <<EOF
+## LICENSE
+
+This work is licensed under a ${cw_TEMPLATE[license]} License.
+
+EOF
+                )
+                fi
+                cat <<EOF | document_show "-" "Alces Clusterware Templates"
+# $(basename "${source_name}" .sh)(7) -- ${cw_TEMPLATE[name]}
+
+## DESCRIPTION
+
+${cw_TEMPLATE[desc]}
+
+${cw_TEMPLATE[extended_desc]}
+
+${license}
+
+## COPYRIGHT
+
+${cw_TEMPLATE[copyright]}
+
+EOF
+            else
+                action_die "no information available for template '$(basename "${source_name}" .sh)'"
+            fi
         fi
     else
-        if [ $? == 1 ]; then
+        errlvl=$?
+        if [ $errlvl == 1 ]; then
             action_die "no templates found"
+        elif [ $errlvl == 3 ]; then
+            action_die "please specify a template index or name"
         else
             action_die "invalid template number requested: ${idx}"
         fi
