@@ -35,7 +35,7 @@ case $action in
     e|en|ena|enab|enabl|enable)
         exec /bin/bash $cw_ROOT/libexec/handler/actions/enable "$@"
         ;;
-    a|av|ava|avai|avail)
+    a|av|ava|avai|avail|l|list|ls)
         exec /bin/bash $cw_ROOT/libexec/handler/actions/avail "$@"
         ;;
     d|di|dis|disa|disab|disabl|disable)

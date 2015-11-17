@@ -38,7 +38,7 @@ case $action in
     i|in|ins|inst|insta|instal|install)
         exec /bin/bash $cw_ROOT/libexec/service/actions/install "$@"
         ;;
-    a|av|ava|avai|avail)
+    a|av|ava|avai|avail|l|list|ls)
         exec /bin/bash $cw_ROOT/libexec/service/actions/avail "$@"
         ;;
     u|up|upd|upda|updat|update)
