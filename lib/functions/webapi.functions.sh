@@ -28,22 +28,49 @@ webapi_curl() {
     curl "$@" -H "Accept: $mimetype" $url
 }
 
-webapi_post() {
-    local url mimetype params
-    url="$1"
-    mimetype="${2:-application/vnd.api+json}"
+webapi_send() {
+    local verb url mimetype params auth skip_payload
+    verb="$1"
+    url="$2"
     shift 2
-
-    params=(-s -d @- -X POST "$@" -H "Content-Type: $mimetype")
+    while [ "$1" ]; do
+        case $1 in
+            --auth)
+                auth="$2"
+                shift 2
+                ;;
+            --mimetype)
+                mimetype="$2"
+                shift 2
+                ;;
+            --skip-payload)
+                skip_payload=true
+                shift
+                ;;
+            *)
+                shift
+                ;;
+        esac
+    done
+    mimetype="${mimetype:-application/vnd.api+json}"
+    params=(-s -X ${verb} "$@")
+    if [ "${auth}" ]; then
+        params+=(-u "${auth}")
+    fi
+    if [ -z "${skip_payload}" ]; then
+        params+=(-d @- -H "Content-Type: $mimetype")
+    fi
     webapi_curl "${url}" "${mimetype}" "${params[@]}"
 }
 
-webapi_delete() {
-    local url mimetype params
-    url="$1"
-    mimetype="${2:-application/vnd.api+json}"
-    shift 2
+webapi_patch() {
+    webapi_send PATCH "$@"
+}
 
-    params=(-s -X DELETE "$@")
-    webapi_curl "${url}" "${mimetype}" "${params[@]}"
+webapi_post() {
+    webapi_send POST "$@"
+}
+
+webapi_delete() {
+    webapi_send DELETE --skip-payload "$@"
 }
