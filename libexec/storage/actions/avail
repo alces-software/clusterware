@@ -1,0 +1,60 @@
+#!/bin/bash
+#==============================================================================
+# Copyright (C) 2015 Stephen F. Norledge and Alces Software Ltd.
+#
+# This file/package is part of Alces Clusterware.
+#
+# Alces Clusterware is free software: you can redistribute it and/or
+# modify it under the terms of the GNU Affero General Public License
+# as published by the Free Software Foundation, either version 3 of
+# the License, or (at your option) any later version.
+#
+# Alces Clusterware is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+# Affero General Public License for more details.
+#
+# You should have received a copy of the GNU Affero General Public License
+# along with this package.  If not, see <http://www.gnu.org/licenses/>.
+#
+# For more information on the Alces Clusterware, please visit:
+# https://github.com/alces-software/clusterware
+#==============================================================================
+require action
+require storage
+
+_show_config() {
+    local path name type default
+    path="$1"
+    name="$(basename "${path}" | cut -f1 -d'.')"
+    type="$(basename "${path}" | cut -f2 -d'.')"
+    if [ "$(storage_default_configuration)" == "${name}" ]; then
+        default="*"
+    else
+        default=" "
+    fi
+    echo -e "[$default] \e[35m${name}\e[0m (\e[38;5;221m${type}\e[0m)"
+}
+
+main() {
+    local a b storage reponame enabled
+    if [ "$1" == "--backends" ]; then
+        for a in "${cw_STORAGE_REPODIR}"/*; do
+            reponame=$(basename "$a")
+            for b in "${a}"/*; do
+                storage="$(basename "$b")"
+                if storage_is_enabled "${storage}"; then
+                    enabled='*'
+                else
+                    enabled=' '
+                fi
+                echo -e "[${enabled}] \e[38;5;68m${reponame}\e[0m/\e[38;5;221m$(basename "$b")\e[0m"
+            done
+        done
+    else
+        storage_each_configuration "_show_config"
+    fi
+    action_cleanup
+}
+
+main "$@"
