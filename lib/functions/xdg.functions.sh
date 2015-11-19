@@ -50,9 +50,11 @@ xdg_data_search() {
 xdg_search() {
     local haystack_paths xdg_dirs
     haystack_paths="$1"
+    needle="$2"
+    fn="$3"
     shift
     IFS=: read -a xdg_dirs <<< "${haystack_paths}"
-    xdg_find_needle "$@" "${xdg_dirs[@]}"
+    xdg_find_needle "$needle" "$fn" "${xdg_dirs[@]}"
 }
 
 xdg_find_needle() {
