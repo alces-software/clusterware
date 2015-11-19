@@ -227,6 +227,20 @@ else
 fi
 say_done $?
 
+title "Setting up storage backend base repository"
+if [ -d "${target}/var/lib/storage/repos" ]; then
+    doing 'Detect'
+else
+    doing 'Initialize'
+    if [ "$alces_REPOS_URL" ]; then
+        mkdir -p "${target}"/var/lib/storage/repos/base
+        tar -C "${target}"/var/lib/storage/repos/base -xvzf "${source}"/clusterware-storage.tar.gz &> "${dep_logs}/services-init.log"
+    else
+        "${target}/bin/alces" storage update &> "${dep_logs}/storage-init.log"
+    fi
+fi
+say_done $?
+
 title "Setting up documents area"
 if [ -d "${target}/var/lib/docs" ]; then
     doing 'Detect'

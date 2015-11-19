@@ -108,6 +108,10 @@ doing "Services"
 $GIT clone https://github.com/alces-software/clusterware-services.git "${src_dir}"/tmp/repos/clusterware-services &>/dev/null
 tar -C "${src_dir}"/tmp/repos/clusterware-services -czf "${prop_dir}/clusterware-services.tar.gz" .
 say_done $?
+doing "Storage"
+$GIT clone https://github.com/alces-software/clusterware-storage.git "${src_dir}"/tmp/repos/clusterware-storage &>/dev/null
+tar -C "${src_dir}"/tmp/repos/clusterware-storage -czf "${prop_dir}/clusterware-storage.tar.gz" .
+say_done $?
 
 title "Preparing bootstrap script"
 doing "Install"
