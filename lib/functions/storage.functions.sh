@@ -75,6 +75,10 @@ storage_configure() {
     type="$1"
     name="$2"
     shift
+    if [[ "${name}" == *"."* ]]; then
+        echo "invalid '.' character in configuration name"
+        return 1
+    fi
     if storage_configuration_exists "${name}"; then
         echo "configuration already exists for '${name}'"
         return 1
@@ -116,18 +120,20 @@ storage_write_configuration() {
         chmod 0600 "${path}"
     fi
     cat > "${path}"
+    echo "${path}"
 }
 
 storage_each_configuration() {
-    local fn user_path sys_path paths a
+    local fn user_path sys_path paths a found
     fn="$1"
 
     sys_path="$(xdg_search "$(xdg_config_dirs)" "clusterware/storage")"
     if [ "${sys_path}" ]; then
         paths=("${sys_path}"/*)
         if [ "${paths}" != "${sys_path}/*" ]; then
+            found=true
             for a in "${paths[@]}"; do
-                if [ "${a##*.}" != "yml" ]; then
+                if [ "${a##*.}" == "rc" ]; then
                     $fn "${a}"
                 fi
             done
@@ -137,13 +143,17 @@ storage_each_configuration() {
     user_path="$(xdg_config_home)"/clusterware/storage
     paths=("${user_path}"/*)
     if [ "${paths}" != "${user_path}/*" ]; then
+        found=true
         for a in "${paths[@]}"; do
-            if [ "${a##*.}" != "yml" ]; then
+            if [ "${a##*.}" == "rc" ]; then
                 $fn "${a}"
             fi
         done
     fi
 
+    if [ -z "$found" ]; then
+        return 1
+    fi
 }
 
 storage_get_configuration() {
@@ -153,7 +163,7 @@ storage_get_configuration() {
         paths=("${sys_path}"/"$1".*)
         if [ "${paths}" != "${sys_path}/$1.*" ]; then
             for a in "${paths[@]}"; do
-                if [ "${a##*.}" != "yml" ]; then
+                if [ "${a##*.}" == "rc" ]; then
                     echo "$a"
                     return 0
                 fi
@@ -165,7 +175,7 @@ storage_get_configuration() {
     paths=("${user_path}".*)
     if [ "${paths}" != "${user_path}.*" ]; then
         for a in "${paths[@]}"; do
-            if [ "${a##*.}" != "yml" ]; then
+            if [ "${a##*.}" == "rc" ]; then
                 echo "$a"
                 return 0
             fi
@@ -177,15 +187,15 @@ storage_configuration_exists() {
     local user_path sys_path paths a
     sys_path="$(xdg_search "$(xdg_config_dirs)" "clusterware/storage")"
     if [ "${sys_path}" ]; then
-        paths=("${sys_path}"/"$1".*)
-        if [ "${paths}" != "${sys_path}/$1.*" ]; then
+        paths=("${sys_path}"/"$1".*.rc)
+        if [ "${paths}" != "${sys_path}/$1.*.rc" ]; then
             return 0
         fi
     fi
 
     user_path="$(xdg_config_home)"/clusterware/storage/"$1"
-    paths=("${user_path}".*)
-    if [ "${paths}" != "${user_path}.*" ]; then
+    paths=("${user_path}".*.rc)
+    if [ "${paths}" != "${user_path}.*.rc" ]; then
         return 0
     fi
     return 1
