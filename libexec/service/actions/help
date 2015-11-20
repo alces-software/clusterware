@@ -151,11 +151,11 @@ general_help() {
   COMMANDS:
 
 EOF
-printf "  %-22s  %s\n" "$binname help" "More help about this command."
-printf "  %-22s  %s\n" "$binname avail" "List installed/available serviceware."
-printf "  %-22s  %s\n" "$binname enable" "Enable a serviceware component."
-printf "  %-22s  %s\n" "$binname install" "Install serviceware from a repository."
-printf "  %-22s  %s\n" "$binname update" "Update serviceware repository."
+printf "    %-22s  %s\n" "$binname help" "More help about this command."
+printf "    %-22s  %s\n" "$binname avail" "List installed/available serviceware."
+printf "    %-22s  %s\n" "$binname enable" "Enable a serviceware component."
+printf "    %-22s  %s\n" "$binname install" "Install serviceware from a repository."
+printf "    %-22s  %s\n" "$binname update" "Update serviceware repository."
 cat <<EOF
 
 Please report bugs to support@alces-software.com

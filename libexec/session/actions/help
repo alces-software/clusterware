@@ -80,10 +80,6 @@ EOF
 
 help_for_disable() {
     cat <<EOF
-  NAME:
-
-    disable
-
   SYNOPSIS:
 
     alces session disable <type>

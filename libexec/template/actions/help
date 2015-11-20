@@ -128,11 +128,11 @@ general_help() {
   COMMANDS:
 
 EOF
-printf "  %-22s  %s\n" "$binname help" "More help about this command."
-printf "  %-22s  %s\n" "$binname list" "List available templates."
-printf "  %-22s  %s\n" "$binname info" "Display information about a template."
-printf "  %-22s  %s\n" "$binname show" "Display a template."
-printf "  %-22s  %s\n" "$binname copy" "Copy a template for your use."
+printf "    %-22s  %s\n" "$binname help" "More help about this command."
+printf "    %-22s  %s\n" "$binname list" "List available templates."
+printf "    %-22s  %s\n" "$binname info" "Display information about a template."
+printf "    %-22s  %s\n" "$binname show" "Display a template."
+printf "    %-22s  %s\n" "$binname copy" "Copy a template for your use."
 cat <<EOF
 
 Please report bugs to support@alces-software.com

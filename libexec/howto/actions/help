@@ -59,6 +59,7 @@ help_for_show() {
   SYNOPSIS:
 
     alces howto show <index|name>
+    alces howto <index|name>
 
   DESCRIPTION:
 
@@ -100,9 +101,10 @@ general_help() {
   COMMANDS:
 
 EOF
-printf "  %-22s  %s\n" "$binname help" "More help about this command."
-printf "  %-22s  %s\n" "$binname list" "List available guides."
-printf "  %-22s  %s\n" "$binname show" "Display a guide."
+printf "    %-24s  %s\n" "$binname help" "More help about this command."
+printf "    %-24s  %s\n" "$binname list" "List available guides."
+printf "    %-24s  %s\n" "$binname show" "Display a guide."
+printf "    %-24s  %s\n" "$binname <index|name>" "Display a guide."
 cat <<EOF
 
 Please report bugs to support@alces-software.com

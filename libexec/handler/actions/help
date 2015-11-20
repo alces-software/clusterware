@@ -147,11 +147,11 @@ general_help() {
   COMMANDS:
 
 EOF
-printf "  %-22s  %s\n" "$binname help" "More help about this command."
-printf "  %-22s  %s\n" "$binname avail" "List installed/available handlers."
-printf "  %-22s  %s\n" "$binname enable" "Enable a handler from a repository."
-printf "  %-22s  %s\n" "$binname disable" "Disable a handler."
-printf "  %-22s  %s\n" "$binname update" "Update handler repository."
+printf "    %-22s  %s\n" "$binname help" "More help about this command."
+printf "    %-22s  %s\n" "$binname avail" "List installed/available handlers."
+printf "    %-22s  %s\n" "$binname enable" "Enable a handler from a repository."
+printf "    %-22s  %s\n" "$binname disable" "Disable a handler."
+printf "    %-22s  %s\n" "$binname update" "Update handler repository."
 cat <<EOF
 
 Please report bugs to support@alces-software.com
