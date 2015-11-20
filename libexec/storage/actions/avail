@@ -40,19 +40,25 @@ main() {
     local a b storage reponame enabled
     if [ "$1" == "--backends" ]; then
         for a in "${cw_STORAGE_REPODIR}"/*; do
-            reponame=$(basename "$a")
-            for b in "${a}"/*; do
-                storage="$(basename "$b")"
-                if storage_is_enabled "${storage}"; then
-                    enabled='*'
-                else
-                    enabled=' '
-                fi
-                echo -e "[${enabled}] \e[38;5;68m${reponame}\e[0m/\e[38;5;221m$(basename "$b")\e[0m"
-            done
+            if [ "$a" == "${cw_STORAGE_REPODIR}/*" ]; then
+                action_die "no storage backends found"
+            else
+                reponame=$(basename "$a")
+                for b in "${a}"/*; do
+                    storage="$(basename "$b")"
+                    if storage_is_enabled "${storage}"; then
+                        enabled='*'
+                    else
+                        enabled=' '
+                    fi
+                    echo -e "[${enabled}] \e[38;5;68m${reponame}\e[0m/\e[38;5;221m$(basename "$b")\e[0m"
+                done
+            fi
         done
     else
-        storage_each_configuration "_show_config"
+        if ! storage_each_configuration "_show_config"; then
+            action_die "no storage configurations found"
+        fi
     fi
     action_cleanup
 }
