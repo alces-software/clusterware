@@ -28,8 +28,8 @@ main() {
     cmd="$1"
     shift
     case $cmd in
-        get|put|mkbucket|rmbucket|rm)
-            :
+        get|put|mkbucket|rmbucket|rm|addbucket)
+            cw_BINNAME="${cw_BINNAME% *} ${cmd}"
             ;;
         *)
             action_die "invalid command supplied: $cmd"

@@ -28,42 +28,55 @@ action=$1
 shift
 cw_BINNAME="${cw_BINNAME} $(basename "$0")"
 
+if [ "${action}" == "-n" ]; then
+    action="$2"
+    args=(-n "$1" "${@:3}")
+else
+    args=("$@")
+fi
+
 case $action in
     h|he|hel|help)
-        exec /bin/bash $cw_ROOT/libexec/storage/actions/help "$@"
+        exec /bin/bash $cw_ROOT/libexec/storage/actions/help "${args[@]}"
+        ;;
+    up|upd|upda|updat|update)
+        exec /bin/bash $cw_ROOT/libexec/storage/actions/update "${args[@]}"
         ;;
     e|en|ena|enab|enabl|enable)
-        exec /bin/bash $cw_ROOT/libexec/storage/actions/enable "$@"
+        exec /bin/bash $cw_ROOT/libexec/storage/actions/enable "${args[@]}"
         ;;
     c|co|con|conf|confi|config|configu|configur|configure)
-        exec /bin/bash $cw_ROOT/libexec/storage/actions/configure "$@"
+        exec /bin/bash $cw_ROOT/libexec/storage/actions/configure "${args[@]}"
         ;;
     f|fo|for|forg|forge|forget)
-        exec /bin/bash $cw_ROOT/libexec/storage/actions/forget "$@"
+        exec /bin/bash $cw_ROOT/libexec/storage/actions/forget "${args[@]}"
         ;;
     u|us|use)
-        exec /bin/bash $cw_ROOT/libexec/storage/actions/use "$@"
+        exec /bin/bash $cw_ROOT/libexec/storage/actions/use "${args[@]}"
         ;;
     g|ge|get)
-        exec /bin/bash $cw_ROOT/libexec/storage/actions/perform get "$@"
+        exec /bin/bash $cw_ROOT/libexec/storage/actions/perform get "${args[@]}"
         ;;
     p|pu|put)
-        exec /bin/bash $cw_ROOT/libexec/storage/actions/perform put "$@"
+        exec /bin/bash $cw_ROOT/libexec/storage/actions/perform put "${args[@]}"
         ;;
     rm)
-        exec /bin/bash $cw_ROOT/libexec/storage/actions/perform rm "$@"
+        exec /bin/bash $cw_ROOT/libexec/storage/actions/perform rm "${args[@]}"
         ;;
     ls|l|li|lis|list)
-        exec /bin/bash $cw_ROOT/libexec/storage/actions/list "$@"
+        exec /bin/bash $cw_ROOT/libexec/storage/actions/list "${args[@]}"
         ;;
     a|av|ava|avai|avail)
-        exec /bin/bash $cw_ROOT/libexec/storage/actions/avail "$@"
+        exec /bin/bash $cw_ROOT/libexec/storage/actions/avail "${args[@]}"
         ;;
     mk|mkd|mkdi|mkdir|mkb|mkbu|mkbuc|mkbuck|mkbucke|mkbucket|mb)
-        exec /bin/bash $cw_ROOT/libexec/storage/actions/perform mkbucket "$@"
+        exec /bin/bash $cw_ROOT/libexec/storage/actions/perform mkbucket "${args[@]}"
         ;;
     rmd|rmdi|rmdir|rmb|rmbu|rmbuc|rmbuck|rmbucke|rmbucket|rb)
-        exec /bin/bash $cw_ROOT/libexec/storage/actions/perform rmbucket "$@"
+        exec /bin/bash $cw_ROOT/libexec/storage/actions/perform rmbucket "${args[@]}"
+        ;;
+    ad|add|addb|addbu|addbuc|addbuck|addbucke|addbucket)
+        exec /bin/bash $cw_ROOT/libexec/storage/actions/perform addbucket "${args[@]}"
         ;;
     *)
         cat <<EOF
@@ -84,6 +97,7 @@ printf "  %-24s  %s\n" "$cw_BINNAME rm" "Delete a file from storage."
 printf "  %-24s  %s\n" "$cw_BINNAME list" "List files held in storage."
 printf "  %-24s  %s\n" "$cw_BINNAME mkbucket" "Make a top-level bucket in storage."
 printf "  %-24s  %s\n" "$cw_BINNAME rmbucket" "Remove a top-level bucket from storage."
+printf "  %-24s  %s\n" "$cw_BINNAME addbucket" "Add an external bucket reference."
 cat <<EOF
 
 Please report bugs to support@alces-software.com
