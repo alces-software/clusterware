@@ -38,6 +38,9 @@ case $action in
     s|sh|sho|show)
         exec /bin/bash $cw_ROOT/libexec/howto/actions/show "$@"
         ;;
+    [1-9]*|*-*)
+        exec /bin/bash $cw_ROOT/libexec/howto/actions/show "$action" "$@"
+        ;;
     *)
         cat <<EOF
 Usage: $cw_BINNAME COMMAND [[OPTION]... [ARGS]]
@@ -45,9 +48,10 @@ Helpful guides on how to use your research environment.
 
 Commands:
 EOF
-printf "  %-22s  %s\n" "$cw_BINNAME help" "More help about this command."
-printf "  %-22s  %s\n" "$cw_BINNAME list" "List available guides."
-printf "  %-22s  %s\n" "$cw_BINNAME show" "Display a guide."
+printf "  %-24s  %s\n" "$cw_BINNAME help" "More help about this command."
+printf "  %-24s  %s\n" "$cw_BINNAME list" "List available guides."
+printf "  %-24s  %s\n" "$cw_BINNAME show" "Display a guide."
+printf "  %-24s  %s\n" "$cw_BINNAME <index|name>" "Display a guide."
 cat <<EOF
 
 Please report bugs to support@alces-software.com
