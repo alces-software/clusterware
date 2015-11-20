@@ -95,6 +95,7 @@ if [ ! -d "${target}/etc" ]; then
     rm -f "${target}"/etc/handlers/.gitkeep
     rm -f "${target}"/etc/session/.gitkeep
     rm -f "${target}"/etc/services/.gitkeep
+    rm -f "${target}"/etc/storage/.gitkeep
 fi
 mkdir -p /var/log/clusterware
 say_done $?
