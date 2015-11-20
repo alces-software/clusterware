@@ -28,7 +28,6 @@ require 'alces/packager/actions'
 require 'alces/packager/errors'
 require 'alces/packager/io_handler'
 require 'terminal-table'
-require 'rainbow'
 require 'memoist'
 
 Alces::Tools::Logging.default = Alces::Tools::Logger.new(File::expand_path(File.join(Alces::Packager::Config.log_root,'packager.log')),
@@ -64,7 +63,9 @@ module Alces
       def initialize(*)
         super
         options.default(compiler: :first)
-        Rainbow.enabled = false if ":#{ENV['cw_FLAGS']}:" =~ /nocolou?r/ || ENV['cw_COLOUR'] == '0'
+        if ":#{ENV['cw_FLAGS']}:" =~ /nocolou?r/ || ENV['cw_COLOUR'] == '0'
+          HighLine.use_color = false
+        end
       end
 
       def list

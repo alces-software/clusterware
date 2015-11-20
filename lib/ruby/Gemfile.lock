@@ -53,7 +53,6 @@ GEM
     mustache (1.0.2)
     netrc (0.10.3)
     posix-spawn (0.3.11)
-    rainbow (2.0.0)
     rdiscount (2.1.8)
     rest-client (1.8.0)
       http-cookie (>= 1.0.2, < 2.0)
@@ -84,7 +83,6 @@ DEPENDENCIES
   dm-sqlite-adapter (>= 1.2.0)
   grit
   memoist
-  rainbow
   ronn
   rubytree
   terminal-table
