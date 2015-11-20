@@ -1,0 +1,357 @@
+#!/bin/bash
+#==============================================================================
+# Copyright (C) 2015 Stephen F. Norledge and Alces Software Ltd.
+#
+# This file/package is part of Alces Clusterware.
+#
+# Alces Clusterware is free software: you can redistribute it and/or
+# modify it under the terms of the GNU Affero General Public License
+# as published by the Free Software Foundation, either version 3 of
+# the License, or (at your option) any later version.
+#
+# Alces Clusterware is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+# Affero General Public License for more details.
+#
+# You should have received a copy of the GNU Affero General Public License
+# along with this package.  If not, see <http://www.gnu.org/licenses/>.
+#
+# For more information on the Alces Clusterware, please visit:
+# https://github.com/alces-software/clusterware
+#==============================================================================
+require action
+
+main() {
+    action=$1
+    shift
+
+    case $action in
+        help|enable|configure|forget|use|avail|put|get|rm|list|mkbucket|rmbucket|addbucket)
+            help_for_${action}
+            ;;
+        ?*)
+            echo "${cw_BINNAME}: no such topic: ${action}"
+            echo ""
+            general_help
+            ;;
+        *)
+            general_help
+            ;;
+    esac
+}
+
+help_for_avail() {
+    cat <<EOF
+  SYNOPSIS:
+
+    alces storage avail [OPTIONS]
+
+  DESCRIPTION:
+
+    Display a list of storage configurations that are configured.  The
+    default storage configuration (used when no storage configuration
+    is explicitly specified) is marked with a '*'.
+
+  OPTIONS:
+
+    --backends
+      Output storage backend types that are available or currently enabled.
+
+EOF
+}
+
+help_for_configure() {
+    cat <<EOF
+  SYNOPSIS:
+
+    alces storage configure [OPTIONS] <name> <type> [PARAMS...]
+
+  DESCRIPTION:
+
+    Configure storage with <name> and storage backend <type>.
+
+    Refer to the storage backend documentation for any parameters that
+    may be specified on the command line.  If parameters are not
+    specified the tool will prompt for configuration values
+    interactively.
+
+    The configuration <name> may not contain the '.' character.
+
+  OPTIONS:
+
+    --system
+      Create a system-wide storage configuration (only available to
+      privileged user).
+
+EOF
+}
+
+help_for_enable() {
+    cat <<EOF
+  SYNOPSIS:
+
+    alces storage enable <type>
+
+  DESCRIPTION:
+
+    Install a storage backend <type> and make it available for use.
+
+EOF
+}
+
+help_for_forget() {
+    cat <<EOF
+  SYNOPSIS:
+
+    alces storage forget [OPTIONS] <name>
+
+  DESCRIPTION:
+
+    Remove a previously created storage configuration.
+
+  OPTIONS:
+
+    --system
+      Forget a system-wide storage configuration (only available to
+      privileged user).
+
+EOF
+}
+
+help_for_help() {
+    cat <<EOF
+  SYNOPSIS:
+
+    alces storage help [<command>]
+
+  DESCRIPTION:
+
+    Get help with storage commands.  If no <command> is specified,
+    show some general help.
+
+EOF
+}
+
+help_for_use() {
+    cat <<EOF
+  SYNOPSIS:
+
+    alces storage use [OPTIONS] <name>
+
+  DESCRIPTION:
+
+    Select <name> as the default storage configuration.  The default
+    configuration is used if no storage configuration is specified
+    when performing a storage operation.
+
+  OPTIONS:
+
+    --system
+      Select a system-wide default storage configuration (only
+      available to privileged user).  The system-wide default is used
+      if a user has not created any storage configurations and not
+      selected a default.
+
+EOF
+}
+
+help_for_put() {
+    cat <<EOF
+  SYNOPSIS:
+
+    alces storage put [OPTIONS] <source> [<target>]
+
+  DESCRIPTION:
+
+    Put <source> file from a local path into storage at <target>
+    location.
+
+    Note that some backends may require <target> to be explicitly
+    specified.
+
+  OPTIONS:
+
+    -n <name>
+     Use storage configuration with <name>.  If not specified, the
+     current default (if present) will be used.  Change the default
+     with "alces storage use".
+
+EOF
+}
+
+help_for_get() {
+    cat <<EOF
+  SYNOPSIS:
+
+    alces storage get [OPTIONS] <source> [<target>]
+
+  DESCRIPTION:
+
+    Get <source> file from storage and place in local path <target>.
+
+    Note that some backends may require <target> to be explicitly
+    specified.
+
+  OPTIONS:
+
+    -n <name>
+     Use storage configuration with <name>.  If not specified, the
+     current default (if present) will be used.  Change the default
+     with "alces storage use".
+
+    Refer to storage backend documentation for further
+    backend-specific options.
+
+EOF
+}
+
+help_for_rm() {
+    cat <<EOF
+  SYNOPSIS:
+
+    alces storage rm [OPTIONS] <path>
+
+  DESCRIPTION:
+
+    Delete file at <path> from storage.
+
+  OPTIONS:
+
+    -n <name>
+     Use storage configuration with <name>.  If not specified, the
+     current default (if present) will be used.  Change the default
+     with "alces storage use".
+
+EOF
+}
+
+help_for_list() {
+    cat <<EOF
+  SYNOPSIS:
+
+    alces storage list [OPTIONS] [<path>]
+
+  DESCRIPTION:
+
+    List available files, directories or buckets.
+
+  OPTIONS:
+
+    -n <name>
+     Use storage configuration with <name>.  If not specified, the
+     current default (if present) will be used.  Change the default
+     with "alces storage use".
+
+EOF
+}
+
+help_for_mkbucket() {
+    cat <<EOF
+  SYNOPSIS:
+
+    alces storage mkbucket [OPTIONS] <name>
+    alces storage mkdir [OPTIONS] <name>
+
+  DESCRIPTION:
+
+    Create a new bucket or top-level directory called <name>.  The
+    bucket/directory name may not contain the '/' character.
+
+  OPTIONS:
+
+    -n <name>
+     Use storage configuration with <name>.  If not specified, the
+     current default (if present) will be used.  Change the default
+     with "alces storage use".
+
+EOF
+}
+
+help_for_rmbucket() {
+    cat <<EOF
+  SYNOPSIS:
+
+    alces storage rmbucket [OPTIONS] <name>
+    alces storage rmdir [OPTIONS] <name>
+
+  DESCRIPTION:
+
+    Remove a bucket or top-level directory called <name>.  The
+    bucket/directory name may not contain the '/' character.
+
+  OPTIONS:
+
+    -n <name>
+     Use storage configuration with <name>.  If not specified, the
+     current default (if present) will be used.  Change the default
+     with "alces storage use".
+
+EOF
+}
+
+help_for_addbucket() {
+    cat <<EOF
+  SYNOPSIS:
+
+    alces storage addbucket [OPTIONS] <name>
+
+  DESCRIPTION:
+
+    Add an external bucket, <name>.
+
+    This acts as a convenient reminder or hint that further buckets
+    are available when using a storage configuration, even if it is
+    not owned by the configured account (e.g. public buckets).
+    External buckets will be shown when using "alces storage list"
+    with no parameters.
+
+    Note that not all storage backends support this operation.
+
+  OPTIONS:
+
+    -n <name>
+     Use storage configuration with <name>.  If not specified, the
+     current default (if present) will be used.  Change the default
+     with "alces storage use".
+
+EOF
+}
+
+
+general_help() {
+    local binname
+    binname="${cw_BINNAME% *}"
+    cat <<EOF
+  NAME:
+
+    ${binname}
+
+  DESCRIPTION:
+
+    Configure and address storage facilities.
+
+  COMMANDS:
+
+EOF
+printf "    %-24s  %s\n" "$binname help" "More help about this command."
+printf "    %-24s  %s\n" "$binname enable" "Enable a storage backend."
+printf "    %-24s  %s\n" "$binname configure" "Configure a storage backend."
+printf "    %-24s  %s\n" "$binname forget" "Forget (remove) a storage backend configuration."
+printf "    %-24s  %s\n" "$binname use" "Select a default storage backend configuration."
+printf "    %-24s  %s\n" "$binname avail" "Show configured storage backends."
+printf "    %-24s  %s\n" "$binname put" "Put a file in storage."
+printf "    %-24s  %s\n" "$binname get" "Get a file from storage."
+printf "    %-24s  %s\n" "$binname rm" "Delete a file from storage."
+printf "    %-24s  %s\n" "$binname list" "List files held in storage."
+printf "    %-24s  %s\n" "$binname mkbucket" "Make a top-level bucket in storage."
+printf "    %-24s  %s\n" "$binname rmbucket" "Remove a top-level bucket from storage."
+printf "    %-24s  %s\n" "$binname addbucket" "Add an external bucket reference."
+cat <<EOF
+
+Please report bugs to support@alces-software.com
+Alces Software home page: <http://alces-software.com>
+EOF
+}
+
+main "$@"
