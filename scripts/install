@@ -88,7 +88,7 @@ if [ ! -d "${target}/etc" ]; then
         -i "${target}/etc/packager.yml" "${target}/etc"/distro.*
     sed -e "s,_ROOT_,${target},g" \
         -e "s,_GRIDWARE-ROOT_,${gridware_root},g" \
-        -i "${target}/etc/modulespath"
+        -i "${target}/etc/modulespath" "${target}/etc/ruby.rc"
     if [ "$alces_DIST_URL" ]; then
         sed -e "s,^cw_DIST_URL=.*,cw_DIST_URL=${alces_DIST_URL}/,g" -i "${target}/etc"/serviceware.rc
     fi
