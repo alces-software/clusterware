@@ -66,7 +66,15 @@ handler_disable() {
 handler_broadcast() {
     local event
     event="$1"
-    "${cw_HANDLER_BROADCASTER}" event -coalesce=false "${event}" "$*"
+    if [ -f "${cw_ROOT}"/etc/config/cluster/auth.rc ]; then
+        . "${cw_ROOT}"/etc/config/cluster/auth.rc
+        "${cw_HANDLER_BROADCASTER}" event \
+            -coalesce=false \
+            -rpc-auth="${cw_CLUSTER_auth_token}" \
+            "${event}" "$*"
+    else
+        return 1
+    fi
 }
 
 handler_tee() {
