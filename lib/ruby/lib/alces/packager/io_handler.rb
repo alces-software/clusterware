@@ -64,7 +64,7 @@ module Alces
         end
 
         def tty?
-          Rainbow.enabled
+          STDOUT.tty? && STDERR.tty?
         end
 
         def colored_path(p)
