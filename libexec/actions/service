@@ -44,6 +44,9 @@ case $action in
     u|up|upd|upda|updat|update)
         exec /bin/bash $cw_ROOT/libexec/service/actions/update "$@"
         ;;
+    build)
+        exec /bin/bash $cw_ROOT/libexec/service/actions/build "$@"
+        ;;
     *)
         cat <<EOF
 Usage: $cw_BINNAME COMMAND [[OPTION]... [ARGS]]

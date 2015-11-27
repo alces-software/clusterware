@@ -56,6 +56,25 @@ serviceware_install() {
     repo_plugin_install "${cw_SERVICEWARE_REPODIR}" "$@"
 }
 
+serviceware_build() {
+    local repodir plugin distro builder exitcode
+    repodir="${cw_SERVICEWARE_REPODIR}"
+    plugin="$1"
+    distro="$2"
+    shift 2
+    if [ -f "${repodir}/${plugin}/metadata.yml" ]; then
+        builder="$(mktemp /tmp/clusterware-builder.XXXXXXXX.sh)"
+        repo_generate_script "${repodir}/${plugin}" "${builder}" "${distro}" "build"
+        cd "${cw_ROOT}"
+        set -o pipefail
+        /bin/bash "${builder}" "$@" 2>&1 | sed 's/^/  >>> /g'
+        exitcode=$?
+        set +o pipefail
+        rm -f "${builder}"
+        return $exitcode
+    fi
+}
+
 serviceware_enable_component() {
     local service component distro
     service="$1"
