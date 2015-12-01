@@ -20,7 +20,7 @@
 # https://github.com/alces-software/clusterware
 #==============================================================================
 deps="git libyaml ruby bundler modules genders pdsh components tigervnc xwd serf pluginhook websockify jq"
-serviceware="gridscheduler aws s3cmd"
+serviceware="gridscheduler aws s3cmd galaxy-1510"
 dists="el6 el7"
 dist_url=${alces_DIST_URL:-https://s3-eu-west-1.amazonaws.com/packages.alces-software.com/clusterware/dist}
 target=${alces_TARGET_DIR:-/opt/clusterware}
