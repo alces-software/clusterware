@@ -110,3 +110,13 @@ config = YAML.load_file('${metadata_path}/metadata.yml')
 exit(1) unless config.key?('${key}')
 RUBY
 }
+
+repo_list_scripts() {
+    local metadata_path key
+    metadata_path="$1"
+    ruby_run <<RUBY
+require 'yaml'
+config = YAML.load_file('${metadata_path}/metadata.yml')
+puts config.keys.join(' ')
+RUBY
+}

@@ -25,16 +25,32 @@ require serviceware
 
 main() {
     local a b c service reponame enabled installed
+    if [ "$1" == "--components" ]; then
+        with_components=true
+        shift
+    fi
     for a in "${cw_SERVICEWARE_REPODIR}"/*; do
         reponame=$(basename "$a")
         for b in "${a}"/*; do
             service="$(basename "$b")"
-            if serviceware_is_installed "${service}"; then
-                installed='*'
+            if [ "${with_components}" ]; then
+                if serviceware_is_installed "${service}"; then
+                    installed='*'
+                    for c in $(serviceware_list_components "${reponame}/${service}"); do
+                        if ! serviceware_is_enabled "${service}-${c}"; then
+                            installed=' '
+                        fi
+                        echo -e "[${installed}] \e[38;5;68m${reponame}\e[0m/\e[38;5;221m$(basename "$b")\e[0m/\e[35m${c}\e[0m"
+                    done
+                fi
             else
-                installed=' '
+                if serviceware_is_installed "${service}"; then
+                    installed='*'
+                else
+                    installed=' '
+                fi
+                echo -e "[${installed}] \e[38;5;68m${reponame}\e[0m/\e[38;5;221m$(basename "$b")\e[0m"
             fi
-            echo -e "[${installed}] \e[38;5;68m${reponame}\e[0m/\e[38;5;221m$(basename "$b")\e[0m"
         done
     done
     action_cleanup

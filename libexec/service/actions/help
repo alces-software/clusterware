@@ -45,12 +45,20 @@ help_for_avail() {
     cat <<EOF
   SYNOPSIS:
 
-    alces service avail
+    alces service avail [OPTIONS]
 
   DESCRIPTION:
 
-    Display services that are available for installation.  Services
-    that are currently installed are marked with a '*'.
+    Display services or components that are available for
+    installation.  Services that are currently installed are marked
+    with a '*'.
+
+  OPTIONS:
+
+    --components
+      Display components of installed services that are available to
+      be enabled.  Services that are currently enabled are marked with
+      a '*'.
 
 EOF
 }

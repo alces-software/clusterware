@@ -106,3 +106,15 @@ serviceware_has_component() {
 
     repo_has_script "${cw_SERVICEWARE_REPODIR}/${service}" "component-${component}"
 }
+
+serviceware_list_components() {
+    local service components
+    service="$1"
+    components=()
+    for a in $(repo_list_scripts "${cw_SERVICEWARE_REPODIR}/${service}"); do
+        if [[ "$a" == "component-"* ]]; then
+            components+=($(echo "$a" | cut -c11-))
+        fi
+    done
+    echo "${components[@]}"
+}
