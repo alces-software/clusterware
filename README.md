@@ -91,6 +91,10 @@ Alces Software home page: <http://alces-software.com/>
 
 Fork the project. Make your feature addition or bug fix. Send a pull request. Bonus points for topic branches.
 
+## What next..?
+
+_This is all great for admins of traditonal HPC clusters, but how can this help me get things done in the real world?_ Luckily for you Clusterware isn't just for admins, unlike tradional HPC tools its been designed from the ground up with modern day technologies in mind - why not try spinning up your own environment on [AWS](https://github.com/alces-software/clusterware/wiki/Deploying-clusters-with-AWS-CloudFormation-and-Alces-Clusterware) or your private OpenStack estate and get to experience the power of clusterware in helping you just get stuff done!
+
 ## Copyright and License
 
 AGPLv3+ License, see [LICENSE.txt](LICENSE.txt) for details.
