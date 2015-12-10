@@ -72,5 +72,5 @@ webapi_post() {
 }
 
 webapi_delete() {
-    webapi_send DELETE --skip-payload "$@"
+    webapi_send DELETE "$@" --skip-payload
 }
