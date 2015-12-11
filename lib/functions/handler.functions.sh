@@ -79,8 +79,15 @@ handler_broadcast() {
 
 handler_tee() {
     local input
-    while read input; do
+    read input
+    if [ -z "$input" ]; then
+        "$@" 2>&1 | log_blob "${cw_LOG_default_log}" "${cw_HANDLER_name}"
+    else
         "$@" <<< "${input}" 2>&1 | log_blob "${cw_LOG_default_log}" "${cw_HANDLER_name}"
         echo "${input}"
-    done
+        while read input; do
+            "$@" <<< "${input}" 2>&1 | log_blob "${cw_LOG_default_log}" "${cw_HANDLER_name}"
+            echo "${input}"
+        done
+    fi
 }
