@@ -1,0 +1,95 @@
+#!/bin/bash
+#==============================================================================
+# Copyright (C) 2015 Stephen F. Norledge and Alces Software Ltd.
+#
+# This file/package is part of Alces Clusterware.
+#
+# Alces Clusterware is free software: you can redistribute it and/or
+# modify it under the terms of the GNU Affero General Public License
+# as published by the Free Software Foundation, either version 3 of
+# the License, or (at your option) any later version.
+#
+# Alces Clusterware is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+# Affero General Public License for more details.
+#
+# You should have received a copy of the GNU Affero General Public License
+# along with this package.  If not, see <http://www.gnu.org/licenses/>.
+#
+# For more information on the Alces Clusterware, please visit:
+# https://github.com/alces-software/clusterware
+#==============================================================================
+setup() {
+    local a xdg_config
+    IFS=: read -a xdg_config <<< "${XDG_CONFIG_HOME:-$HOME/.config}:${XDG_CONFIG_DIRS:-/etc/xdg}"
+    for a in "${xdg_config[@]}"; do
+        if [ -e "${a}"/clusterware/config.vars.sh ]; then
+            source "${a}"/clusterware/config.vars.sh
+            break
+        fi
+    done
+    if [ -z "${cw_ROOT}" ]; then
+        echo "$0: unable to locate clusterware configuration"
+        exit 1
+    fi
+    kernel_load
+}
+
+_get_usable_name() {
+    local name suffix
+    suffix=$(uuid -v4 | cut -f1 -d'-')
+    name="$1-${suffix}.${cw_NAMING_domain}"
+    while naming_rr_exists "${name}"; do
+        suffix=$(uuid -v4 | cut -f1 -d'-')
+        name="$1-${suffix}.cloud.compute.estate"
+    done
+    echo "${name}"
+}
+
+_ensure_secret() {
+    local secret
+    if [ -z "${cw_NAMING_secret}" ]; then
+        cw_NAMING_secret=$(uuid -v4)
+        echo "cw_NAMING_secret=\"${cw_NAMING_secret}\"" >> ${cw_ROOT}/etc/naming.rc
+    fi
+}
+
+main() {
+    local name basename ip
+    basename="${1:-mycluster}"
+    files_load_config meta
+    if [ -z "${cw_META_hostname}" ]; then
+        name="$(_get_usable_name ${basename})"
+        _ensure_secret
+        ip="${2:-$(network_get_public_address)}"
+        if ! naming_create_rr "${name}" "${ip}"; then
+            action_die "unable to create DNS entry for ${name} -> ${ip}"
+        else
+            echo "cw_META_hostname_desc=\"Clusterware host name\"" >> "${cw_ROOT}"/etc/meta.rc
+            echo "cw_META_hostname=\"${name}\"" >> "${cw_ROOT}"/etc/meta.rc
+            # give an initial chance to propagate
+            sleep 10
+            while ! naming_rr_exists "${name}"; do
+                echo 'waiting'
+                sleep 10
+            done
+        fi
+    else
+        name="${cw_META_hostname}"
+    fi
+    if naming_cert_exists; then
+        action_die "certificate already present"
+    elif ! naming_issue_cert "${name}"; then
+        action_die "unable to issue SSL cert for ${name}"
+    fi
+}
+
+setup
+
+require action
+require naming
+require network
+require files
+
+main "$@"
