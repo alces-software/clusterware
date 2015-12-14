@@ -20,10 +20,13 @@
 # https://github.com/alces-software/clusterware
 #==============================================================================
 network_get_public_address() {
-    local public_ipv4
-    # Attempt to determine our public IP address using the standard EC2
-    # API.
-    public_ipv4=$(curl -f --connect-timeout 5 http://169.254.169.254/latest/meta-data/public-ipv4 2>/dev/null)
+    local public_ipv4 tmout
+    tmout=${1:-5}
+    if [ "${tmout}" -gt 0 ]; then
+        # Attempt to determine our public IP address using the standard EC2
+        # API.
+        public_ipv4=$(curl -f --connect-timeout ${tmout} http://169.254.169.254/latest/meta-data/public-ipv4 2>/dev/null)
+    fi
 
     if [ -z "$public_ipv4" ]; then
         # Couldn't find it via EC2 API, use apparent public interface address.
@@ -33,6 +36,26 @@ network_get_public_address() {
     else
         echo "$public_ipv4"
     fi
+}
+
+network_get_public_hostname() {
+    local public_hostname tmout dig_tmout
+    tmout=${1:-5}
+    if [ "${tmout}" -gt 0 ]; then
+        # Attempt to determine our public DNS name using the standard EC2
+        # API.
+        public_hostname=$(curl -f --connect-timeout ${tmout} http://169.254.169.254/latest/meta-data/public-hostname 2>/dev/null)
+        dig_tmout=${tmout}
+    else
+        dig_tmout=1
+    fi
+
+    if [ -z "$public_hostname" ]; then
+        # Couldn't find it via EC2 API, try a reverse lookup of public IP.
+        public_hostname=$(dig +time=${dig_tmout} +short -x $(network_get_public_address ${tmout}) 2>/dev/null)
+        public_hostname="${public_hostname%?}"
+    fi
+    echo "$public_hostname"
 }
 
 network_get_mapped_address() {
@@ -96,4 +119,10 @@ network_get_free_port() {
         port=$((${port}+1))
     done
     echo $port
+}
+
+network_has_metadata_service() {
+    local tmout
+    tmout="${1:-5}"
+    curl -f --connect-timeout $tmout http://169.254.169.254/ &>/dev/null
 }

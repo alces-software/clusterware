@@ -27,6 +27,7 @@ install_runtime_prerequisites() {
     # alces session
     # s3cmd
     # alces template/howto
+    # dns functions (dig)
     yum -e0 -y install wget sqlite3 patch && \
         yum -e0 -y install tcl && \
         yum -e0 -y install openssl readline zlib libffi gmp && \
@@ -34,7 +35,8 @@ install_runtime_prerequisites() {
         yum -e0 -y install uuid netpbm-progs iproute xauth \
           xkeyboard-config xorg-x11-xkb-utils xorg-x11-apps xorg-x11-server-utils xterm && \
         yum -e0 -y install python-dateutil && \
-        yum -e0 -y install man
+        yum -e0 -y install man \
+        yum -e0 -y install bind-utils
 }
 
 install_base_prerequisites() {
