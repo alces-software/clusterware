@@ -20,6 +20,7 @@
 # https://github.com/alces-software/clusterware
 #==============================================================================
 cw_MEMBER_DIR="${cw_ROOT}"/var/lib/members
+cw_MEMBER_reader="${cw_ROOT}/opt/serf/bin/serf"
 
 member_register() {
     local member name ip role tags
@@ -57,6 +58,16 @@ cw_MEMBER_ip="${ip}"
 cw_MEMBER_role="${role}"
 cw_MEMBER_tags="${tags}"
 EOF
+}
+
+member_list() {
+    if [ -f "${cw_ROOT}"/etc/config/cluster/auth.rc ]; then
+        . "${cw_ROOT}"/etc/config/cluster/auth.rc
+        "${cw_MEMBER_reader}" members \
+            -rpc-auth="${cw_CLUSTER_auth_token}" | \
+              sed -e 's/:7946//g' -e 's/\(.*\) alive \(.*role=\)\([^,]*\)/\1 \3 \2\3/g' \
+              | awk '{print $1"\t"$2"\t"$3"\t"$4};'
+    fi
 }
 
 member_unregister() {
