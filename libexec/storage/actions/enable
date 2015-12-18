@@ -43,7 +43,7 @@ main() {
     elif ! storage_exists "${repo}/${type}"; then
         action_die "storage type not found: $repo/$type"
     elif storage_is_enabled "${type}"; then
-        action_die "storage type already enabled: ${type}"
+        action_die "storage type already enabled: ${type}" 0
     fi
     if storage_install "${repo}/${type}" "${cw_DIST}" "$@"; then
         storage_enable "${repo}/${type}"

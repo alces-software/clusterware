@@ -88,6 +88,7 @@ repo_generate_script() {
 require 'yaml'
 
 config = YAML.load_file('${metadata_path}/metadata.yml')
+installer = "set -e"
 installer = ". /etc/profile.d/alces-clusterware.sh"
 installer << "\n" << 'cw_ROOT=${cw_ROOT}'
 installer << "\n" << 'cd ${metadata_path}'

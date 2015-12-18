@@ -43,7 +43,7 @@ main() {
     elif ! session_exists "${repo}/${session}"; then
         action_die "session not found: $repo/$session"
     elif session_is_enabled "${session}"; then
-        action_die "session already enabled: ${session}"
+        action_die "session already enabled: ${session}" 0
     fi
     if session_install "${repo}/${session}" "${cw_DIST}" "$@"; then
         session_enable "${repo}/${session}"

@@ -43,7 +43,7 @@ main() {
     elif ! serviceware_exists "${repo}/${service}"; then
         action_die "service not found: $repo/$service"
     elif serviceware_is_installed "${service}"; then
-        action_die "service already installed: ${service}"
+        action_die "service already installed: ${service}" 0
     fi
     if serviceware_install "${repo}/${service}" "${cw_DIST}" "$@"; then
         action_die "installed serviceware: ${repo}/${service} -> ${service}" 0

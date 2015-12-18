@@ -47,7 +47,7 @@ main() {
     elif ! serviceware_is_installed "${service}"; then
         action_die "serviceware not installed: ${service}"
     elif serviceware_is_enabled "${service}-${component}"; then
-        action_die "service already enabled: ${service}/${component}"
+        action_die "service already enabled: ${service}/${component}" 0
     elif ! serviceware_has_component "${repo}/${service}" "${component}"; then
         action_die "service does not provide component: ${service}/${component}"
     fi

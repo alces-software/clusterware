@@ -43,7 +43,7 @@ main() {
     elif ! handler_exists "${repo}/${handler}"; then
         action_die "handler not found: $repo/$handler"
     elif handler_is_enabled "${handler}"; then
-        action_die "handler already enabled: ${handler}"
+        action_die "handler already enabled: ${handler}" 0
     fi
     if handler_install "${repo}/${handler}" "${cw_DIST}" "$@"; then
         handler_enable "${repo}/${handler}"
