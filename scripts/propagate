@@ -72,6 +72,13 @@ if [ $? -gt 0 ]; then
 fi
 
 for os in $dists; do
+    dep_src="${prop_dir}/dist/${os}"
+    if [ -d "${dep_src}" ]; then
+	rm -rf "${dep_src}"
+    fi
+done
+
+for os in $dists; do
     title "Fetching Clusterware dependencies for distribution: $os"
     dep_src="${prop_dir}/dist/${os}"
     mkdir -p "${dep_src}"
@@ -91,6 +98,9 @@ for os in $dists; do
 done
 
 title "Preparing public repository contents"
+if [ -d "${src_dir}/tmp/repos" ]; then
+    rm -rf "${src_dir}/tmp/repos"
+fi
 mkdir -p "${src_dir}/tmp/repos"
 doing "Handlers"
 $GIT clone https://github.com/alces-software/clusterware-handlers.git "${src_dir}"/tmp/repos/clusterware-handlers &>/dev/null
