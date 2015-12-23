@@ -39,10 +39,10 @@ setup() {
 _get_usable_name() {
     local name suffix
     suffix=$(uuid -v4 | cut -f1 -d'-')
-    name="$1-${suffix}.${cw_NAMING_domain}"
-    while naming_rr_exists "${name}"; do
+    name="$1-${suffix}"
+    while naming_rr_exists --ignore-cname "${name}.${cw_NAMING_domain}"; do
         suffix=$(uuid -v4 | cut -f1 -d'-')
-        name="$1-${suffix}.cloud.compute.estate"
+        name="$1-${suffix}"
     done
     echo "${name}"
 }
@@ -56,32 +56,49 @@ _ensure_secret() {
 }
 
 main() {
-    local name basename ip
+    local name basename ip is_local
+    if [ "$1" == "--local" ]; then
+	is_local=true
+	shift
+    fi
     basename="${1:-mycluster}"
+    shift
     files_load_config meta
     if [ -z "${cw_META_hostname}" ]; then
         name="$(_get_usable_name ${basename})"
+        echo "cw_META_fqdn_desc=\"Clusterware fully-qualified name\"" >> "${cw_ROOT}"/etc/meta.rc
+        echo "cw_META_fqdn=\"${name}.${cw_NAMING_domain}\"" >> "${cw_ROOT}"/etc/meta.rc
+        echo "cw_META_hostname_desc=\"Clusterware host name\"" >> "${cw_ROOT}"/etc/meta.rc
+        echo "cw_META_hostname=\"${name}\"" >> "${cw_ROOT}"/etc/meta.rc
         _ensure_secret
         ip="${2:-$(network_get_public_address)}"
-        if ! naming_create_rr "${name}" "${ip}"; then
-            action_die "unable to create DNS entry for ${name} -> ${ip}"
-        else
-            echo "cw_META_hostname_desc=\"Clusterware host name\"" >> "${cw_ROOT}"/etc/meta.rc
-            echo "cw_META_hostname=\"${name}\"" >> "${cw_ROOT}"/etc/meta.rc
-            # give an initial chance to propagate
-            sleep 10
-            while ! naming_rr_exists "${name}"; do
-                echo 'waiting'
-                sleep 10
-            done
-        fi
+
+	if [ "${is_local}" ]; then
+            if ! naming_create_rr "${name}.${cw_NAMING_domain}" "${ip}"; then
+		action_die "unable to create DNS entry for ${name} -> ${ip}"
+            else
+		# give an initial chance to propagate
+		sleep 10
+		while ! naming_rr_exists --ignore-cname "${name}.${cw_NAMING_domain}"; do
+                    echo 'Waiting for DNS record to appear'
+                    sleep 10
+		done
+            fi
+	fi
     else
         name="${cw_META_hostname}"
     fi
     if naming_cert_exists; then
         action_die "certificate already present"
-    elif ! naming_issue_cert "${name}"; then
-        action_die "unable to issue SSL cert for ${name}"
+    elif [ "${is_local}" ]; then
+	if ! naming_issue_cert "${name}"; then
+            action_die "unable to issue SSL cert for ${name}"
+	fi
+    else
+        ip="${ip:-$(network_get_public_address)}"
+        if ! naming_fetch_cert "${name}" "${ip}" "$@"; then
+            action_die "unable to fetch SSL cert for ${name}"
+        fi
     fi
 }
 

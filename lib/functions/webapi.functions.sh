@@ -25,7 +25,7 @@ webapi_curl() {
     mimetype="$2"
     shift 2
 
-    curl "$@" -H "Accept: $mimetype" $url
+    curl -f "$@" -H "Accept: $mimetype" $url
 }
 
 webapi_send() {

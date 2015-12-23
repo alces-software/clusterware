@@ -20,14 +20,28 @@
 # https://github.com/alces-software/clusterware
 #==============================================================================
 require files
+require webapi
 
 cw_NAMING_aws="${cw_ROOT}/opt/aws/bin/aws"
 cw_NAMING_simp_le="${cw_ROOT}/opt/simp_le/bin/simp_le"
+cw_NAMING_jq="${cw_ROOT}/opt/jq/bin/jq"
 
 files_load_config --optional naming
 
 naming_rr_exists() {
-    naming_lookup_rr "$1" > /dev/null
+    local ignore_cname
+    if [ "$1" == "--ignore-cname" ]; then
+	ignore_cname=true
+	shift
+    fi
+    result=$(naming_lookup_rr "$1")
+    errlvl=$?
+    if [ "${ignore_cname}" ]; then
+	# if this is a CNAME, then the first line will not be an IP address
+	echo "$result" | head -n1 | egrep -q '([1-2]?[0-9]{0,2}\.){3,3}[1-2]?[0-9]{0,2}'
+    else
+	return $errlvl
+    fi
 }
 
 naming_lookup_rr() {
@@ -93,6 +107,32 @@ naming_delete_rr() {
 
 naming_cert_exists() {
     [ -f "${cw_ROOT}"/etc/cluster/cert.pem ]
+}
+
+naming_fetch_cert() {
+    local name names ip secret a
+    name="$1"
+    ip="$2"
+    shift 2
+    output=$(cat <<JSON | webapi_post \
+		     https://alces-custodian.herokuapp.com/create
+    {
+	"name": "${name}",
+	"ip": "${ip}",
+        "secret": "${cw_NAMING_secret}"
+    }
+JSON
+	  )
+    errlvl="$?"
+    if [ "${errlvl}" == "0" ]; then
+	mkdir -p "${cw_ROOT}"/etc/ssl/cluster
+	touch "${cw_ROOT}"/etc/ssl/cluster/key.pem
+	chmod 0600 "${cw_ROOT}"/etc/ssl/cluster/key.pem
+	echo "${output}" | "${cw_NAMING_jq}" -r .fullchain > "${cw_ROOT}"/etc/ssl/cluster/fullchain.pem
+	echo "${output}" | "${cw_NAMING_jq}" -r .key > "${cw_ROOT}"/etc/ssl/cluster/key.pem
+	echo "${output}" | "${cw_NAMING_jq}" -r .cert > "${cw_ROOT}"/etc/ssl/cluster/cert.pem
+    fi
+    return ${errlvl}
 }
 
 naming_issue_cert() {

@@ -4,7 +4,7 @@
 ## Copyright (c) 2015 Alces Software Ltd
 ##
 ################################################################################
-cw_NAMING_zoneid="Z1XIPTCZW5WAM"
-cw_NAMING_access_key="AKIAJZT5ZG357BJTZTOQ"
-cw_NAMING_secret_key="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"
+#cw_NAMING_access_key=""
+#cw_NAMING_secret_key=""
+#cw_NAMING_zoneid=""
 cw_NAMING_domain="cloud.compute.estate"
