@@ -7,5 +7,5 @@
 #cw_NAMING_access_key=""
 #cw_NAMING_secret_key=""
 #cw_NAMING_zoneid=""
-cw_NAMING_secret="_SECRET_"
+cw_NAMING_auth="_SECRET_"
 cw_NAMING_domain="cloud.compute.estate"

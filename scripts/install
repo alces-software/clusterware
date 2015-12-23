@@ -97,7 +97,7 @@ if [ ! -d "${target}/etc" ]; then
     rm -f "${target}"/etc/services/.gitkeep
     rm -f "${target}"/etc/storage/.gitkeep
     chmod 0600 "${target}"/etc/naming.rc
-    sed -e "s,_SECRET_,${alces_NAMING_key},g" \
+    sed -e "s,_SECRET_,${alces_NAMING_auth},g" \
 	-i "${target}"/etc/naming.rc
 fi
 mkdir -p /var/log/clusterware

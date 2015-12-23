@@ -97,7 +97,7 @@ main() {
     else
         ip="${ip:-$(network_get_public_address)}"
         s="$(dd if=/dev/urandom bs=8 count=1 2>/dev/null | base64 | cut -c1-8)"
-        k="$(echo -n "${name}:${s}:${cw_NAMING_secret}" | md5sum | cut -f1 -d' ')"
+        k="$(echo -n "${name}:${s}:${cw_NAMING_auth}" | md5sum | cut -f1 -d' ')"
         if ! naming_fetch_cert "${name}" "${ip}" "${s}" "${k}"; then
             action_die "unable to fetch SSL cert for ${name}"
         fi
