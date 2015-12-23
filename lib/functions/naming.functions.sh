@@ -188,9 +188,9 @@ OU = ${unit}
 CN = ${name}
 EOF
     mkdir -p "${output}"
-    touch "${output}"/host.key
-    chmod 400 "${output}"/host.key
-    openssl genrsa 1024 > "${output}"/host.key 2>/dev/null
+    touch "${output}"/key.pem
+    chmod 400 "${output}"/key.pem
+    openssl genrsa 1024 > "${output}"/key.pem 2>/dev/null
     openssl req -config "${conf}" -new -x509 -nodes -sha1 -days 3650 \
 	    -key "${output}"/key.pem > "${output}"/cert.pem
     rm -f "${conf}"
