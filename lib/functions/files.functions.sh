@@ -95,9 +95,9 @@ files_load_config() {
         path="${cw_ROOT}/etc"
     fi
 
-    if [ -f "${path}/${name}.vars.sh" ]; then
+    if [ -r "${path}/${name}.vars.sh" ]; then
         . "${path}/${name}.vars.sh"
-    elif [ -f "${path}/${name}.rc" ]; then
+    elif [ -r "${path}/${name}.rc" ]; then
         . "${path}/${name}.rc"
     else
         echo "Unable to locate ${name} configuration in given path: ${path}"
