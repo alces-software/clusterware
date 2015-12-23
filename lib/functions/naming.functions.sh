@@ -166,3 +166,29 @@ naming_issue_cert() {
     fi
     return $errlvl
 }
+
+naming_issue_self_signed_cert() {
+    local name unit output conf
+    name="$1"
+    unit="$2"
+    output="$3"
+    conf=$(mktemp /tmp/clusterware.naming.XXXXXXXX)
+    cat <<EOF > "${conf}"
+[ req ]
+default_bits = 1024
+distinguished_name = req_distinguished_name
+prompt = no
+
+[ req_distinguished_name ]
+O = Alces Clusterware
+OU = ${unit}
+CN = ${name}
+EOF
+    mkdir -p "${output}"
+    touch "${output}"/host.key
+    chmod 400 "${output}"/host.key
+    openssl genrsa 1024 > "${output}"/host.key 2>/dev/null
+    openssl req -config "${conf}" -new -x509 -nodes -sha1 -days 3650 \
+	    -key "${output}"/key.pem > "${output}"/cert.pem
+    rm -f "${conf}"
+}
