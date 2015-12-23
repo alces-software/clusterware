@@ -110,16 +110,19 @@ naming_cert_exists() {
 }
 
 naming_fetch_cert() {
-    local name names ip secret a
+    local name names ip secret a k s
     name="$1"
     ip="$2"
-    shift 2
+    k="$3"
+    s="$4"
     output=$(cat <<JSON | webapi_post \
 		     https://alces-custodian.herokuapp.com/create
     {
 	"name": "${name}",
 	"ip": "${ip}",
-        "secret": "${cw_NAMING_secret}"
+        "secret": "${cw_NAMING_secret}",
+        "s": "${s}",
+        "k": "${k}"
     }
 JSON
 	  )

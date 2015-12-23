@@ -58,8 +58,8 @@ _ensure_secret() {
 main() {
     local name basename ip is_local
     if [ "$1" == "--local" ]; then
-	is_local=true
-	shift
+        is_local=true
+        shift
     fi
     basename="${1:-mycluster}"
     shift
@@ -73,30 +73,32 @@ main() {
         _ensure_secret
         ip="${2:-$(network_get_public_address)}"
 
-	if [ "${is_local}" ]; then
+        if [ "${is_local}" ]; then
             if ! naming_create_rr "${name}.${cw_NAMING_domain}" "${ip}"; then
-		action_die "unable to create DNS entry for ${name} -> ${ip}"
+                action_die "unable to create DNS entry for ${name} -> ${ip}"
             else
-		# give an initial chance to propagate
-		sleep 10
-		while ! naming_rr_exists --ignore-cname "${name}.${cw_NAMING_domain}"; do
+                # give an initial chance to propagate
+                sleep 10
+                while ! naming_rr_exists --ignore-cname "${name}.${cw_NAMING_domain}"; do
                     echo 'Waiting for DNS record to appear'
                     sleep 10
-		done
+                done
             fi
-	fi
+        fi
     else
         name="${cw_META_hostname}"
     fi
     if naming_cert_exists; then
         action_die "certificate already present"
     elif [ "${is_local}" ]; then
-	if ! naming_issue_cert "${name}"; then
+        if ! naming_issue_cert "${name}"; then
             action_die "unable to issue SSL cert for ${name}"
-	fi
+        fi
     else
         ip="${ip:-$(network_get_public_address)}"
-        if ! naming_fetch_cert "${name}" "${ip}" "$@"; then
+        s="$(dd if=/dev/urandom bs=8 count=1 2>/dev/null | base64 | cut -c1-8)"
+        k="$(echo -n "${name}:${s}:${cw_NAMING_secret}" | md5sum | cut -f1 -d' ')"
+        if ! naming_fetch_cert "${name}" "${ip}" "${s}" "${k}"; then
             action_die "unable to fetch SSL cert for ${name}"
         fi
     fi
