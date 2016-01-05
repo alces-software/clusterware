@@ -106,7 +106,7 @@ naming_delete_rr() {
 }
 
 naming_cert_exists() {
-    [ -f "${cw_ROOT}"/etc/cluster/cert.pem ]
+    [ -f "${cw_ROOT}"/etc/ssl/cluster/cert.pem ]
 }
 
 naming_fetch_cert() {
