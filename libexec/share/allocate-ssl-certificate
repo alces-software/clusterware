@@ -66,9 +66,9 @@ main() {
     files_load_config meta
     if [ -z "${cw_META_hostname}" ]; then
         name="$(_get_usable_name ${basename})"
-        echo "cw_META_fqdn_desc=\"Clusterware fully-qualified name\"" >> "${cw_ROOT}"/etc/meta.rc
+        echo "cw_META_fqdn_desc=\"Public host name\"" >> "${cw_ROOT}"/etc/meta.rc
         echo "cw_META_fqdn=\"${name}.${cw_NAMING_domain}\"" >> "${cw_ROOT}"/etc/meta.rc
-        echo "cw_META_hostname_desc=\"Clusterware host name\"" >> "${cw_ROOT}"/etc/meta.rc
+        echo "cw_META_hostname_desc=\"Clusterware name\"" >> "${cw_ROOT}"/etc/meta.rc
         echo "cw_META_hostname=\"${name}\"" >> "${cw_ROOT}"/etc/meta.rc
         _ensure_secret
         ip="${2:-$(network_get_public_address)}"
