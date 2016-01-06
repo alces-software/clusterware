@@ -56,7 +56,7 @@ _ensure_secret() {
 }
 
 main() {
-    local name basename ip is_local
+    local name basename ip is_local errlvl
     if [ "$1" == "--local" ]; then
         is_local=true
         shift
@@ -98,9 +98,21 @@ main() {
         ip="${ip:-$(network_get_public_address)}"
         s="$(dd if=/dev/urandom bs=8 count=1 2>/dev/null | base64 | cut -c1-8)"
         k="$(echo -n "${name}:${s}:${cw_NAMING_auth}" | md5sum | cut -f1 -d' ')"
-        if ! naming_fetch_cert "${name}" "${ip}" "${s}" "${k}"; then
-            action_die "unable to fetch SSL cert for ${name}"
+	naming_fetch_cert "${name}" "${ip}" "${s}" "${k}"
+	errlvl=$?
+        if [ "$errlvl" == 0 ]; then
+	    return
+        elif [ "$errlvl" == 147 ]; then
+	    # retry
+	    if naming_fetch_cert "${name}" "${ip}" "${s}" "${k}"; then
+		return
+	    fi
         fi
+	echo "unable to fetch SSL cert for ${name}; falling back to self-signed cert"
+	# issue a self-signed cert instead
+	naming_issue_self_signed_cert "${name}" \
+				      "Clusterware Cluster Certificate" \
+				      "${cw_ROOT}"/etc/ssl/cluster
     fi
 }
 
