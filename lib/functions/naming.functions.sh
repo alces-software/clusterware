@@ -1,5 +1,5 @@
 #==============================================================================
-# Copyright (C) 2015 Stephen F. Norledge and Alces Software Ltd.
+# Copyright (C) 2015-2016 Stephen F. Norledge and Alces Software Ltd.
 #
 # This file/package is part of Alces Clusterware.
 #
@@ -128,12 +128,21 @@ JSON
 	  )
     errlvl="$?"
     if [ "${errlvl}" == "0" ]; then
-	mkdir -p "${cw_ROOT}"/etc/ssl/cluster
-	touch "${cw_ROOT}"/etc/ssl/cluster/key.pem
-	chmod 0600 "${cw_ROOT}"/etc/ssl/cluster/key.pem
-	echo "${output}" | "${cw_NAMING_jq}" -r .fullchain > "${cw_ROOT}"/etc/ssl/cluster/fullchain.pem
-	echo "${output}" | "${cw_NAMING_jq}" -r .key > "${cw_ROOT}"/etc/ssl/cluster/key.pem
-	echo "${output}" | "${cw_NAMING_jq}" -r .cert > "${cw_ROOT}"/etc/ssl/cluster/cert.pem
+	retry="$(echo "${output}" | "${cw_NAMING_jq}" -e -r .retry)"
+	if [ $? == 0 ]; then
+	    sleep $retry
+	    # We use a high error code to distinguish this from a curl
+	    # exit code (at time of writing, highest exit code of curl
+	    # is 63).
+	    return 147
+	else
+	    mkdir -p "${cw_ROOT}"/etc/ssl/cluster
+	    touch "${cw_ROOT}"/etc/ssl/cluster/key.pem
+	    chmod 0600 "${cw_ROOT}"/etc/ssl/cluster/key.pem
+	    echo "${output}" | "${cw_NAMING_jq}" -r .fullchain > "${cw_ROOT}"/etc/ssl/cluster/fullchain.pem
+	    echo "${output}" | "${cw_NAMING_jq}" -r .key > "${cw_ROOT}"/etc/ssl/cluster/key.pem
+	    echo "${output}" | "${cw_NAMING_jq}" -r .cert > "${cw_ROOT}"/etc/ssl/cluster/cert.pem
+	fi
     fi
     return ${errlvl}
 }
@@ -193,5 +202,6 @@ EOF
     openssl genrsa 1024 > "${output}"/key.pem 2>/dev/null
     openssl req -config "${conf}" -new -x509 -nodes -sha1 -days 3650 \
 	    -key "${output}"/key.pem > "${output}"/cert.pem
+    cp "${output}"/cert.pem "${output}"/fullchain.pem
     rm -f "${conf}"
 }
