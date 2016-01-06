@@ -38,8 +38,7 @@ main() {
 
     if [ ! -d "${cw_SERVICEWARE_REPODIR}/${repo}" ]; then
         if [ -z "$url" ]; then
-            say "no repository URL was specified for repo: $1"
-            bail 1
+            action_die "no repository URL was specified for repo: $1" 1
         fi
         echo "Initializing serviceware: ${repo}"
         doing 'Clone'

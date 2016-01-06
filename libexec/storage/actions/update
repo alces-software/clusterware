@@ -38,8 +38,7 @@ main() {
 
     if [ ! -d "${cw_STORAGE_REPODIR}/${repo}" ]; then
         if [ -z "$url" ]; then
-            say "no repository URL was specified for repo: $1"
-            bail 1
+            action_die "no repository URL was specified for repo: $1" 1
         fi
         echo "Initializing storage backends: ${repo}"
         doing 'Clone'

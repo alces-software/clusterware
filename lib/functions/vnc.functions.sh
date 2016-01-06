@@ -241,8 +241,7 @@ vnc_session_kill() {
                         if vnc_kill_server "${sessiondir}" &>/dev/null; then
                             action_warn "session ${shortid} has been terminated"
                         else
-                            action_warn "session ${shortid} could not be terminated"
-                            bail 1
+                            action_die "session ${shortid} could not be terminated" 1
                         fi
                     fi
                 else
