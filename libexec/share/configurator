@@ -37,6 +37,10 @@ setup() {
 }
 
 main() {
+    files_load_config --optional configurator
+    if [ "${cw_CONFIGURATOR_skip}" == true ]; then
+	action_die "skipping configurator execution" 0
+    fi
     handler_run_hook initialize "$@"
     if files_wait_for_file "${cw_ROOT}/etc/config.yml" 300; then
         "${cw_ROOT}"/libexec/share/fetch-config
