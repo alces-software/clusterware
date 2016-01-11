@@ -29,6 +29,17 @@ DOC
 # Execute as ruby script if we're evaluating under bash
 if [ "" ]; then 0; else eval 'cw_RUBY_EXEC "$@" || exit 1'; fi; end
 
+if Process.euid != 0
+  require 'etc'
+  begin
+    gridware_group = Etc.getgrnam('gridware')
+    raise 'Gridware group membership not found' unless Process.groups.include?(gridware_group.gid)
+  rescue
+    STDERR.puts "alces gridware: permission denied"
+    exit 1
+  end
+end
+
 ENV['BUNDLE_GEMFILE'] ||= "#{ENV['cw_ROOT']}/lib/ruby/Gemfile"
 $: << "#{ENV['cw_ROOT']}/lib/ruby/lib"
 
