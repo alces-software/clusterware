@@ -81,7 +81,7 @@ files_wait_for_file() {
 }
 
 files_load_config() {
-    local base name required path
+    local base name optional path
     if [ "$1" == "--optional" ]; then
         optional=true
         shift
@@ -100,10 +100,10 @@ files_load_config() {
     elif [ -r "${path}/${name}.rc" ]; then
         . "${path}/${name}.rc"
     else
-        echo "Unable to locate ${name} configuration in given path: ${path}"
         if [ "$optional" ]; then
             return 1
         else
+            echo "FATAL: unable to locate ${name} configuration in given path: ${path}"
             exit 1
         fi
     fi
