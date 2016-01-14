@@ -1,6 +1,6 @@
 #!/bin/bash
 #==============================================================================
-# Copyright (C) 2015 Stephen F. Norledge and Alces Software Ltd.
+# Copyright (C) 2015-2016 Stephen F. Norledge and Alces Software Ltd.
 #
 # This file/package is part of Alces Clusterware.
 #
@@ -47,6 +47,16 @@ _get_usable_name() {
     echo "${name}"
 }
 
+_check_usable_name() {
+    local name
+    name="$1"
+    if naming_rr_exists --ignore-cname "${name}.${cw_NAMING_domain}"; then
+	return 1
+    else
+	return 0
+    fi
+}
+
 _ensure_secret() {
     local secret
     if [ -z "${cw_NAMING_secret}" ]; then
@@ -56,16 +66,29 @@ _ensure_secret() {
 }
 
 main() {
-    local name basename ip is_local errlvl
+    local name basename ip is_local errlvl try_skip_suffix
     if [ "$1" == "--local" ]; then
         is_local=true
         shift
+    fi
+    if [ "$1" == "--try-skip-suffix" ]; then
+	try_skip_suffix=true
+	shift
     fi
     basename="${1:-mycluster}"
     shift
     files_load_config meta
     if [ -z "${cw_META_hostname}" ]; then
-        name="$(_get_usable_name ${basename})"
+	if [ "${try_skip_suffix}" ]; then
+	    if _check_usable_name "${basename}"; then
+		name="${basename}"
+	    else
+		echo "specified name, ${name}, is not available; falling back to suffixed name"
+		name="$(_get_usable_name ${basename})"
+	    fi
+	else
+            name="$(_get_usable_name ${basename})"
+	fi
         echo "cw_META_fqdn_desc=\"Public host name\"" >> "${cw_ROOT}"/etc/meta.rc
         echo "cw_META_fqdn=\"${name}.${cw_NAMING_domain}\"" >> "${cw_ROOT}"/etc/meta.rc
         echo "cw_META_hostname_desc=\"Clusterware name\"" >> "${cw_ROOT}"/etc/meta.rc
@@ -111,7 +134,7 @@ main() {
 	echo "unable to fetch SSL cert for ${name}; falling back to self-signed cert"
 	# issue a self-signed cert instead
 	naming_issue_self_signed_cert "${name}" \
-				      "Clusterware Cluster Certificate" \
+				      "Clusterware Instance Certificate" \
 				      "${cw_ROOT}"/etc/ssl/cluster
     fi
 }
