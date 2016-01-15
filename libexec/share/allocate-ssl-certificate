@@ -83,7 +83,7 @@ main() {
 	    if _check_usable_name "${basename}"; then
 		name="${basename}"
 	    else
-		echo "specified name, ${name}, is not available; falling back to suffixed name"
+		echo "specified name, ${basename}, is not available; falling back to suffixed name"
 		name="$(_get_usable_name ${basename})"
 	    fi
 	else
