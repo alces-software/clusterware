@@ -104,23 +104,23 @@ fi
 mkdir -p "${src_dir}/tmp/repos"
 doing "Handlers"
 $GIT clone https://github.com/alces-software/clusterware-handlers.git "${src_dir}"/tmp/repos/clusterware-handlers &>/dev/null
-tar -C "${src_dir}"/tmp/repos/clusterware-handlers -czf "${prop_dir}/clusterware-handlers.tar.gz" .
+tar --warning=no-file-changed -C "${src_dir}"/tmp/repos/clusterware-handlers -czf "${prop_dir}/clusterware-handlers.tar.gz" . || true
 say_done $?
 doing "Gridware"
 $GIT clone https://github.com/alces-software/packager-base.git "${src_dir}"/tmp/repos/packager-base &>/dev/null
-tar -C "${src_dir}"/tmp/repos/packager-base -czf "${prop_dir}/packager-base.tar.gz" .
+tar --warning=no-file-changed -C "${src_dir}"/tmp/repos/packager-base -czf "${prop_dir}/packager-base.tar.gz" . || true
 say_done $?
 doing "Sessions"
 $GIT clone https://github.com/alces-software/clusterware-sessions.git "${src_dir}"/tmp/repos/clusterware-sessions &>/dev/null
-tar -C "${src_dir}"/tmp/repos/clusterware-sessions -czf "${prop_dir}/clusterware-sessions.tar.gz" .
+tar --warning=no-file-changed -C "${src_dir}"/tmp/repos/clusterware-sessions -czf "${prop_dir}/clusterware-sessions.tar.gz" . || true
 say_done $?
 doing "Services"
 $GIT clone https://github.com/alces-software/clusterware-services.git "${src_dir}"/tmp/repos/clusterware-services &>/dev/null
-tar -C "${src_dir}"/tmp/repos/clusterware-services -czf "${prop_dir}/clusterware-services.tar.gz" .
+tar --warning=no-file-changed -C "${src_dir}"/tmp/repos/clusterware-services -czf "${prop_dir}/clusterware-services.tar.gz" . || true
 say_done $?
 doing "Storage"
 $GIT clone https://github.com/alces-software/clusterware-storage.git "${src_dir}"/tmp/repos/clusterware-storage &>/dev/null
-tar -C "${src_dir}"/tmp/repos/clusterware-storage -czf "${prop_dir}/clusterware-storage.tar.gz" .
+tar --warning=no-file-changed -C "${src_dir}"/tmp/repos/clusterware-storage -czf "${prop_dir}/clusterware-storage.tar.gz" . || true
 say_done $?
 
 title "Preparing bootstrap script"
