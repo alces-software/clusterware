@@ -31,6 +31,7 @@ if [ -z "$alces_OS" ]; then
 fi
 
 # Configuration parameters for isolated network propagation
+#alces_APP_MANAGER_ADDRESS=""
 #export alces_SOURCE_URL=""
 #export alces_DIST_URL=""
 #export alces_REPOS_URL=""
