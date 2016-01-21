@@ -25,12 +25,10 @@ if (( UID != 0 )); then
   exit 1
 fi
 
-if [ -z "$1" ]; then
-    echo "Usage: $0 <IP address or hostname of this system>"
+if [ -z "${alces_APP_MANAGER_ADDRESS}" ]; then
+    echo "$0: must set alces_APP_MANAGER_ADDRESS variable"
     exit 1
 fi
-
-APP_MANAGER_ADDRESS="$1"
 
 GIT=$(type -P git)
 GIT=${GIT:-$(type -P /opt/clusterware/opt/git/bin/git)}
@@ -137,9 +135,9 @@ say_done $?
 
 doing "Configure"
 # update the bootstrap script
-sed -i -e "s,#export alces_SOURCE_URL.*,export alces_SOURCE_URL=\"\${alces_SOURCE_URL:-http://${APP_MANAGER_ADDRESS}/clusterware/clusterware.tar.gz}\",g" "${prop_dir}"/bootstrap
-sed -i -e "s,#export alces_DIST_URL.*,export alces_DIST_URL=\"\${alces_DIST_URL:-http://${APP_MANAGER_ADDRESS}/clusterware/dist}\",g" "${prop_dir}"/bootstrap
-sed -i -e "s,#export alces_REPOS_URL.*,export alces_REPOS_URL=\"\${alces_REPOS_URL:-http://${APP_MANAGER_ADDRESS}/clusterware}\",g" "${prop_dir}"/bootstrap
+sed -i -e "s,#export alces_SOURCE_URL.*,export alces_SOURCE_URL=\"\${alces_SOURCE_URL:-http://${alces_APP_MANAGER_ADDRESS}/clusterware/clusterware.tar.gz}\",g" "${prop_dir}"/bootstrap
+sed -i -e "s,#export alces_DIST_URL.*,export alces_DIST_URL=\"\${alces_DIST_URL:-http://${alces_APP_MANAGER_ADDRESS}/clusterware/dist}\",g" "${prop_dir}"/bootstrap
+sed -i -e "s,#export alces_REPOS_URL.*,export alces_REPOS_URL=\"\${alces_REPOS_URL:-http://${alces_APP_MANAGER_ADDRESS}/clusterware}\",g" "${prop_dir}"/bootstrap
 say_done $?
 
 title "Cleaning up"
