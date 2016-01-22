@@ -1,6 +1,6 @@
 #!/bin/bash
 #==============================================================================
-# Copyright (C) 2015-2016 Stephen F. Norledge and Alces Software Ltd.
+# Copyright (C) 2016 Stephen F. Norledge and Alces Software Ltd.
 #
 # This file/package is part of Alces Clusterware.
 #
@@ -36,28 +36,36 @@ setup() {
     kernel_load
 }
 
+_emit() {
+    local w=79
+    printf "%*s\n" $(((${#1}+${w})/2)) "$1"
+}
+
 main() {
-    files_load_config --optional configurator
-    if [ "${cw_CONFIGURATOR_skip}" == true ]; then
-	action_die "skipping configurator execution" 0
-    fi
-    handler_run_hook initialize "$@"
-    if files_wait_for_file "${cw_ROOT}/etc/config.yml" 300; then
-        "${cw_ROOT}"/libexec/share/fetch-config
-        handler_run_hook preconfigure "$@"
-        handler_run_hook configure "$@"
-        handler_run_hook start "$@"
-        handler_run_hook node-started "$@"
+    if [ "$1" == "enable" ]; then
+	files_load_config clusterware
+        _emit '+++++++++++++++++++++++++++++++++++++++++++++' > /etc/nologin
+        _emit "Alces Clusterware (r${cw_RELEASE:-1})" >> /etc/nologin
+	if distro_is el6 || distro_is el7; then
+            _emit "Based on $(sed 's/\(.*\) release \(.*\) .*/\1 \2/g' /etc/redhat-release)" >> /etc/nologin
+	fi
+        _emit '+++++++++++++++++++++++++++++++++++++++++++++' >> /etc/nologin
+        echo >> /etc/nologin
+	_emit 'This cluster is being prepared.' >> /etc/nologin
+	cat <<EOF >> /etc/nologin
+
+This cluster is currently being configured and is not yet operational.  Please
+try again in a few minutes.  If you continue to see this message, please
+contact the cluster administrator.
+EOF
     else
-	handler_run_hook fail "$@"
-        action_die "unable to load configuration: ${cw_ROOT}/etc/config.yml"
+	rm -f /etc/nologin
     fi
 }
 
 setup
 
-require action
-require handler
+require distro
 require files
 
 main "$@"

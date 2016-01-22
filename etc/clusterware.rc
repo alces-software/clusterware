@@ -1,7 +1,8 @@
 ################################################################################
 ##
 ## Alces Clusterware - Shell configuration
-## Copyright (c) 2015 Alces Software Ltd
+## Copyright (c) 2015-2016 Alces Software Ltd
 ##
 ################################################################################
-cw_RELEASE=2016.01
+cw_RELEASE=2016.02
+cw_STATUS=unconfigured

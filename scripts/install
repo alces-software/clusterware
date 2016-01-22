@@ -265,6 +265,14 @@ doing 'Install'
 cp "${source}/dist/logrotate/clusterware" /etc/logrotate.d
 say_done $?
 
+title "Updating system files"
+doing 'Update'
+if ! grep -q 'account \[default=ignore success=1\] pam_succeed_if.so quiet user ingroup adm' /etc/pam.d/sshd; then
+    sed -i '/^account\s*required\s*pam_nologin.so/i account [default=ignore success=1] pam_succeed_if.so quiet user ingroup adm' \
+	/etc/pam.d/sshd
+fi
+say_done $?
+
 title "Installing startup scripts"
 doing 'Install'
 install_startup_hooks &> "${dep_logs}/install-startup-hooks.log"
