@@ -57,11 +57,15 @@ doing() {
         pad=$2
     fi
     printf "    [36m%${pad}s[0m ... " "$1"
-    toggle_spin
+    if [ -z "$cw_DISABLE_SPINNER" ]; then
+	toggle_spin
+    fi
 }
 
 say_done () {
-    toggle_spin
+    if [ -z "$cw_DISABLE_SPINNER" ]; then
+	toggle_spin
+    fi
     if [ $1 -gt 0 ]; then
         echo '[31mFAIL[0m'
         action_exit 1

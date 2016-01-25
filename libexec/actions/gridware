@@ -40,6 +40,23 @@ if Process.euid != 0
   end
 end
 
+if ARGV[0] == 'init'
+  ARGV.shift
+  Kernel.exec "#{ENV['cw_ROOT']}/libexec/gridware/init", *ARGV
+else
+  unless ENV['cw_GRIDWARE_root']
+    v = `source #{ENV['cw_ROOT']}/etc/gridware.rc 2> /dev/null && echo ${cw_GRIDWARE_root}`.chomp
+    ENV['cw_GRIDWARE_root'] = v unless v.empty?
+  end
+
+  if ! File.exist?("#{ENV['cw_GRIDWARE_root']}/etc/gridware.#{ENV['cw_DIST'}.yml") &&
+     ! File.exist?("#{ENV['cw_ROOT']}/etc/gridware.yml")
+    STDERR.puts "alces gridware: uninitialized; try 'alces gridware init' first"
+    exit 1
+  end
+end
+
+ENV['ALCES_CONFIG_PATH'] ||= "#{ENV['cw_GRIDWARE_root']}/etc:#{ENV['cw_ROOT']}/etc"
 ENV['BUNDLE_GEMFILE'] ||= "#{ENV['cw_ROOT']}/lib/ruby/Gemfile"
 $: << "#{ENV['cw_ROOT']}/lib/ruby/lib"
 

@@ -39,7 +39,8 @@ module Alces
 
         def config
           @config ||= DEFAULT_CONFIG.dup.tap do |h|
-            cfgfile = Alces::Tools::Config.find("packager", false)
+            cfgfile = Alces::Tools::Config.find("gridware.#{ENV['cw_DIST']}", false) ||
+                      Alces::Tools::Config.find("gridware", false)
             h.merge!(YAML.load_file(cfgfile)) unless cfgfile.nil?
           end
         end
