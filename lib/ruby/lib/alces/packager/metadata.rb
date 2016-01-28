@@ -102,8 +102,6 @@ module Alces
           nil
         elsif packaged_file?(f)
           packaged_file_path(f)
-        elsif local_file?(f)
-          local_file_path(f)
         else
           archive_file_path(f)
         end
@@ -121,19 +119,9 @@ module Alces
         File.exists?(packaged_file_path(f))
       end
 
-      def local_file_path(f)
-        File.expand_path(File.join(Config.local_archives_dir,name,version,f))
-      end
-
-      def local_file?(f)
-        File.exists?(local_file_path(f))
-      end
-
       def source_file(f)
         if packaged_file?(f)
           packaged_file_path(f)
-        elsif local_file?(f)
-          local_file_path(f)
         else
           archive_file_path(f)
         end

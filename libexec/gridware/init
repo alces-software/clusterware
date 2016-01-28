@@ -87,7 +87,6 @@ _create_gridware_configuration() {
 :modules_dir: ${depot}/${cw_DIST}/etc/modules
 :packages_dir: ${depot}/${cw_DIST}/pkg
 :archives_dir: /var/cache/gridware/archives
-:local_archives_dir: ${cw_GRIDWARE_root}/src
 :buildroot: /var/cache/gridware/src
 :dbroot: ${depot}/${cw_DIST}/etc
 :fallback_package_url: https://s3-eu-west-1.amazonaws.com/packages.alces-software.com/gridware
