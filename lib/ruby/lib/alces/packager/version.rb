@@ -28,9 +28,9 @@ module Alces
       class << self
         include Alces::Tools::FileManagement
 
-        def write_defaults!
+        def write_defaults!(depot)
           Version.all(default: true).each do |v|
-            versionfile_name = File.join(Config.modules_dir, v.path, '.version')
+            versionfile_name = File.join(Config.modules_dir(depot), v.path, '.version')
 #            raise ModulefileError, "Failed to write module file #{versionfile_name} (already exists)" if File.exists?(versionfile_name)
             if File.directory?(File.dirname(versionfile_name))
               raise ModulefileError, "Failed to write module file #{versionfile_name}" unless write(versionfile_name, ModuleTree.versionfile_for(v.version))

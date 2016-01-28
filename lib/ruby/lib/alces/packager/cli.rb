@@ -75,6 +75,10 @@ module Alces
           c.option '-t', '--tag STRING', String, 'Specify additional build tag'
         end
 
+        def add_depot_options(c)
+          c.option '-d', '--depot STRING', String, 'Specify depot'
+        end
+
         def set_aliases(target, opts = {})
           opts = {min: 1}.merge(opts)
           s = target.to_s
@@ -130,6 +134,8 @@ module Alces
         c.description = 'Install <package> with optional parameters'
         c.action HandlerProxy, :install
         add_package_options(c)
+        add_depot_options(c)
+        c.option '-g', '--global', 'Allow use of packages across all depots'
         c.option '-m', '--modules STRING', String, 'Specify modules to load before build'
       end
       set_aliases(:install, min: 4)
@@ -137,16 +143,16 @@ module Alces
       command :purge do |c|
         c.syntax = 'alces gridware purge <package>'
         c.description = 'Purge installation and remove build directory for <package>'
+        add_depot_options(c)
         c.action HandlerProxy, :purge
-        add_package_options(c)
       end
       set_aliases(:purge, extra: :rm)
 
       command :clean do |c|
         c.syntax = 'alces gridware clean <package>'
         c.description = 'Remove build directory for <package>'
+        add_depot_options(c)
         c.action HandlerProxy, :clean
-        add_package_options(c)
       end
       set_aliases(:clean)
 
@@ -160,6 +166,7 @@ module Alces
       command :default do |c|
         c.syntax = 'alces gridware default <package path>'
         c.description = "Set package at <package path> as default"
+        add_depot_options(c)
         c.action HandlerProxy, :default
       end
       set_aliases(:default, min: 3)
@@ -174,6 +181,7 @@ module Alces
       command :register do |c|
         c.syntax = 'alces gridware register <directory> <package path>'
         c.description = "Register manually installed package in <directory> as <package path>"
+        add_depot_options(c)
         c.action HandlerProxy, :register
       end
       set_aliases(:register)

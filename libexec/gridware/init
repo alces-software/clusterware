@@ -67,10 +67,7 @@ _create_default_depot() {
 }
 
 _create_gridware_configuration() {
-    local depot
-    depot="$(_detect_depot "${cw_GRIDWARE_default_depot:-local}")"
-
-    cat <<EOF > "${cw_GRIDWARE_root}"/etc/gridware.${cw_DIST}.yml
+    cat <<EOF > "${cw_GRIDWARE_root}"/etc/gridware.yml
 ################################################################################
 ##
 ## Alces Clusterware - Gridware packager configuration
@@ -83,12 +80,9 @@ _create_gridware_configuration() {
  - ${cw_ROOT}/var/lib/gridware/repos/base
  - ${cw_GRIDWARE_root}/etc/repos/local
 :depotroot: ${cw_GRIDWARE_root}
-:gridware: ${depot}/${cw_DIST}
-:modules_dir: ${depot}/${cw_DIST}/etc/modules
-:packages_dir: ${depot}/${cw_DIST}/pkg
+:default_depot: ${cw_GRIDWARE_default_depot:-local}
 :archives_dir: /var/cache/gridware/archives
 :buildroot: /var/cache/gridware/src
-:dbroot: ${depot}/${cw_DIST}/etc
 :fallback_package_url: https://s3-eu-west-1.amazonaws.com/packages.alces-software.com/gridware
 :fetch_timeout: 10
 EOF
@@ -97,13 +91,16 @@ EOF
 _update_modulespath() {
     local name
     name="$1"
-    sed -e "/^#=Alces Gridware Depots/a ${cw_GRIDWARE_root}/${name}/\$cw_DIST/etc/modules" \
-        -i "${cw_ROOT}"/etc/modulespath
+    if ! grep -q '${cw_GRIDWARE_root}/${name}/\$cw_DIST/etc/modules' "${cw_ROOT}"/etc/modulespath; then
+	sed -e "/^#=Alces Gridware Depots/a ${cw_GRIDWARE_root}/${name}/\$cw_DIST/etc/modules" \
+            -i "${cw_ROOT}"/etc/modulespath
+    fi
 }
 
 _initialize_depot() {
-    local depot
+    local depot name
     depot="$1"
+    name="$2"
 
     mkdir -p "${depot}/${cw_DIST}/pkg" "${depot}/${cw_DIST}/etc"
     cp -R "${cw_ROOT}/etc/gridware/depotskel"/* "${depot}"/${cw_DIST}/etc
@@ -116,15 +113,6 @@ require 'rubygems'
 require 'bundler'
 Bundler.setup(:default)
 
-require 'alces/packager/config'
-module ::Alces::Packager::Config
-  class << self
-    def dbroot
-      "${depot}/${cw_DIST}/etc"
-    end
-  end
-end
-
 require 'alces/packager/package'
 
 system_gcc_opts = {
@@ -134,7 +122,10 @@ system_gcc_opts = {
   default: true,
   path: 'compilers/gcc/system'
 }
-Alces::Packager::Package.create!(system_gcc_opts)
+
+DataMapper.repository(:'${name}') do
+  Alces::Packager::Package.create!(system_gcc_opts)
+end
 RUBY
 
     chmod -R g+rw "${depot}"
@@ -145,11 +136,17 @@ RUBY
 main() {
     local depot name
     cw_GRIDWARE_root="${1:-${cw_GRIDWARE_root}}"
-
+    shift
+    
+    while [ "$1" ]; do
+	cw_GRIDWARE_depots="${cw_GRIDWARE_depots} $1"
+	shift
+    done
+    
     mkdir -p "${cw_GRIDWARE_root}"
     _create_default_depot
 
-    if [ ! -f "${cw_GRIDWARE_root}"/etc/gridware.${cw_DIST}.yml ]; then
+    if [ ! -f "${cw_GRIDWARE_root}"/etc/gridware.yml ]; then
 	mkdir -p "${cw_GRIDWARE_root}"/etc
 	_create_gridware_configuration
     fi
@@ -172,7 +169,7 @@ main() {
 	    doing 'Detect'
 	else
 	    doing "Configure"
-	    _initialize_depot "${depot}"
+	    _initialize_depot "${depot}" "${name}"
 	fi
 	say_done $?
     done

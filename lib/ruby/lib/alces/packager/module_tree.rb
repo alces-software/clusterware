@@ -50,40 +50,40 @@ module Alces
           end
         end
 
-        def set(metadata, opts)
+        def set(depot, metadata, opts)
           p = Package.first_or_create(type: opts[:type] || metadata.type,
                                       name: opts[:name] || metadata.name,
                                       version: opts[:version] || metadata.version,
                                       compiler_tag: opts[:compiler_tag],
                                       tag: opts[:tag])
           safely do
-            tree = new
-            p.renderer(metadata, opts).modulefiles.each do |modulepath, modulefile|
+            tree = new(depot)
+            p.renderer(depot, metadata, opts).modulefiles.each do |modulepath, modulefile|
               tree.set(modulepath, modulefile)
             end
             tree.persist!
-            Version.write_defaults!
-            Package.write_defaults!
-            Package.write_aliases!
+            Version.write_defaults!(depot)
+            Package.write_defaults!(depot)
+            Package.write_aliases!(depot)
           end
         end
 
-        def find(modulepath)
-          tree = new
+        def find(depot, modulepath)
+          tree = new(depot)
           tree.find(modulepath)
         end
 
-        def remove(modulepath)
+        def remove(depot, modulepath)
           Package.first(path: modulepath).tap do |p|
             p.destroy unless p.nil?
           end
           safely do
-            tree = new
+            tree = new(depot)
             tree.remove(modulepath)
             tree.persist!
-            Version.write_defaults!
-            Package.write_defaults!
-            Package.write_aliases!
+            Version.write_defaults!(depot)
+            Package.write_defaults!(depot)
+            Package.write_aliases!(depot)
           end
         end
 
@@ -118,11 +118,12 @@ EOF
       include Alces::Tools::Logging
       include Alces::Tools::FileManagement
 
-      attr_accessor :root
+      attr_accessor :root, :depot
 
-      def initialize
+      def initialize(depot)
         self.root = Tree::TreeNode.new('ROOT')
-        populate(Config.modules_dir)
+        self.depot = depot
+        populate(Config.modules_dir(depot))
       end
 
       def set(modulepath, modulefile)
@@ -146,7 +147,7 @@ EOF
       def find(modulepath)
         node = node_for(modulepath)
         unless node.nil?
-          File.join(Config.modules_dir,node.parentage.reverse.map(&:name).tap(&:shift).push(node.name))
+          File.join(Config.modules_dir(depot),node.parentage.reverse.map(&:name).tap(&:shift).push(node.name))
         end
       end
 
@@ -160,7 +161,8 @@ EOF
         purger.call(node) unless node.nil?
       end          
 
-      def persist!(path = Config.modules_dir)
+      def persist!
+        path = Config.modules_dir(depot)
         renormalize!
         root_dir = "#{path}.#{$$}"
         root.each_leaf do |l|
@@ -284,7 +286,7 @@ EOF
           #set     appdir     /Users/markt/gridware/pkg/libs/eigen/3.0.5/gcc/default/dist
           # use magic path comment or appdir declaration to
           # determine the fully qualified package name
-          if l =~ /## path: (.*)/ || l =~ /set\s+appdir\s+#{Config.packages_dir}\/(\S*).*$/
+          if l =~ /## path: (.*)/
             components = $1.split('/')
             break
           end

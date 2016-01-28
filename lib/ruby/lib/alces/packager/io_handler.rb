@@ -19,6 +19,8 @@
 # For more information on the Alces Clusterware, please visit:
 # https://github.com/alces-software/clusterware
 #==============================================================================
+require 'alces/tools/logging'
+
 module Alces
   module Packager
     module IoHandler

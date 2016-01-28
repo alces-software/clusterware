@@ -89,7 +89,7 @@ module Alces
         end
 
         raise InstallDirectoryError, "Package installation directory already exists: #{dest_dir}, try a 'purge'" if File.exists?(dest_dir)
-        if m = ModuleTree.find(modulefile_name)
+        if m = ModuleTree.find(opts[:depot], modulefile_name)
           raise ModulefileError, "Modulefile already exists: #{modulefile_name}, try a 'purge'"
         end
         raise BuildDirectoryError, "Build directory already exists: #{build_dir}, try a 'clean'" if File.exists?(build_dir)
@@ -325,7 +325,7 @@ EOF
                 h[:tag] = defn[:tag] if defn.key?(:tag)
                 h[:tag] = nil if defn[:type] == 'compilers'
               end
-              ModuleTree.set(package, module_opts.merge(defn_opts))
+              ModuleTree.set(opts[:depot], package, module_opts.merge(defn_opts))
             end
           else
             if package.metadata[:module].is_a?(Hash)
@@ -337,7 +337,7 @@ EOF
             else
               package.metadata[:module_content] = ERB.new(package.metadata[:module]).result(binding)
             end
-            ModuleTree.set(package, module_opts)
+            ModuleTree.set(opts[:depot], package, module_opts)
           end
         end
         say 'OK'.color(:green)
@@ -367,7 +367,7 @@ EOF
         elsif opts[:noninteractive] != :force
           files = [].tap do |a|
             a << dest_dir if File.directory?(dest_dir)
-            if m = ModuleTree.find(modulefile_name)
+            if m = ModuleTree.find(opts[:depot], modulefile_name)
               a << m 
             end
           end
@@ -386,7 +386,7 @@ EOF
         with_spinner do
           rm_r(dest_dir) if File.exists?(dest_dir)
           # rm(modulefile_name) if File.exists?(modulefile_name)
-          ModuleTree.remove(modulefile_name)
+          ModuleTree.remove(opts[:depot], modulefile_name)
         end
         say 'OK'.color(:green)
         clean if purge_opts[:clean]
@@ -747,7 +747,7 @@ EOF
       end
 
       def dest_dir
-        File.expand_path(File.join(Config.packages_dir, package_descriptor))
+        File.expand_path(File.join(Config.packages_dir(opts[:depot]), package_descriptor))
       end
       memoize :dest_dir
 
@@ -795,7 +795,7 @@ EOF
 
       def packages_for(phase)
         package.requirements(opts[:compiler], opts[:variant], phase).
-          map{|r| [r, Package.resolve(r, compiler_tag)]}
+          map{|r| [r, Package.resolve(r, compiler_tag, opts[:global])]}
       end
 
       def apply_optional_overrides(packages)

@@ -33,26 +33,21 @@ module Alces
       class << self
         def config
           @config ||= DEFAULT_CONFIG.dup.tap do |h|
-            cfgfile = Alces::Tools::Config.find("gridware.#{ENV['cw_DIST']}", false) ||
-                      Alces::Tools::Config.find("gridware", false)
+            cfgfile = Alces::Tools::Config.find("gridware", false)
             h.merge!(YAML.load_file(cfgfile)) unless cfgfile.nil?
           end
         end
 
-        def packages_dir
-          if config[:packages_dir]
-            File.expand_path(config[:packages_dir])
-          else
-            File.expand_path(Config.gridware)
-          end
+        def packages_dir(depot)
+          File.expand_path(File.join(depot_path(depot),'pkg'))
         end
 
-        def modules_dir
-          if config[:modules_dir]
-            File.expand_path(config[:modules_dir])
-          else
-            File.expand_path(File.join(gridware,'modulefiles'))
-          end
+        def modules_dir(depot)
+          File.expand_path(File.join(depot_path(depot),'etc/modules'))
+        end
+
+        def dbroot(depot)
+          File.expand_path(File.join(depot_path(depot),'etc'))
         end
 
         def method_missing(s,*a,&b)
@@ -61,6 +56,11 @@ module Alces
           else
             super
           end
+        end
+
+        private
+        def depot_path(depot)
+          File.join(Depot.hash_path_for(depot),ENV['cw_DIST'])
         end
       end
     end

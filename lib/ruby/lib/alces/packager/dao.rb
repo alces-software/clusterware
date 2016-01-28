@@ -20,6 +20,7 @@
 # https://github.com/alces-software/clusterware
 #==============================================================================
 require 'alces/packager/config'
+require 'alces/packager/depot'
 require 'dm-core'
 require 'dm-migrations'
 
@@ -28,12 +29,21 @@ module Alces
     module Dao
       class << self
         def initialize!(opts = {})
-          DataMapper.setup(:default, "sqlite://#{File.expand_path(File.join(Config.dbroot,'package.db'))}")
+          DataMapper.setup(:default, "sqlite::memory:")
+          Depot.each do |d|
+            DataMapper.setup(d.to_sym, "sqlite://#{File.expand_path(File.join(Config.dbroot(d),'package.db'))}")
+          end
         end
 
         def finalize!
           DataMapper.finalize
-          DataMapper.auto_upgrade!
+          Depot.each do |d|
+            begin
+              DataMapper::Model.descendants.each {|m| m.send(:auto_upgrade!, d.to_sym)}
+            rescue
+              nil
+            end
+          end
         end
       end
     end

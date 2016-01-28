@@ -29,6 +29,15 @@ module Alces
       include Alces::Tools::FileManagement
 
       class << self
+        def hash_path_for(name)
+          depot_path = File.join(Config.depotroot,name)
+          if File.symlink?(depot_path)
+            File.readlink(depot_path)
+          else
+            nil
+          end
+        end
+
         def find(name)
           # special cases
           return if name == 'depots' || name == 'etc'
@@ -44,6 +53,13 @@ module Alces
               say name
             end
           end
+        end
+
+        def each(&block)
+          Dir.glob(File.join(Config.depotroot,'*'))
+            .select { |p| File.symlink?(p) }
+            .map { |p| File.basename(p) }
+            .each(&block)
         end
       end
 

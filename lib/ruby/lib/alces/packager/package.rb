@@ -29,72 +29,69 @@ module Alces
   module Packager
     class Package
       class << self
-        def with_both_repos(&block)
-          if (res = block.call).nil? && DataMapper::Repository.adapters.key?(:global)
-            repository(:global) do
-              res = block.call
-            end
-          end
-          res
-        end
-
         def compiler(name, version = nil)
-          with_both_repos do
-            if version.nil?
-              first(:path.like => "compilers/#{name}/%", :default => true) || first(:path.like => "compilers/#{name}/%")
-            else
-              first(:path.like => "compilers/#{name}/%", :version => version)
-            end
+          if version.nil?
+            first(:path.like => "compilers/#{name}/%", :default => true) || first(:path.like => "compilers/#{name}/%")
+          else
+            first(:path.like => "compilers/#{name}/%", :version => version)
           end
         end
         
         # have affinity for currently selected compiler
-        def resolve(descriptor, compiler_tag = nil)
-          with_both_repos do 
-            path, op, version = descriptor.split(' ')
-            packages = all(path: path)
-            if packages.empty? && !compiler_tag.nil?
-              packages = all(:path.like => "#{path}/%", compiler_tag: compiler_tag)
+        def resolve(descriptor, compiler_tag = nil, all_depots = false)
+          if all_depots
+            Depot.each do |d|
+              res = DataMapper.repository(d) do
+                resolve(descriptor, compiler_tag)
+              end
+              return res unless res.nil?
             end
-            if packages.empty?
-              packages = all(:path.like => "#{path}/%")
-            end
-            resolve_for_version(packages, op, version)
+            return nil
           end
+          path, op, version = descriptor.split(' ')
+          packages = all(path: path)
+          if packages.empty? && !compiler_tag.nil?
+            packages = all(:path.like => "#{path}/%", compiler_tag: compiler_tag)
+          end
+          if packages.empty?
+            packages = all(:path.like => "#{path}/%")
+          end
+          resolve_for_version(packages, op, version)
+        end
+
+        def try_semver(v1, op, v2)
+          v1 = v1 + '.0' while v1.split('.').length < 3
+          v2 = v2 + '.0' while v2.split('.').length < 3
+          Semver.new(v1).send(op,v2)
+        rescue ArgumentError
+          v1.send(op.to_sym,v2)
         end
 
         def resolve_for_version(packages, op, version)
           if op.nil?
-            # XXX - this doesn't take into account what version has been set as the default...
-            packages.first
+            packages.find {|p| p.default == true} || packages.first
           else
             matcher = case op
                       when '<>', '!='
-                        lambda { |p| p.version != version }
+                        lambda { |p| try_semver(p.version, '!=', version) }
                       when '=', '=='
-                        lambda { |p| p.version == version }
-                      when '>='
-                        lambda { |p| p.version >= version }
-                      when '>'
-                        lambda { |p| p.version > version }
-                      when '<'
-                        lambda { |p| p.version < version }
-                      when '<='
-                        lambda { |p| p.version <= version }
+                        lambda { |p| try_semver(p.version, '==', version) }
+                      when '>=', '>', '<', '<='
+                        lambda { |p| try_semver(p.version, op, version) }
                       when '~>'
                         # clever operator; ~> 1.0 = 1.* ; 1.0.0 = 1.0.*
                         split = version.split('.')[0..-2]
                         lower_bound = split.join('.')
                         upper_bound = split.tap { |a| a[-1] = a[-1].to_i + 1 }.join('.')
                         lambda do |p|
-                begin
-                  p_semver = Semver.new(p.version)
-                  p_semver.satisfies("~ #{lower_bound}.*") &&
-                    p_semver.satisfies("<= #{upper_bound}")
-                rescue ArgumentError
-                  p.version >= lower_bound && p.version <= upper_bound
-                end
-              end
+                          begin
+                            p_semver = Semver.new(p.version)
+                            p_semver.satisfies("~ #{lower_bound}.*") &&
+                              p_semver.satisfies("<= #{upper_bound}")
+                          rescue ArgumentError
+                            p.version >= lower_bound && p.version <= upper_bound
+                          end
+                        end
                       else
                         raise 'Invalid requirement operator: #{op}'
                       end
@@ -108,8 +105,8 @@ module Alces
           end
         end
         
-        def write_aliases!
-          File.open(File.expand_path(File.join(Config.modules_dir,'.aliases')), 'w') do |io|
+        def write_aliases!(depot)
+          File.open(File.expand_path(File.join(Config.modules_dir(depot),'.aliases')), 'w') do |io|
             Package.all.each do |p|
               p.aliases.each do |k,v|
                 io.puts "module-alias #{k} #{v}"
@@ -132,9 +129,9 @@ module Alces
           end
         end
 
-        def write_defaults!
+        def write_defaults!(depot)
           Package.all(default: true, :type.not => 'compilers').each do |p|
-            versionfile_name = File.join(Config.modules_dir, p.type, p.name, p.version, '.version')
+            versionfile_name = File.join(Config.modules_dir(depot), p.type, p.name, p.version, '.version')
             #raise ModulefileError, "Failed to write module file #{versionfile_name} (already exists)" if File.exists?(versionfile_name)
             if File.directory?(File.dirname(versionfile_name))
               raise ModulefileError, "Failed to write module file #{versionfile_name}" unless File.write(versionfile_name, ModuleTree.versionfile_for(p.tag))
@@ -211,19 +208,19 @@ module Alces
         Digest::SHA1.hexdigest(path)[0..7]
       end
 
-      def renderer(metadata, opts)
+      def renderer(depot, metadata, opts)
         requirements = opts[:requirements]
         if opts[:compiler]
           requirements.unshift(Package.resolve(opts[:compiler]))
         end
         if type == 'compilers'
-          CompilerModuleFileRenderer.new(self, metadata, requirements, opts)
+          CompilerModuleFileRenderer.new(self, depot, metadata, requirements, opts)
         else
-          ModuleFileRenderer.new(self, metadata, requirements, opts)
+          ModuleFileRenderer.new(self, depot, metadata, requirements, opts)
         end
       end
 
-      class ModuleFileRenderer < Struct.new(:package, :metadata, :requirements, :opts)
+      class ModuleFileRenderer < Struct.new(:package, :depot, :metadata, :requirements, :opts)
         delegate :type, :name, :version, :tag, to: :package
         delegate :description, :centred_summary, :top_title_bar, :bottom_title_bar,
                  :url, :help, :license, :license_help, to: :metadata
@@ -237,11 +234,11 @@ module Alces
         end
 
         def package_dir
-          File.expand_path(File.join(Config.packages_dir, package.path))
+          File.expand_path(File.join(Config.packages_dir(depot), package.path))
         end
 
         def modulefile_path
-          File.expand_path(File.join(Config.modules_dir, package.path))
+          File.expand_path(File.join(Config.modules_dir(depot), package.path))
         end
 
         def caps_name

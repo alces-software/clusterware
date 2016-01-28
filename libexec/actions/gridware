@@ -49,7 +49,7 @@ else
     ENV['cw_GRIDWARE_root'] = v unless v.empty?
   end
 
-  if ! File.exist?("#{ENV['cw_GRIDWARE_root']}/etc/gridware.#{ENV['cw_DIST']}.yml") &&
+  if ! File.exist?("#{ENV['cw_GRIDWARE_root']}/etc/gridware.yml") &&
      ! File.exist?("#{ENV['cw_ROOT']}/etc/gridware.yml")
     STDERR.puts "alces gridware: uninitialized; try 'alces gridware init' first"
     exit 1

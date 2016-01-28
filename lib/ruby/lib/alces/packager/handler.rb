@@ -63,6 +63,7 @@ module Alces
       def initialize(*)
         super
         options.default(compiler: :first)
+        options.default(depot: (Config.default_depot rescue 'local'))
         if ":#{ENV['cw_FLAGS']}:" =~ /nocolou?r/ || ENV['cw_COLOUR'] == '0'
           HighLine.use_color = false
         end
@@ -140,37 +141,45 @@ module Alces
       end
 
       def install
-        return unless validate_metadata!
+        with_depot do
+          return unless validate_metadata!
 
-        #Validate the package before going any further
-        say "Installing #{colored_path(metadata)}"
-        metadata.validate!
-        if metadata.metadata[:variants] && variant == 'all'
-          metadata.metadata[:variants].keys.each do |v|
-            Actions.install(metadata, action_opts(:install).merge(variant: v), IoHandler)
+          #Validate the package before going any further
+          say "Installing #{colored_path(metadata)}"
+          metadata.validate!
+          if metadata.metadata[:variants] && variant == 'all'
+            metadata.metadata[:variants].keys.each do |v|
+              Actions.install(metadata, action_opts(:install).merge(variant: v), IoHandler)
+            end
+          else
+            Actions.install(metadata, action_opts(:install), IoHandler)
           end
-        else
-          Actions.install(metadata, action_opts(:install), IoHandler)
+          puts "\nInstallation complete."
         end
-        puts "\nInstallation complete."
       end
 
       def purge
-        return unless validate_package!
-        say "Purging #{colored_path(package)}"
-        Actions.purge(package, action_opts(:purge), IoHandler)
+        with_depot do
+          return unless validate_package!
+          say "Purging #{colored_path(package)}"
+          Actions.purge(package, action_opts(:purge), IoHandler)
+        end
       end
 
       def clean
-        if validate_package!
-          say "Cleaning up #{colored_path(package)}"
-          Actions.clean(package, action_opts(:clean), IoHandler)
+        with_depot do
+          begin
+            if validate_package!
+              say "Cleaning up #{colored_path(package)}"
+              Actions.clean(package, action_opts(:clean), IoHandler)
+            end
+          rescue
+            args.unshift(package_name)
+            validate_metadata!
+            say "Cleaning up #{colored_path(metadata)}"
+            Actions.clean(metadata, action_opts(:clean), IoHandler)
+          end
         end
-      rescue
-        args.unshift(package_name)
-        validate_metadata!
-        say "Cleaning up #{colored_path(metadata)}"
-        Actions.clean(metadata, action_opts(:clean), IoHandler)
       end
 
       def update
@@ -195,39 +204,43 @@ module Alces
       end
 
       def default
-        # set the specified package as default
-        if (package_path = args.first).nil?
-          raise MissingArgumentError, 'Please supply a package path'
+        with_depot do
+          # set the specified package as default
+          if (package_path = args.first).nil?
+            raise MissingArgumentError, 'Please supply a package path'
+          end
+          package_parts = package_path.split('/')
+          package_prefix = package_parts[0..-2].join('/')
+          version = package_parts.last
+          package = Package.first(path: package_path) || Version.first(path: package_prefix, version: version)
+          raise NotFoundError, "Package '#{colored_path(package_path)}' not found" if package.nil?
+          Actions.set_default(package, action_opts(:default), IoHandler)
         end
-        package_parts = package_path.split('/')
-        package_prefix = package_parts[0..-2].join('/')
-        version = package_parts.last
-        package = Package.first(path: package_path) || Version.first(path: package_prefix, version: version)
-        raise NotFoundError, "Package '#{colored_path(package_path)}' not found" if package.nil?
-        Actions.set_default(package, action_opts(:default), IoHandler)
       end
 
       def register
-        directory = args[0]
-        raise MissingArgumentError, 'Please supply directory and package path' if directory.nil?
-        package_path = args[1]
-        raise MissingArgumentError, 'Please supply a package path' if package_path.nil?
-        package_file = args[2]
-        raise MissingArgumentError, 'Please supply path to a package file' if package_file.nil?
-        # generate some metadata...
-        package_path = package_path.split('/')
-        name, version = package_path[-3..-2]
-        yaml = File.read(package_file, encoding: 'utf-8')
-        metadata = YAML.load(yaml)
-        checksum = Digest::MD5.hexdigest(yaml)
-        metadata = Metadata.new(name, version, metadata, checksum, nil)
-        module_opts = {
-          requirements: [],
-          tag: package_path.last,
-          params: [],
-          modules: []
-        }
-        ModuleTree.set(metadata, module_opts)
+        with_depot do
+          directory = args[0]
+          raise MissingArgumentError, 'Please supply directory and package path' if directory.nil?
+          package_path = args[1]
+          raise MissingArgumentError, 'Please supply a package path' if package_path.nil?
+          package_file = args[2]
+          raise MissingArgumentError, 'Please supply path to a package file' if package_file.nil?
+          # generate some metadata...
+          package_path = package_path.split('/')
+          name, version = package_path[-3..-2]
+          yaml = File.read(package_file, encoding: 'utf-8')
+          metadata = YAML.load(yaml)
+          checksum = Digest::MD5.hexdigest(yaml)
+          metadata = Metadata.new(name, version, metadata, checksum, nil)
+          module_opts = {
+            requirements: [],
+            tag: package_path.last,
+            params: [],
+            modules: []
+          }
+          ModuleTree.set(metadata, module_opts)
+        end
       end
 
       def depot
@@ -331,7 +344,9 @@ module Alces
           variant: variant,
           verbose: verbose,
           noninteractive: (yes ? :force : non_interactive),
-          tag: tag
+          tag: tag,
+          depot: options.depot,
+          global: options.global
         }.tap do |h|
           # don't need params or modules when switching defaults, purging or cleaning
           unless [:default, :purge, :clean].include?(action)
@@ -418,6 +433,14 @@ module Alces
           m.params.each do |k,v|
             say sprintf("%15s: %s\n", k, v)
           end
+        end
+      end
+
+      def with_depot(&block)
+        if Depot.find(options.depot)
+          DataMapper.repository(options.depot, &block)
+        else
+          raise NotFoundError, "Could not find depot: #{options.depot}"
         end
       end
     end
