@@ -400,6 +400,8 @@ EOF
         doing 'Purge'
         with_spinner do
           rm_r(dest_dir) if File.exists?(dest_dir)
+          FileUtils.rmdir(File.dirname(dest_dir))
+          FileUtils.rmdir(File.dirname(File.dirname(dest_dir)))
           # rm(modulefile_name) if File.exists?(modulefile_name)
           ModuleTree.remove(opts[:depot], modulefile_name)
         end
