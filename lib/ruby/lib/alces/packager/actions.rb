@@ -164,7 +164,22 @@ EOF
           unpack_package
         end
         analyse_package if analyse?
+        satisfy_dependencies
         patch_source
+      end
+
+      def satisfy_dependencies
+        s = dependency_script
+        unless s.nil?
+          doing 'Dependencies'
+          with_spinner do
+            res = with_temp_file(s) do |f|
+              run('/bin/bash',f)
+            end
+            handle_failure!(res,'dependency') if res.fail?
+          end
+          say 'OK'.color(:green)
+        end
       end
 
       def install
@@ -616,6 +631,17 @@ EOF
         script(:prepare, 'Prepare', package.archive_dir)
       end
 
+      def dependency_script
+        if package.metadata[:dependencies]
+          case ENV['cw_DIST']
+          when /^el/
+            generate_dependency_script('el', 'rpm -q %s', 'yum install -y %s')
+          when /^ubuntu/
+            generate_dependency_script('ubuntu', 'dpkg -l %s', 'apt-get install -y %s')
+          end
+        end
+      end
+
       def script(key, name, working_dir = src_dir)
         ERB.new(template_for(package.metadata[key], working_dir).tap do |t|
                   i("#{name} template"){t} 
@@ -637,6 +663,19 @@ EOF
       end
 
       private
+      def generate_dependency_script(stem, check_cmd, install_cmd)
+        deps = [*package.metadata[:dependencies][stem]] +
+               [*package.metadata[:dependencies][ENV['cw_DIST']]]
+        unless deps.empty?
+          s = %(deps=()\n)
+          deps.each do |dep|
+            s << %(if ! #{sprintf(check_cmd,dep)}; then\n  deps+=(#{dep})\nfi\n)
+          end
+          s << %(if [ "${#deps}" -gt 0 ]; then #{sprintf(install_cmd,'"${deps[@]}"')}; fi)
+          s.tap { i("Dependencies script"){s} }
+        end
+      end
+
       def template_for(script_fragment, working_dir = src_dir)
         <<EOF
 #{script_prelude(working_dir)}
