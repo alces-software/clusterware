@@ -99,8 +99,12 @@ module Alces
 
         doing 'Content'
         with_spinner do
-          run(['wget',"#{source_url}/content.tgz",'-T',timeout.to_s,'-O',"#{target}/content.tgz"]) do |r|
-            raise DepotError, "Unable to download content." unless r.success?
+          run(['wget',"#{source_url}/content.#{ENV['cw_DIST']}.tgz",'-T',timeout.to_s,'-O',"#{target}/content.tgz"]) do |r|
+            unless r.success?
+              run(['wget',"#{source_url}/content.tgz",'-T',timeout.to_s,'-O',"#{target}/content.tgz"]) do |r2|
+                raise DepotError, "Unable to download content." unless r2.success?
+              end
+            end
           end
         end
         say 'OK'.color(:green)
