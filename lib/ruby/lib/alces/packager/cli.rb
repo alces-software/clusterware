@@ -178,13 +178,22 @@ module Alces
       end
       set_aliases(:depot, min: 3)
 
-      command :register do |c|
-        c.syntax = 'alces gridware register <directory> <package path>'
-        c.description = "Register manually installed package in <directory> as <package path>"
+      command :export do |c|
+        c.syntax = 'alces gridware export <package path>'
+        c.description = "Export gridware package <package path> to a tarball"
         add_depot_options(c)
-        c.action HandlerProxy, :register
+        c.option '--ignore-bad', 'Allow packages containing hard coded paths to be exported'
+        c.action HandlerProxy, :export
       end
-      set_aliases(:register)
+      set_aliases(:export)
+
+      command :import do |c|
+        c.syntax = 'alces gridware import <archive file>'
+        c.description = "Import gridware package held in tarball <archive file> to a depot"
+        add_depot_options(c)
+        c.action HandlerProxy, :import
+      end
+      set_aliases(:import)
     end
   end
 end

@@ -25,6 +25,8 @@ require 'alces/packager/config'
 require 'alces/packager/depot'
 require 'alces/packager/repository'
 require 'alces/packager/actions'
+require 'alces/packager/archive_exporter'
+require 'alces/packager/archive_importer'
 require 'alces/packager/errors'
 require 'alces/packager/io_handler'
 require 'terminal-table'
@@ -218,28 +220,20 @@ module Alces
         end
       end
 
-      def register
+      def export
         with_depot do
-          directory = args[0]
-          raise MissingArgumentError, 'Please supply directory and package path' if directory.nil?
-          package_path = args[1]
-          raise MissingArgumentError, 'Please supply a package path' if package_path.nil?
-          package_file = args[2]
-          raise MissingArgumentError, 'Please supply path to a package file' if package_file.nil?
-          # generate some metadata...
-          package_path = package_path.split('/')
-          name, version = package_path[-3..-2]
-          yaml = File.read(package_file, encoding: 'utf-8')
-          metadata = YAML.load(yaml)
-          checksum = Digest::MD5.hexdigest(yaml)
-          metadata = Metadata.new(name, version, metadata, checksum, nil)
-          module_opts = {
-            requirements: [],
-            tag: package_path.last,
-            params: [],
-            modules: []
-          }
-          ModuleTree.set(metadata, module_opts)
+          package_path = args[0]
+          raise MissingArgumentError, 'Please supply a package path' if package_path.nil? || !package_path.include?('/')
+          ArchiveExporter.export(package_path, options.depot, IoHandler, options.ignore_bad)
+        end
+      end
+
+      def import
+        with_depot do
+          archive_path = args[0]
+          raise MissingArgumentError, 'Please supply path to archive' if archive_path.nil?
+
+          ArchiveImporter.import(archive_path, options.depot, IoHandler)
         end
       end
 
@@ -348,8 +342,8 @@ module Alces
           depot: options.depot,
           global: options.global
         }.tap do |h|
-          # don't need params or modules when switching defaults, purging or cleaning
-          unless [:default, :purge, :clean].include?(action)
+          # only need params or modules when installing
+          if [:install].include?(action)
             h[:params] = params
             h[:modules] = modules
             if metadata.mode == :unpacker
@@ -399,7 +393,10 @@ module Alces
       end
 
       def packages
-        @packages ||= Package.all(:path.like => "#{package_name}%")
+        @packages ||= begin
+                        ps = Package.all(:path.like => "#{package_name}")
+                        ps.empty? ? Package.all(:path.like => "#{package_name}%") : ps
+                      end
       end
 
       def find_metadata(a)
