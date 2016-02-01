@@ -65,6 +65,9 @@ module Alces
       def initialize(*)
         super
         options.default(compiler: :first)
+        options.default(groups: false)
+        options.default(descriptions: false)
+        options.default(names: false)
         options.default(depot: (Config.default_depot rescue 'local'))
         if ":#{ENV['cw_FLAGS']}:" =~ /nocolou?r/ || ENV['cw_COLOUR'] == '0'
           HighLine.use_color = false
@@ -73,7 +76,7 @@ module Alces
 
       def list
         if options.full
-          details
+          details(definitions)
         else
           glob = args.first || '*'
           d 'package list requested'
@@ -86,16 +89,58 @@ module Alces
         end
       end
 
-      def details
+      def search
+        if args.first.nil?
+          raise MissingArgumentError, 'Please supply a search string'
+        end
+        args.map! {|s| Regexp.escape(s)}
+        if !options.descriptions && !options.names && !options.groups
+          opts = {
+            group: true,
+            name: true,
+            description: true
+          }
+          options.groups = true
+          options.names = true
+          options.descriptions = true
+        else
+          opts = {
+            group: options.groups,
+            name: options.names,
+            description: options.descriptions
+          }
+        end
+        pkgs = search_metadata(args, opts)
+        if options.full
+          details(pkgs, args)
+        else
+          mode = options.oneline == true || !STDOUT.tty? ? ':rows' : ':columns_across'
+          Alces::Packager::CLI.send(:enable_paging)
+          say <<-ERB.chomp
+<%= list(#{pkgs.sort.map { |p| colored_path(p) }.inspect},#{mode}) %>
+          ERB
+        end
+      end
+      
+      def details(packages, highlights = [])
+        highlighter = lambda do |s,t|
+          if t
+            s.gsub(/(.*)(#{highlights.join('.*')})(.*)/i) do
+              $1 + $2.reverse + $3
+            end
+          else
+            s
+          end
+        end
         cols = $terminal.output_cols
         wrap_col = ((cols - 56) * 0.5).floor
         rows = [].tap do |a|
-          definitions.sort.each do |p|
+          packages.sort.each do |p|
             a << [
-                  colored_path(p),
-                  (p.metadata[:group] || '<Unknown>').color(:green)
+                  highlighter.call(colored_path(p), options.names),
+                  highlighter.call((p.metadata[:group] || '<Unknown>'), options.groups).color(:green)
                  ]
-            a.last << $terminal.wrap(p.metadata[:summary] || '<Unknown>',wrap_col) if cols > 80
+            a.last << $terminal.wrap(highlighter.call(p.metadata[:summary] || '<Unknown>', options.descriptions),wrap_col) if cols > 80
             a << :separator
           end
         end
@@ -399,6 +444,21 @@ module Alces
                       end
       end
 
+      def search_metadata(a, opts)
+        re = Regexp.new(a.join('.*'),true)
+        Repository.map do |r|
+          r.packages.select do |p|
+            (opts[:description] &&
+              ((p.metadata[:description] || '') =~ re ||
+                (p.metadata[:summary] || '') =~ re)) ||
+              (opts[:group] &&
+               (p.metadata[:group] || '') =~ re) ||
+              (opts[:name] &&
+               p.name =~ re)
+          end
+        end.flatten
+      end
+      
       def find_metadata(a)
         Repository.map do |r|
           r.packages.select do |p|

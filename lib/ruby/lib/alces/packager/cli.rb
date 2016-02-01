@@ -122,6 +122,18 @@ module Alces
       end
       set_aliases(:list, extra: :ls)
 
+      command :search do |c|
+        c.syntax = 'alces gridware search'
+        c.description = 'Search available packages'
+        c.action HandlerProxy, :search
+        c.option '-f', '--full', 'list full details'
+        c.option '-1', '--oneline', 'list one package per line'
+        c.option '-g', '--groups', 'search package groups'
+        c.option '-d', '--descriptions', 'search package summaries and descriptions'
+        c.option '-n', '--names', 'search package names'
+      end
+      set_aliases(:search)
+
       command :info do |c|
         c.syntax = 'alces gridware info <package>'
         c.description = 'Display information about <package>'
