@@ -448,11 +448,11 @@ EOF
         end
         case package
         when Package
-          Package.write_defaults!
+          Package.write_defaults!(opts[:depot])
         when Version
-          Version.write_defaults!
+          Version.write_defaults!(opts[:depot])
         end
-        Package.write_aliases!
+        Package.write_aliases!(opts[:depot])
         say 'OK'.color(:green)
       end
 
