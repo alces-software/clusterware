@@ -122,22 +122,34 @@ module Alces
         dest_module_dir = File.join(Config.modules_dir(depot), package_path)
         dest_pkg_dir = File.join(Config.packages_dir(depot), package_path)
         taggings.each do |tagging|
-          exists = false
-          catch(:done) do
+          condition = catch(:done) do
             title "Processing #{package_path}/#{tagging[:tag]}"
             doing "Importing"
             with_spinner do
               # verify not already installed!
               p = Package.first(name: name, type: type, version: version, tag: tagging[:tag])
               if !p.nil?
-                exists = true
-                throw :done
+                throw :done, [:exists, p]
               end
+
+              # verify dependencies are available
+              unresolved = (tagging[:requirements] || []).map do |req|
+                req if Package.resolve(req, tagging[:compiler_tag]).nil?
+              end.compact
+              if unresolved.any?
+                throw :done, [:unresolved, unresolved]
+              end
+
               module_file = File.join(dir, ENV['cw_DIST'], 'etc', 'modules', package_path, tagging[:tag])
               pkg_dir = File.join(dir, ENV['cw_DIST'], 'pkg', package_path, tagging[:tag])
               s = File.read(module_file).gsub('_DEPOT_',depot_path)
               File.write(module_file,s)
-                
+              (tagging[:rewritten] || []).each do |f|
+                fname = File.join(dir, ENV['cw_DIST'], 'pkg', package_path, tagging[:tag], f)
+                s = File.read(fname).gsub('_DEPOT_',depot_path)
+                File.write(fname,s)
+              end
+
               Package.first_or_create(type: type,
                                       name: name,
                                       version: version,
@@ -150,9 +162,12 @@ module Alces
               FileUtils.mkdir_p(dest_pkg_dir)
               FileUtils.mv(pkg_dir, dest_pkg_dir)
             end
+            nil
           end
-          if exists
+          if condition && condition.first == :exists
             say 'EXISTS'.color(:yellow)
+          elsif condition && condition.first == :unresolved
+            say "#{'MISSING'.color(:red)}\n\n#{'ERROR'.color(:red).underline}: Unable to satisfy runtime requirements: #{condition[1].join(', ')}"
           else
             say 'OK'.color(:green)
           end
@@ -182,6 +197,11 @@ module Alces
             File.write(compiler_module_file,s)
             s = File.read(lib_module_file).gsub('_DEPOT_',depot_path)
             File.write(lib_module_file,s)
+            (rewritten || []).each do |f|
+              fname = File.join(dir, ENV['cw_DIST'], 'pkg', 'compilers', name, version, f)
+              s = File.read(fname).gsub('_DEPOT_',depot_path)
+              File.write(fname,s)
+            end
             
             Package.first_or_create(type: type,
                                     name: name,

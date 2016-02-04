@@ -38,7 +38,7 @@ module Alces
       delegate :say, :with_spinner, :doing, :title, :colored_path, :to => :io
       
       def initialize(package_path, depot, io, ignore_bad_package)
-        self.package_path = package_path
+        self.package_path = package_path.gsub(/([\[\]\{\}\*\?\\])/, '\\\\\1')
         self.depot = depot
         self.io = io
         self.ignore_bad_package = ignore_bad_package
@@ -99,9 +99,17 @@ module Alces
           File.write(dest_lib_module_file,s)
         end
 
-        detect_bad_paths(dest_pkg_dir)
-
+        rewritten_files, bad_files = detect_bad_paths(dest_pkg_dir, depot_path)
+        h[:rewritten] = rewritten_files
+        
         File.write(File.join(dir,'metadata.yml'), h.to_yaml)
+        if bad_files.any?
+          if ignore_bad_package
+            say "#{'WARNING!'.color(:yellow)} Package contains hard-coded directory (#{bad_files.join(', ')})"
+          else
+            raise PackageError, "Package contains hard-coded directory (#{bad_files.join(', ')})"
+          end
+        end
 
         archive(dir)
       end
@@ -112,6 +120,13 @@ module Alces
 
         FileUtils.mkdir_p(dest_pkg_dir)
         FileUtils.mkdir_p(dest_module_dir)
+
+        basename, variant = @name.split('_')
+        md = Repository.map do |r|
+          r.packages.select do |p|
+            p.type == @type && p.name == basename
+          end
+        end.flatten.first
 
         @tags.each do |tag|
           title "Export (#{tag})"
@@ -129,36 +144,64 @@ module Alces
           say 'OK'.color(:green)
 
           doing "Ready"
+          bad_files = []
           with_spinner do
             # modify depot in modulefiles
             p = Package.first(name: @name, type: @type, version: version, tag: tag)
-            h[:taggings] << {
-              tag: tag,
-              compiler_tag: p.compiler_tag
-            }
-              
+            reqs = md.base_requirements(:runtime) + \
+                   md.compiler_requirements(p.compiler_tag,:runtime) + \
+                   md.variant_requirements(variant, :runtime)
+
             s = File.read(dest_module).gsub(depot_path,'_DEPOT_')
             File.write(dest_module,s)
+            rewritten_files, bad_files = detect_bad_paths(File.join(dest_pkg_dir,tag), depot_path)
+
+            h[:taggings] << {
+              tag: tag,
+              compiler_tag: p.compiler_tag,
+              requirements: reqs,
+              rewritten: rewritten_files
+            }
           end
-          detect_bad_paths(File.join(dest_pkg_dir,tag))
+          if bad_files.any?
+            if ignore_bad_package
+              say "#{'WARNING!'.color(:yellow)} Package contains hard-coded directory (#{bad_files.join(', ')})"
+            else
+              raise PackageError, "Package contains hard-coded directory (#{bad_files.join(', ')})"
+            end
+          end
         end
         File.write(File.join(dir,'metadata.yml'), h.to_yaml)
 
         archive(dir)
       end
 
-      def detect_bad_paths(dir)
+      def text_file?(file)
+        run(['file',file]) do |r|
+          r.success? && r.stdout.include?("text")
+        end
+      end
+
+      def detect_bad_paths(dir, depot_path)
         # warn about depot specifics in package code
         run(['grep','-lr',depot_path,dir]) do |r|
           if r.success?
-            files = r.stdout.chomp.gsub(File.join(dir,''),'').tr("\n",', ')
-            if ignore_bad_package
-              say "#{'WARNING!'.color(:yellow)} Package contains hard-coded directory (#{files})"
-            else
-              raise PackageError, "Package contains hard-coded directory (#{files})"
+            out = r.stdout
+            rewritten_files = []
+            bad_files = []
+            out.split("\n").each do |f|
+              if text_file?(f)
+                s = File.read(f).gsub(depot_path,'_DEPOT_')
+                File.write(f,s)
+                rewritten_files << f.gsub(File.join(dir,''),'')
+              else
+                bad_files << f.gsub(File.join(dir,''),'')
+              end
             end
+            [rewritten_files,bad_files]
           else
             say 'OK'.color(:green)
+            [[],[]]
           end
         end
       end
@@ -211,7 +254,9 @@ module Alces
         return @version unless @version.nil?
         if @version.nil?
           candidates = Dir.glob(File.join(package_dir, @type, @name, '*'))
-          if candidates.length == 1
+          if candidates.length == 0
+            raise NotFoundError, "Could not find package for: #{File.join(@type, @name)}"
+          elsif candidates.length == 1
             @version = File.basename(candidates[0])
           else
             say "More than one package version found, please choose one of:"
