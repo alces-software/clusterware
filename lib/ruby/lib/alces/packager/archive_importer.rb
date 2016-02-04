@@ -88,45 +88,11 @@ module Alces
             raise PackageError, "Incompatible distro in archive (#{distro}) for this system (#{ENV['cw_DIST']})"
           end
           say 'OK'.color(:green)
-          
-          # modify depot in modulefiles
-          dest_module_dir = File.join(Config.modules_dir(depot), package_path)
-          dest_pkg_dir = File.join(Config.packages_dir(depot), package_path)
-          taggings.each do |tagging|
-            exists = false
-            catch(:done) do
-              title "Processing #{package_path}/#{tagging[:tag]}"
-              doing "Importing"
-              with_spinner do
-                # verify not already installed!
-                p = Package.first(name: name, type: type, version: version, tag: tagging[:tag])
-                if !p.nil?
-                  exists = true
-                  throw :done
-                end
-                module_file = File.join(dir, ENV['cw_DIST'], 'etc', 'modules', package_path, tagging[:tag])
-                pkg_dir = File.join(dir, ENV['cw_DIST'], 'pkg', package_path, tagging[:tag])
-                s = File.read(module_file).gsub('_DEPOT_',depot_path)
-                File.write(module_file,s)
-                
-                Package.first_or_create(type: type,
-                                        name: name,
-                                        version: version,
-                                        compiler_tag: tagging[:compiler_tag],
-                                        tag: tagging[:tag])
 
-                # move into place
-                FileUtils.mkdir_p(dest_module_dir)
-                FileUtils.mv(module_file, dest_module_dir)
-                FileUtils.mkdir_p(dest_pkg_dir)
-                FileUtils.mv(pkg_dir, dest_pkg_dir)
-              end
-            end
-            if exists
-              say 'EXISTS'.color(:yellow)
-            else
-              say 'OK'.color(:green)
-            end
+          if type == 'compilers'
+            import_compiler(dir)
+          else
+            import_package(dir)
           end
 
           title "Finalizing import"
@@ -151,6 +117,92 @@ module Alces
       end
       
       private
+      def import_package(dir)
+        # modify depot in modulefiles
+        dest_module_dir = File.join(Config.modules_dir(depot), package_path)
+        dest_pkg_dir = File.join(Config.packages_dir(depot), package_path)
+        taggings.each do |tagging|
+          exists = false
+          catch(:done) do
+            title "Processing #{package_path}/#{tagging[:tag]}"
+            doing "Importing"
+            with_spinner do
+              # verify not already installed!
+              p = Package.first(name: name, type: type, version: version, tag: tagging[:tag])
+              if !p.nil?
+                exists = true
+                throw :done
+              end
+              module_file = File.join(dir, ENV['cw_DIST'], 'etc', 'modules', package_path, tagging[:tag])
+              pkg_dir = File.join(dir, ENV['cw_DIST'], 'pkg', package_path, tagging[:tag])
+              s = File.read(module_file).gsub('_DEPOT_',depot_path)
+              File.write(module_file,s)
+                
+              Package.first_or_create(type: type,
+                                      name: name,
+                                      version: version,
+                                      compiler_tag: tagging[:compiler_tag],
+                                      tag: tagging[:tag])
+
+              # move into place
+              FileUtils.mkdir_p(dest_module_dir)
+              FileUtils.mv(module_file, dest_module_dir)
+              FileUtils.mkdir_p(dest_pkg_dir)
+              FileUtils.mv(pkg_dir, dest_pkg_dir)
+            end
+          end
+          if exists
+            say 'EXISTS'.color(:yellow)
+          else
+            say 'OK'.color(:green)
+          end
+        end
+      end
+
+      def import_compiler(dir)
+        # modify depot in modulefiles
+        dest_compiler_module_dir = File.join(Config.modules_dir(depot), 'compilers', name)
+        dest_lib_module_dir = File.join(Config.modules_dir(depot), 'libs', name)
+        dest_pkg_dir = File.join(Config.packages_dir(depot), 'compilers', name)
+        title "Processing #{package_path}"
+        doing "Importing"
+        exists = false
+        catch(:done) do
+          with_spinner do
+            # verify not already installed!
+            p = Package.first(name: name, type: type, version: version)
+            if !p.nil?
+              exists = true
+              throw :done
+            end
+            compiler_module_file = File.join(dir, ENV['cw_DIST'], 'etc', 'modules', 'compilers', name, version)
+            lib_module_file = File.join(dir, ENV['cw_DIST'], 'etc', 'modules', 'libs', name, version)
+            pkg_dir = File.join(dir, ENV['cw_DIST'], 'pkg', 'compilers', name, version)
+            s = File.read(compiler_module_file).gsub('_DEPOT_',depot_path)
+            File.write(compiler_module_file,s)
+            s = File.read(lib_module_file).gsub('_DEPOT_',depot_path)
+            File.write(lib_module_file,s)
+            
+            Package.first_or_create(type: type,
+                                    name: name,
+                                    version: version)
+
+            # move into place
+            FileUtils.mkdir_p(dest_compiler_module_dir)
+            FileUtils.mv(compiler_module_file, dest_compiler_module_dir)
+            FileUtils.mkdir_p(dest_lib_module_dir)
+            FileUtils.mv(lib_module_file, dest_lib_module_dir)
+            FileUtils.mkdir_p(dest_pkg_dir)
+            FileUtils.mv(pkg_dir, dest_pkg_dir)
+          end
+        end
+        if exists
+          say 'EXISTS'.color(:yellow)
+        else
+          say 'OK'.color(:green)
+        end
+      end
+
       def load_metadata(dir)
         if File.exist?(File.join(dir,'metadata.yml'))
           @metadata = YAML.load_file(File.join(dir,'metadata.yml'))

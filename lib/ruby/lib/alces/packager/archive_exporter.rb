@@ -56,72 +56,134 @@ module Alces
             version: version,
             taggings: []
           }
-          
-          dest_pkg_dir = File.join(dir, ENV['cw_DIST'], 'pkg', normalized_package_path)
-          dest_module_dir = File.join(dir, ENV['cw_DIST'], 'etc', 'modules', normalized_package_path)
-          FileUtils.mkdir_p(dest_pkg_dir)
-          FileUtils.mkdir_p(dest_module_dir)
 
-          @tags.each do |tag|
-            title "Export (#{tag})"
-            fqpn = File.join(normalized_package_path, tag)
-            module_file = File.join(Config.modules_dir(depot), fqpn)
-            pkg_dir = File.join(package_dir, fqpn)
-            
-            doing "Prepare"
-            with_spinner do
-              FileUtils.cp_r(pkg_dir, dest_pkg_dir)
-              FileUtils.cp_r(module_file, dest_module_dir)
-            end
-            say 'OK'.color(:green)
-
-            doing "Ready"
-            with_spinner do
-              # modify depot in modulefiles
-              p = Package.first(name: @name, type: @type, version: version, tag: tag)
-              h[:taggings] << {
-                tag: tag,
-                compiler_tag: p.compiler_tag
-              }
-              s = File.read(File.join(dest_module_dir,tag)).gsub(depot_path,'_DEPOT_')
-              File.write(File.join(dest_module_dir,tag),s)
-            end
-            # warn about depot specifics in package code
-            run(['grep','-lr',depot_path,File.join(dest_pkg_dir,tag)]) do |r|
-              if r.success?
-                files = r.stdout.chomp.gsub(File.join(dest_pkg_dir,tag,''),'').tr("\n",', ')
-                if ignore_bad_package
-                  say "#{'WARNING!'.color(:yellow)} Package contains hard-coded directory (#{files})"
-                else
-                  raise PackageError, "Package contains hard-coded directory (#{files})"
-                end
-              else
-                say 'OK'.color(:green)
-              end
-            end
+          if @type == 'compilers'
+            export_compiler(h, dir)
+          else
+            export_package(h, dir)
           end
-          File.write(File.join(dir,'metadata.yml'), h.to_yaml)
-
-          title 'Creating archive'
-          # tar up temporary tree
-          doing 'Archive'
-          package_name = normalized_package_path.tr('/','-')
-          tar_name = '/tmp/' + package_name + '-' + ENV['cw_DIST'] + '.tar.gz'
-          with_spinner do
-            run(['tar', '-czf', tar_name, '-C', dir, ENV['cw_DIST'], 'metadata.yml']) do |r|
-              raise PackageError, "Unable to create tarball." unless r.success?
-            end
-          end
-          say "#{'OK'.color(:green)}"
-          say "\nExported #{colored_path(normalized_package_path)} to #{tar_name}\n\n"
         end
       end
-      
+
       private
+
+      def export_compiler(h, dir)
+        dest_pkg_dir = File.join(dir, ENV['cw_DIST'], 'pkg', 'compilers', @name)
+        dest_compiler_module_dir = File.join(dir, ENV['cw_DIST'], 'etc', 'modules', 'compilers', @name)
+        dest_lib_module_dir = File.join(dir, ENV['cw_DIST'], 'etc', 'modules', 'libs', @name)
+        FileUtils.mkdir_p(dest_pkg_dir)
+        FileUtils.mkdir_p(dest_compiler_module_dir)
+        FileUtils.mkdir_p(dest_lib_module_dir)
+
+        title "Export"
+
+        compiler_module_file = File.join(Config.modules_dir(depot), 'compilers', @name, version)
+        lib_module_file = File.join(Config.modules_dir(depot), 'libs', @name, version)
+        pkg_dir = File.join(package_dir, 'compilers', @name, version)
+        dest_compiler_module_file = File.join(dest_compiler_module_dir, version)
+        dest_lib_module_file = File.join(dest_lib_module_dir, version)
+
+        doing "Prepare"
+        with_spinner do
+          FileUtils.cp_r(pkg_dir, dest_pkg_dir)
+          FileUtils.cp_r(compiler_module_file, dest_compiler_module_dir)
+          FileUtils.cp_r(lib_module_file, dest_lib_module_dir)
+        end
+        say 'OK'.color(:green)
+
+        doing "Ready"
+        with_spinner do
+          s = File.read(dest_compiler_module_file).gsub(depot_path,'_DEPOT_')
+          File.write(dest_compiler_module_file,s)
+          s = File.read(dest_lib_module_file).gsub(depot_path,'_DEPOT_')
+          File.write(dest_lib_module_file,s)
+        end
+
+        detect_bad_paths(dest_pkg_dir)
+
+        File.write(File.join(dir,'metadata.yml'), h.to_yaml)
+
+        archive(dir)
+      end
+
+      def export_package(h, dir)
+        dest_pkg_dir = File.join(dir, ENV['cw_DIST'], 'pkg', normalized_package_path)
+        dest_module_dir = File.join(dir, ENV['cw_DIST'], 'etc', 'modules', normalized_package_path)
+
+        FileUtils.mkdir_p(dest_pkg_dir)
+        FileUtils.mkdir_p(dest_module_dir)
+
+        @tags.each do |tag|
+          title "Export (#{tag})"
+
+          fqpn = File.join(normalized_package_path, tag)
+          module_file = File.join(Config.modules_dir(depot), fqpn)
+          pkg_dir = File.join(package_dir, fqpn)
+          dest_module = File.join(dest_module_dir,tag)
+
+          doing "Prepare"
+          with_spinner do
+            FileUtils.cp_r(pkg_dir, dest_pkg_dir)
+            FileUtils.cp_r(module_file, dest_module_dir)
+          end
+          say 'OK'.color(:green)
+
+          doing "Ready"
+          with_spinner do
+            # modify depot in modulefiles
+            p = Package.first(name: @name, type: @type, version: version, tag: tag)
+            h[:taggings] << {
+              tag: tag,
+              compiler_tag: p.compiler_tag
+            }
+              
+            s = File.read(dest_module).gsub(depot_path,'_DEPOT_')
+            File.write(dest_module,s)
+          end
+          detect_bad_paths(File.join(dest_pkg_dir,tag))
+        end
+        File.write(File.join(dir,'metadata.yml'), h.to_yaml)
+
+        archive(dir)
+      end
+
+      def detect_bad_paths(dir)
+        # warn about depot specifics in package code
+        run(['grep','-lr',depot_path,dir]) do |r|
+          if r.success?
+            files = r.stdout.chomp.gsub(File.join(dir,''),'').tr("\n",', ')
+            if ignore_bad_package
+              say "#{'WARNING!'.color(:yellow)} Package contains hard-coded directory (#{files})"
+            else
+              raise PackageError, "Package contains hard-coded directory (#{files})"
+            end
+          else
+            say 'OK'.color(:green)
+          end
+        end
+      end
+
+      def archive(dir)
+        title 'Creating archive'
+        # tar up temporary tree
+        doing 'Archive'
+        package_name = normalized_package_path.tr('/','-')
+        tar_name = '/tmp/' + package_name + '-' + ENV['cw_DIST'] + '.tar.gz'
+        with_spinner do
+          run(['tar', '-czf', tar_name, '-C', dir, ENV['cw_DIST'], 'metadata.yml']) do |r|
+            raise PackageError, "Unable to create tarball." unless r.success?
+          end
+        end
+        say "#{'OK'.color(:green)}"
+        say "\nExported #{colored_path(normalized_package_path)} to #{tar_name}\n\n"
+      end
+      
       def setup
         @type, @name, @version, tag = package_path.split('/')
         @tags =
-          if tag && File.directory?(File.join(package_dir, @type, @name, version, tag))
+          if @type == 'compilers'
+            @tags = ['']
+          elsif tag && File.directory?(File.join(package_dir, @type, @name, version, tag))
             @tags = [tag]
           else
             Dir.glob(File.join(package_dir, @type, @name, version, '*'))
@@ -134,6 +196,15 @@ module Alces
       
       def package_dir
         @package_dir ||= Config.packages_dir(depot)
+      end
+
+      def fqpn(tag)
+        @fqpn ||=
+          if @type == 'compilers'
+            normalized_package_path
+          else
+            File.join(normalized_package_path, tag)
+          end
       end
 
       def version
