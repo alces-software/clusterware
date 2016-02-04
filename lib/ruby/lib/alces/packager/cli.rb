@@ -139,7 +139,7 @@ module Alces
         c.description = 'Display information about <package>'
         c.action HandlerProxy, :info
       end
-      set_aliases(:info)
+      set_aliases(:info, min: 3, extra: [:show, :sho, :sh])
 
       command :install do |c|
         c.syntax = 'alces gridware install <package> [<param>=<value> [...]]'
@@ -150,7 +150,7 @@ module Alces
         c.option '-g', '--global', 'Allow use of packages across all depots'
         c.option '-m', '--modules STRING', String, 'Specify modules to load before build'
       end
-      set_aliases(:install, min: 4)
+      set_aliases(:install, min: 3)
 
       command :purge do |c|
         c.syntax = 'alces gridware purge <package>'
@@ -205,7 +205,7 @@ module Alces
         add_depot_options(c)
         c.action HandlerProxy, :import
       end
-      set_aliases(:import)
+      set_aliases(:import, min: 2)
     end
   end
 end

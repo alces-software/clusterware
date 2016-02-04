@@ -150,7 +150,7 @@ module Alces
           headings << 'Summary' 
         end
         Alces::Packager::CLI.send(:enable_paging)
-        say Terminal::Table.new(title: 'Available Gridware Packages', 
+        say Terminal::Table.new(title: 'Matching Gridware Packages', 
                                 headings: headings,
                                 rows: rows, 
                                 style: {width: cols < 80 ? 80 : cols - 5}).to_s
@@ -168,7 +168,8 @@ module Alces
         definitions.sort.each do |m|
           say "#{colored_path(m)}:"
           # XXX more info in here
-          say "  #{'Summary'.underline}\n    #{m.summary}"
+          say "  #{'Name'.underline}\n    #{m.title}"
+          say "\n  #{'Summary'.underline}\n    #{m.summary}"
           say "\n  #{'Version'.underline}\n    #{m.version}"
           say "\n  #{'Compatible compilers'.underline} (--compiler)\n    "
           say m.compilers.keys.join("\n    ")
@@ -450,7 +451,8 @@ module Alces
           r.packages.select do |p|
             (opts[:description] &&
               ((p.metadata[:description] || '') =~ re ||
-                (p.metadata[:summary] || '') =~ re)) ||
+               (p.metadata[:summary] || '') =~ re ||
+               (p.metadata[:title] || '') =~ re)) ||
               (opts[:group] &&
                (p.metadata[:group] || '') =~ re) ||
               (opts[:name] &&
