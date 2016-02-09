@@ -23,7 +23,7 @@ fetch_dist() {
     local name=$1
     # XXX - compare md5?
     if [ ! -f "${dep_src}/${name}.tar.gz" ]; then
-	if [ -z "${cw_BUILD_disable_spinner}" ]; then
+	if [ -z "${cw_BUILD_noninteractive}" ]; then
 	    progress="-#"
 	else
 	    progress=""
@@ -40,7 +40,7 @@ fetch_source() {
     local file=$2
     # XXX - compare md5?
     if [ ! -f "${dep_src}/${file}" ]; then
-	if [ -z "${cw_BUILD_disable_spinner}" ]; then
+	if [ -z "${cw_BUILD_noninteractive}" ]; then
 	    progress="-#"
 	else
 	    progress=""

@@ -51,7 +51,7 @@ EOF
 source "${source}/scripts/os/${os}.sh"
 
 cw_BUILD_tmp="${cw_BUILD_tmp:-tmp}"
-
+export cw_UI_disable_spinner="${cw_BUILD_noninteractive}"
 mkdir -p ${source}/${cw_BUILD_tmp}/log ${source}/${cw_BUILD_tmp}/src ${source}/${cw_BUILD_tmp}/build
 dep_logs="${source}/${cw_BUILD_tmp}/log"
 dep_build="${source}/${cw_BUILD_tmp}/build"

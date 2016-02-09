@@ -57,13 +57,13 @@ doing() {
         pad=$2
     fi
     printf "    [36m%${pad}s[0m ... " "$1"
-    if [ -z "$cw_DISABLE_SPINNER" ]; then
+    if [ -z "$cw_UI_disable_spinner" ]; then
 	toggle_spin
     fi
 }
 
 say_done () {
-    if [ -z "$cw_DISABLE_SPINNER" ]; then
+    if [ -z "$cw_UI_disable_spinner" ]; then
 	toggle_spin
     fi
     if [ $1 -gt 0 ]; then

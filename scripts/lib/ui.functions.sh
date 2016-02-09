@@ -21,6 +21,7 @@
 #==============================================================================
 # ensure all children die when we do
 trap "export PGID=\$BASHPID; ( /bin/kill -- -\$PGID &>/dev/null ) &" EXIT INT TERM
+export cw_UI_disable_spinner="${cw_BUILD_noninteractive}"
 
 toggle_spin() {
         if [ -z "$spin_pid" ]; then
@@ -58,13 +59,13 @@ doing() {
         pad=$2
     fi
     printf "    [36m%${pad}s[0m ... " "$1"
-    if [ -z "$cw_BUILD_disable_spinner" ]; then
+    if [ -z "$cw_BUILD_noninteractive" ]; then
       toggle_spin
     fi
 }
 
 say_done () {
-    if [ -z "$cw_BUILD_disable_spinner" ]; then
+    if [ -z "$cw_BUILD_noninteractive" ]; then
         toggle_spin
     fi
     if [ $1 -gt 0 ]; then

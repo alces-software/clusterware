@@ -33,7 +33,7 @@ if [ -z "$GIT" ]; then
 fi
 
 src_dir="${cw_BUILD_source_dir:-$(mktemp -d /tmp/clusterware.XXXXXXXX)}"
-if [ -z "${cw_BUILD_disable_spinner}" ]; then
+if [ -z "${cw_BUILD_noninteractive}" ]; then
     progress="-#"
 else
     progress=""
