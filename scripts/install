@@ -50,11 +50,12 @@ EOF
 
 source "${source}/scripts/os/${os}.sh"
 
-alces_BUILD_TMP="${alces_BUILD_TMP:-tmp}"
-mkdir -p ${source}/${alces_BUILD_TMP}/log ${source}/${alces_BUILD_TMP}/src ${source}/${alces_BUILD_TMP}/build
-dep_logs="${source}/${alces_BUILD_TMP}/log"
-dep_build="${source}/${alces_BUILD_TMP}/build"
-dep_src="${source}/${alces_BUILD_TMP}/src"
+cw_BUILD_tmp="${cw_BUILD_tmp:-tmp}"
+
+mkdir -p ${source}/${cw_BUILD_tmp}/log ${source}/${cw_BUILD_tmp}/src ${source}/${cw_BUILD_tmp}/build
+dep_logs="${source}/${cw_BUILD_tmp}/log"
+dep_build="${source}/${cw_BUILD_tmp}/build"
+dep_src="${source}/${cw_BUILD_tmp}/src"
 
 # Install pre-requisites
 title "Installing prerequisites"
@@ -78,15 +79,15 @@ if [ ! -d "${target}/etc" ]; then
     cp -R "${source}/etc" "${target}"
     sed -i -e "s/_OS_/${os}/g" "${target}/etc"/distro.*
     sed -i -e "s,_ROOT_,${target},g" "${target}/etc/ruby.rc" "${target}/etc/modulespath"
-    if [ "$alces_DIST_URL" ]; then
-        sed -e "s,^cw_DIST_URL=.*,cw_DIST_URL=${alces_DIST_URL}/,g" -i "${target}/etc"/serviceware.rc
+    if [ "$cw_BUILD_dist_url" ]; then
+        sed -e "s,^cw_DIST_URL=.*,cw_DIST_URL=${cw_BUILD_dist_url}/,g" -i "${target}/etc"/serviceware.rc
     fi
     rm -f "${target}"/etc/handlers/.gitkeep
     rm -f "${target}"/etc/session/.gitkeep
     rm -f "${target}"/etc/services/.gitkeep
     rm -f "${target}"/etc/storage/.gitkeep
     chmod 0600 "${target}"/etc/naming.rc
-    sed -e "s,_SECRET_,${alces_NAMING_auth},g" \
+    sed -e "s,_SECRET_,${cw_BUILD_naming_auth},g" \
 	-i "${target}"/etc/naming.rc
 fi
 mkdir -p /var/log/clusterware
@@ -147,7 +148,7 @@ else
 	cp "${source}"/dist/repos/base/repo.yml "${target}"/var/lib/gridware/repos/base/repo.yml
     fi
 
-    if [ "$alces_REPOS_URL" ]; then
+    if [ "$cw_BUILD_repos_url" ]; then
         mkdir -p "${target}"/var/lib/gridware/repos/base/pkg
         tar -C "${target}"/var/lib/gridware/repos/base/pkg -xvzf "${source}"/packager-base.tar.gz &> "${dep_logs}/gridware-init.log"
     else
@@ -172,7 +173,7 @@ if [ -d "${target}/var/lib/handler/repos" ]; then
     doing 'Detect'
 else
     doing 'Initialize'
-    if [ "$alces_REPOS_URL" ]; then
+    if [ "$cw_BUILD_repos_url" ]; then
         mkdir -p "${target}"/var/lib/handler/repos/base
         tar -C "${target}"/var/lib/handler/repos/base -xvzf "${source}"/clusterware-handlers.tar.gz &> "${dep_logs}/handler-init.log"
     else
@@ -186,7 +187,7 @@ if [ -d "${target}/var/lib/sessions/repos" ]; then
     doing 'Detect'
 else
     doing 'Initialize'
-    if [ "$alces_REPOS_URL" ]; then
+    if [ "$cw_BUILD_repos_url" ]; then
         mkdir -p "${target}"/var/lib/sessions/repos/base
         tar -C "${target}"/var/lib/sessions/repos/base -xvzf "${source}"/clusterware-sessions.tar.gz &> "${dep_logs}/session-init.log"
     else
@@ -201,7 +202,7 @@ if [ -d "${target}/var/lib/services/repos" ]; then
     doing 'Detect'
 else
     doing 'Initialize'
-    if [ "$alces_REPOS_URL" ]; then
+    if [ "$cw_BUILD_repos_url" ]; then
         mkdir -p "${target}"/var/lib/services/repos/base
         tar -C "${target}"/var/lib/services/repos/base -xvzf "${source}"/clusterware-services.tar.gz &> "${dep_logs}/services-init.log"
     else
@@ -215,7 +216,7 @@ if [ -d "${target}/var/lib/storage/repos" ]; then
     doing 'Detect'
 else
     doing 'Initialize'
-    if [ "$alces_REPOS_URL" ]; then
+    if [ "$cw_BUILD_repos_url" ]; then
         mkdir -p "${target}"/var/lib/storage/repos/base
         tar -C "${target}"/var/lib/storage/repos/base -xvzf "${source}"/clusterware-storage.tar.gz &> "${dep_logs}/services-init.log"
     else

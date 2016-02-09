@@ -1,6 +1,6 @@
 #!/bin/bash
 #==============================================================================
-# Copyright (C) 2015 Stephen F. Norledge and Alces Software Ltd.
+# Copyright (C) 2015-2016 Stephen F. Norledge and Alces Software Ltd.
 #
 # This file/package is part of Alces Clusterware.
 #
@@ -25,23 +25,23 @@ if (( UID != 0 )); then
   exit 1
 fi
 
-if [ -z "$alces_OS" ]; then
-  echo "$0: must set alces_OS variable (current options are: 'el6', 'el7')"
+if [ -z "$cw_DIST" ]; then
+  echo "$0: must set cw_DIST variable (current options are: 'el6', 'el7')"
   exit 1
 fi
 
 # Configuration parameters for isolated network propagation
-#alces_APP_MANAGER_ADDRESS=""
-#export alces_SOURCE_URL=""
-#export alces_DIST_URL=""
-#export alces_REPOS_URL=""
+#cw_BUILD_app_manager_address=""
+#export cw_BUILD_source_url=""
+#export cw_BUILD_dist_url=""
+#export cw_BUILD_repos_url=""
 
-# set alces_FETCH_HANDLING to either 'source' or 'bin'
+# set cw_BUILD_fetch_handling to either 'source' or 'bin'
 #  'source' -- build all dependencies
 #  'bin'    -- download prebuilt dependencies
-alces_FETCH_HANDLING="${alces_FETCH_HANDLING:-bin}"
+cw_BUILD_fetch_handling="${cw_BUILD_fetch_handling:-bin}"
 
-src_dir="${alces_SOURCE_DIR:-$(mktemp -d /tmp/clusterware.XXXXXXXX)}"
+src_dir="${cw_BUILD_source_dir:-$(mktemp -d /tmp/clusterware.XXXXXXXX)}"
 
 if [ ! -f "${src_dir}"/scripts/install ]; then
     if [ "$(ls -A "${src_dir}" 2>/dev/null)" ]; then
@@ -50,8 +50,8 @@ if [ ! -f "${src_dir}"/scripts/install ]; then
     fi
     cleanup=true
     src_url_base="https://github.com/alces-software/clusterware/archive"
-    src_url_file="${alces_SOURCE_BRANCH:-master}.tar.gz"
-    src_url="${alces_SOURCE_URL:-${src_url_base}/${src_url_file}}"
+    src_url_file="${cw_BUILD_source_branch:-master}.tar.gz"
+    src_url="${cw_BUILD_source_url:-${src_url_base}/${src_url_file}}"
     # Download source
     cat <<EOF
 [33m
@@ -69,12 +69,12 @@ EOF
         exit 1
     fi
 
-    if [ "$alces_REPOS_URL" ]; then
-        curl -# -L "${alces_REPOS_URL}/clusterware-handlers.tar.gz" > "${src_dir}/clusterware-handlers.tar.gz"
-        curl -# -L "${alces_REPOS_URL}/clusterware-sessions.tar.gz" > "${src_dir}/clusterware-sessions.tar.gz"
-        curl -# -L "${alces_REPOS_URL}/clusterware-services.tar.gz" > "${src_dir}/clusterware-services.tar.gz"
-        curl -# -L "${alces_REPOS_URL}/clusterware-storage.tar.gz" > "${src_dir}/clusterware-storage.tar.gz"
-        curl -# -L "${alces_REPOS_URL}/packager-base.tar.gz" > "${src_dir}/packager-base.tar.gz"
+    if [ "$cw_BUILD_repos_url" ]; then
+        curl -# -L "${cw_BUILD_repos_url}/clusterware-handlers.tar.gz" > "${src_dir}/clusterware-handlers.tar.gz"
+        curl -# -L "${cw_BUILD_repos_url}/clusterware-sessions.tar.gz" > "${src_dir}/clusterware-sessions.tar.gz"
+        curl -# -L "${cw_BUILD_repos_url}/clusterware-services.tar.gz" > "${src_dir}/clusterware-services.tar.gz"
+        curl -# -L "${cw_BUILD_repos_url}/clusterware-storage.tar.gz" > "${src_dir}/clusterware-storage.tar.gz"
+        curl -# -L "${cw_BUILD_repos_url}/packager-base.tar.gz" > "${src_dir}/packager-base.tar.gz"
     fi
 fi
 
@@ -85,7 +85,7 @@ cat <<EOF
 ===============================================================================
 [0m
 EOF
-bash "${src_dir}/scripts/install" "$alces_OS" "$alces_FETCH_HANDLING"
+bash "${src_dir}/scripts/install" "$cw_DIST" "$cw_BUILD_fetch_handling"
 if [ "$cleanup" = "true" ]; then
     rm -rf "${src_dir}"
 fi

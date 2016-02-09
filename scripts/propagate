@@ -32,7 +32,12 @@ if [ -z "$GIT" ]; then
   exit 1
 fi
 
-src_dir="${alces_SOURCE_DIR:-$(mktemp -d /tmp/clusterware.XXXXXXXX)}"
+src_dir="${cw_BUILD_source_dir:-$(mktemp -d /tmp/clusterware.XXXXXXXX)}"
+if [ -z "${cw_BUILD_disable_spinner}" ]; then
+    progress="-#"
+else
+    progress=""
+fi
 
 if [ ! -f "${src_dir}"/scripts/control.vars.sh ]; then
     if [ "$(ls -A "${src_dir}" 2>/dev/null)" ]; then
@@ -40,15 +45,15 @@ if [ ! -f "${src_dir}"/scripts/control.vars.sh ]; then
 	exit 1
     fi
     cleanup=true
-    src_url_base="${alces_SOURCE_URL:-https://raw.githubusercontent.com/alces-software/clusterware}/${alces_SOURCE_BRANCH:-master}/scripts"
+    src_url_base="${cw_BUILD_source_url:-https://raw.githubusercontent.com/alces-software/clusterware}/${cw_BUILD_source_branch:-master}/scripts"
     mkdir -p "${src_dir}"/scripts/lib
     for a in bootstrap control.vars.sh lib/ui.functions.sh lib/fetch.functions.sh; do
-	curl -# -L "${src_url_base}"/${a} > "${src_dir}"/scripts/$a
+	curl ${progress} -L "${src_url_base}"/${a} > "${src_dir}"/scripts/$a
     done
     source "${src_dir}"/scripts/control.vars.sh
     mkdir -p "${src_dir}"/scripts/dependencies
     for a in $deps; do
-	curl -# -L "${src_url_base}"/dependencies/${a}.sh > "${src_dir}"/scripts/dependencies/$a.sh
+	curl ${progress} -L "${src_url_base}"/dependencies/${a}.sh > "${src_dir}"/scripts/dependencies/$a.sh
     done
 else
     source "${src_dir}"/scripts/control.vars.sh
@@ -58,14 +63,14 @@ source "${src_dir}"/scripts/lib/ui.functions.sh
 source "${src_dir}"/scripts/lib/fetch.functions.sh
 
 cw_src_url_base="https://github.com/alces-software/clusterware/archive"
-cw_src_url_file="${alces_SOURCE_BRANCH:-master}.tar.gz"
+cw_src_url_file="${cw_BUILD_source_branch:-master}.tar.gz"
 cw_src_url="${cw_src_url_base}/${cw_src_url_file}"
 fetch_handling=bin
 prop_dir="${target}/var/lib/clusterware"
 
 title "Fetching Clusterware source"
 mkdir -p "${prop_dir}"
-curl -# -L "${cw_src_url}" > "${prop_dir}/clusterware.tar.gz"
+curl ${progress} -L "${cw_src_url}" > "${prop_dir}/clusterware.tar.gz"
 if [ $? -gt 0 ]; then
     echo "Unable to retrieve clusterware source, aborting."
     exit 1
@@ -130,10 +135,10 @@ say_done $?
 
 doing "Configure"
 # update the bootstrap script
-sed -i -e 's,^#alces_APP_MANAGER_ADDRESS=.*,alces_APP_MANAGER_ADDRESS="${alces_APP_MANAGER_ADDRESS:-app-manager1}",g' "${prop_dir}"/bootstrap
-sed -i -e 's,#export alces_SOURCE_URL.*,export alces_SOURCE_URL="${alces_SOURCE_URL:-http://${alces_APP_MANAGER_ADDRESS}/clusterware/clusterware.tar.gz}",g' "${prop_dir}"/bootstrap
-sed -i -e 's,#export alces_DIST_URL.*,export alces_DIST_URL="${alces_DIST_URL:-http://${alces_APP_MANAGER_ADDRESS}/clusterware/dist}",g' "${prop_dir}"/bootstrap
-sed -i -e 's,#export alces_REPOS_URL.*,export alces_REPOS_URL="${alces_REPOS_URL:-http://${alces_APP_MANAGER_ADDRESS}/clusterware}",g' "${prop_dir}"/bootstrap
+sed -i -e 's,^#cw_BUILD_app_manager_address=.*,cw_BUILD_app_manager_address="${cw_BUILD_app_manager_address:-app-manager1}",g' "${prop_dir}"/bootstrap
+sed -i -e 's,#export cw_BUILD_source_url.*,export cw_BUILD_source_url="${cw_BUILD_source_url:-http://${cw_BUILD_app_manager_address}/clusterware/clusterware.tar.gz}",g' "${prop_dir}"/bootstrap
+sed -i -e 's,#export cw_BUILD_dist_url.*,export cw_BUILD_dist_url="${cw_BUILD_dist_url:-http://${cw_BUILD_app_manager_address}/clusterware/dist}",g' "${prop_dir}"/bootstrap
+sed -i -e 's,#export cw_BUILD_repos_url.*,export cw_BUILD_repos_url="${cw_BUILD_repos_url:-http://${cw_BUILD_app_manager_address}/clusterware}",g' "${prop_dir}"/bootstrap
 say_done $?
 
 title "Cleaning up"

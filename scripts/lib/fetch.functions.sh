@@ -23,7 +23,12 @@ fetch_dist() {
     local name=$1
     # XXX - compare md5?
     if [ ! -f "${dep_src}/${name}.tar.gz" ]; then
-        curl -# -L ${dist_url}/${os}/${name}.tar.gz > "${dep_src}/${name}.tar.gz"
+	if [ -z "${cw_BUILD_disable_spinner}" ]; then
+	    progress="-#"
+	else
+	    progress=""
+	fi
+        curl ${progress} -L ${dist_url}/${os}/${name}.tar.gz > "${dep_src}/${name}.tar.gz"
     else
         doing 'Detect'
         say_done $?
@@ -35,7 +40,12 @@ fetch_source() {
     local file=$2
     # XXX - compare md5?
     if [ ! -f "${dep_src}/${file}" ]; then
-        curl -# -L "$url" > "${dep_src}/${file}"
+	if [ -z "${cw_BUILD_disable_spinner}" ]; then
+	    progress="-#"
+	else
+	    progress=""
+	fi
+        curl ${progress} -L "$url" > "${dep_src}/${file}"
     else
         doing 'Detect'
         say_done $?

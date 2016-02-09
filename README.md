@@ -15,10 +15,10 @@ The install scripts handle the installation of all required packages from your d
 
 ### TL;DR
 
-One-line installation - **note that you must verify you have the correct value for** `alces_OS`:
+One-line installation - **note that you must verify you have the correct value for** `cw_DIST`:
 
 ```bash
-curl -sL http://git.io/clusterware-installer | sudo alces_OS=el7 /bin/bash
+curl -sL http://git.io/clusterware-installer | sudo cw_DIST=el7 /bin/bash
 ```
 
 ### Basic installation
@@ -31,10 +31,10 @@ Clusterware is a system-level package and must be installed by the `root` user.
    sudo -s
    ```
 
-2. Set the `alces_OS` environment variable to match the distribution on which you are installing. Currently supported options are `el6` and `el7`:
+2. Set the `cw_DIST` environment variable to match the distribution on which you are installing. Currently supported options are `el6` and `el7`:
 
      ```bash
-     export alces_OS=el7
+     export cw_DIST=el7
      ```
 
 3. Invoke installation by piping output from `curl` to `bash`:

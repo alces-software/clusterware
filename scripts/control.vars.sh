@@ -22,5 +22,5 @@
 deps="git libyaml ruby bundler modules genders pdsh components tigervnc xwd serf pluginhook websockify jq"
 serviceware="gridscheduler aws s3cmd galaxy simp_le alces-storage-manager-daemon clusterware-dropbox-cli"
 dists="el6 el7"
-dist_url=${alces_DIST_URL:-https://s3-eu-west-1.amazonaws.com/packages.alces-software.com/clusterware/dist}
-target=${alces_TARGET_DIR:-/opt/clusterware}
+dist_url=${cw_BUILD_dist_url:-https://s3-eu-west-1.amazonaws.com/packages.alces-software.com/clusterware/dist}
+target=${cw_BUILD_target_dir:-/opt/clusterware}

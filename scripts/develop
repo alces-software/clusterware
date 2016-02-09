@@ -25,12 +25,12 @@ if (( UID != 0 )); then
   exit 1
 fi
 
-if [ -z "$alces_OS" ]; then
-  echo "$0: must set alces_OS variable (current options are: 'el6', 'el7')"
+if [ -z "$cw_DIST" ]; then
+  echo "$0: must set cw_DIST variable (current options are: 'el6', 'el7')"
   exit 1
 fi
 
-src_dir="${alces_SOURCE_DIR:-/root/clusterware}"
+src_dir="${cw_BUILD_source_dir:-/root/clusterware}"
 if [ ! -d "${src_dir}"  ]; then
     yum install -e0 -y git
     # clone the git tree to /root/clusterware

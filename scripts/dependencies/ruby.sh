@@ -19,8 +19,8 @@
 # For more information on the Alces Clusterware, please visit:
 # https://github.com/alces-software/clusterware
 #==============================================================================
-alces_RUBYHOME="${target}/opt/ruby"
-alces_RUBY="${target}/opt/ruby/bin/ruby"
+cw_RUBYHOME="${target}/opt/ruby"
+cw_RUBY="${target}/opt/ruby/bin/ruby"
 
 detect_ruby() {
     [ -d "${target}/opt/ruby" ]
@@ -45,7 +45,7 @@ install_ruby() {
         cd "${dep_build}"/ruby-*
 
         doing 'Configure'
-        ./configure --prefix="${alces_RUBYHOME}" --enable-shared --disable-install-doc \
+        ./configure --prefix="${cw_RUBYHOME}" --enable-shared --disable-install-doc \
             --with-libyaml --with-opt-dir="${target}/opt/lib" \
             &> "${dep_logs}/ruby-configure.log"
         say_done $?

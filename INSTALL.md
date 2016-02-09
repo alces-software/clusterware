@@ -21,10 +21,10 @@ Clusterware is a system-level package and must be installed by the `root` user.
    sudo -s
    ```
 
-2. Set the `alces_OS` environment variable to match the distribution on which you are installing. Currently supported options are `el6` and `el7`:
+2. Set the `cw_DIST` environment variable to match the distribution on which you are installing. Currently supported options are `el6` and `el7`:
 
      ```bash
-     export alces_OS=el7
+     export cw_DIST=el7
      ```
 
 3. Invoke installation by piping output from `curl` to `bash`:
@@ -53,60 +53,60 @@ Additional environment variables may be set to influence the installation proces
 
 ### Build from upstream source
 
-Set the `alces_FETCH_HANDLING` variable to indicate that you want to build from upstream source code rather than installing prebuilt binaries for your distribution.  Choose `source` to download and build components from upstream sources, or `dist` to use prebuilt binaries downloaded from Amazon S3.
+Set the `cw_BUILD_fetch_handling` variable to indicate that you want to build from upstream source code rather than installing prebuilt binaries for your distribution.  Choose `source` to download and build components from upstream sources, or `dist` to use prebuilt binaries downloaded from Amazon S3.
    
 ```bash
-export alces_FETCH_HANDLING=source
+export cw_BUILD_fetch_handling=source
 curl -sL http://git.io/clusterware-installer | /bin/bash
 ```
 
 ### Build from existing directory
 
-Set the `alces_SOURCE_DIR` variable to point to an existing clone of the repository.  If a clone isn't available in the path you specify the path will be used to house the downloaded code rather than the default `/tmp/clusterware` temporary directory.
+Set the `cw_BUILD_source_dir` variable to point to an existing clone of the repository.  If a clone isn't available in the path you specify the path will be used to house the downloaded code rather than the default `/tmp/clusterware` temporary directory.
 
 ```bash
 cd /usr/src
 git clone https://github.com/alces-software/clusterware
-export alces_SOURCE_DIR=/usr/src/clusterware
+export cw_BUILD_source_dir=/usr/src/clusterware
 /usr/src/clusterware/scripts/bootstrap
 ```
 
 ### Build from an alternative branch
 
-Set the `alces_SOURCE_BRANCH` variable with the name of the branch you wish to build.  Defaults to `master`. e.g.:
+Set the `cw_BUILD_source_branch` variable with the name of the branch you wish to build.  Defaults to `master`. e.g.:
 
 ```bash
-export alces_SOURCE_BRANCH=0.1.0
+export cw_BUILD_source_branch=0.1.0
 curl -sL http://git.io/clusterware-installer | /bin/bash
 ```
 
 ### Download source from an alternative URL
 
-Set the `alces_SOURCE_URL` variable with the URL to a tarball of the Clusterware source code in `tar.gz` format.  Defaults to `https://github.com/alces-software/clusterware/archive/<branch>`. e.g.:
+Set the `cw_BUILD_source_url` variable with the URL to a tarball of the Clusterware source code in `tar.gz` format.  Defaults to `https://github.com/alces-software/clusterware/archive/<branch>`. e.g.:
 
 ```bash
-export alces_SOURCE_URL=http://symphony-app.mgt.symphony.local/clusterware/clusterware.tar.gz
+export cw_BUILD_source_url=http://symphony-app.mgt.symphony.local/clusterware/clusterware.tar.gz
 curl -sL http://symphony-app.mgt.symphony.local/clusterware/bootstrap | /bin/bash
 ```
 
 ### Download binary dependencies from an alternative lcoation
 
-Set the `alces_DIST_URL` variable with a base URL for suitable tarballs.  Defaults to `https://s3-eu-west-1.amazonaws.com/packages.alces-software.com/clusterware/dist`. e.g.:
+Set the `cw_BUILD_dist_url` variable with a base URL for suitable tarballs.  Defaults to `https://s3-eu-west-1.amazonaws.com/packages.alces-software.com/clusterware/dist`. e.g.:
 
 ```bash
-export alces_DIST_URL=http://symphony-app.mgt.symphony.local/clusterware/dist
-export alces_SOURCE_URL=http://symphony-app.mgt.symphony.local/clusterware/clusterware.tar.gz
+export cw_BUILD_dist_url=http://symphony-app.mgt.symphony.local/clusterware/dist
+export cw_BUILD_source_url=http://symphony-app.mgt.symphony.local/clusterware/clusterware.tar.gz
 curl -sL http://symphony-app.mgt.symphony.local/clusterware/bootstrap | /bin/bash
 ```
 
 ### Download public repository dependencies from an alternative lcoation
 
-Set the `alces_REPO_URL` variable with a base URL for suitable tarballs.  Defaults to unset.  e.g.:
+Set the `cw_BUILD_repo_url` variable with a base URL for suitable tarballs.  Defaults to unset.  e.g.:
 
 ```bash
-export alces_REPO_URL=http://symphony-app.mgt.symphony.local/clusterware
-export alces_DIST_URL=http://symphony-app.mgt.symphony.local/clusterware/dist
-export alces_SOURCE_URL=http://symphony-app.mgt.symphony.local/clusterware/clusterware.tar.gz
+export cw_BUILD_repo_url=http://symphony-app.mgt.symphony.local/clusterware
+export cw_BUILD_dist_url=http://symphony-app.mgt.symphony.local/clusterware/dist
+export cw_BUILD_source_url=http://symphony-app.mgt.symphony.local/clusterware/clusterware.tar.gz
 curl -sL http://symphony-app.mgt.symphony.local/clusterware/bootstrap | /bin/bash
 ```
 
@@ -114,20 +114,9 @@ curl -sL http://symphony-app.mgt.symphony.local/clusterware/bootstrap | /bin/bas
 
 ### Install Alces Clusterware in an alternative location
 
-Set the `alces_TARGET_DIR` variable with the filesystem location for installation of Alces Clusterware.  Defaults to `/opt/clusterware`. e.g.:
+Set the `cw_BUILD_target_dir` variable with the filesystem location for installation of Alces Clusterware.  Defaults to `/opt/clusterware`. e.g.:
 
 ```bash
-export alces_TARGET_DIR=/opt/sw/cluster/clusterware
+export cw_BUILD_target_dir=/opt/sw/cluster/clusterware
 curl -sL http://git.io/clusterware-installer | /bin/bash
 ```
-
-### Install Gridware in an alternative location
-
-Set the `alces_GRIDWARE_TARGET_DIR` variable with the filesystem location for installation of the Gridware component.  Defaults to `/opt/gridware`. e.g.:
-
-```bash
-export alces_GRIDWARE_TARGET_DIR=/opt/sw/packages
-curl -sL http://git.io/clusterware-installer | /bin/bash
-```
-
-Note that this only affects the Gridware package and configuration tree and does not modify where cache and log files are written (which remain at `/var/cache/gridware` and `/var/log/gridware` respectively).
