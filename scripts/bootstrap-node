@@ -1,0 +1,115 @@
+#!/bin/bash
+#==============================================================================
+# Copyright (C) 2016 Stephen F. Norledge and Alces Software Ltd.
+#
+# This file/package is part of Alces Clusterware.
+#
+# Alces Clusterware is free software: you can redistribute it and/or
+# modify it under the terms of the GNU Affero General Public License
+# as published by the Free Software Foundation, either version 3 of
+# the License, or (at your option) any later version.
+#
+# Alces Clusterware is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+# Affero General Public License for more details.
+#
+# You should have received a copy of the GNU Affero General Public License
+# along with this package.  If not, see <http://www.gnu.org/licenses/>.
+#
+# For more information on the Alces Clusterware, please visit:
+# https://github.com/alces-software/clusterware
+#==============================================================================
+write_config() {
+    case ${cw_BOOTSTRAP_role} in
+	login)
+	    cat <<EOF >"${cw_BOOTSTRAP_root}"/etc/config.yml
+# LOGIN CONFIG
+EOF
+	    ;;
+	compute)
+	    cat <<EOF >"${cw_BOOTSTRAP_root}"/etc/config.yml
+# COMPUTE CONFIG
+EOF
+	;;
+    esac
+}
+
+bootstrap_clusterware() {
+    export cw_DIST="${cw_BOOTSTRAP_dist}"
+    export cw_BUILD_target_dir="${cw_BOOTSTRAP_root}"
+    export cw_BUILD_app_manager_address="${cw_BOOTSTRAP_app_manager_address}"
+    export cw_BUILD_noninteractive=true
+    export cw_UI_disable_spinner=true
+    export cw_BUILD_naming_auth="GNjdioBB+c6r2Dkackqt"
+    curl http://${cw_BOOTSTRAP_app_manager_address}/clusterware/bootstrap-clusterware | /bin/bash
+    # disable clusterware-configurator at startup; this will be
+    # explicitly controlled by the clusterware-bootstrapper.
+    case $cw_DIST in
+	el7)
+	    systemctl disable clusterware-configurator
+	;;
+	el6)
+	    chkconfig clusterware-configurator off
+	;;
+    esac
+}
+
+start_configurator() {
+    case $cw_DIST in
+	el7)
+	    systemctl start clusterware-configurator
+	;;
+	el6)
+	    service clusterware-configurator start
+	;;
+    esac
+}
+
+enable_handlers() {
+    local handlers handler
+    handlers=(_BASE-HANDLERS_)
+    case ${cw_BOOTSTRAP_role} in
+	login)
+	    handlers+=(_LOGIN-HANDLERS_)
+	;;
+	compute)
+	    handlers+=(_COMPUTE-HANDLERS_)
+	;;
+    esac
+    
+    for handler in "${handlers[@]}"; do
+	alces handler enable ${handler}
+    done
+}
+
+configure_site_per_node() {
+    # SITE CONFIG PER NODE
+    :
+}
+
+configure_site_per_boot() {
+    # SITE CONFIG PER BOOT
+    :
+}
+
+main() {
+    if [ ! -f "${cw_BOOTSTRAP_root}"/etc/config.yml ]; then
+	# First boot, bootstrap clusterware, perform initial set up of clusterware for this system.
+	bootstrap_clusterware
+	enable_handlers
+	configure_site_per_node
+    fi
+    write_config
+    configure_site_per_boot
+    start_configurator
+}
+
+export cw_BOOTSTRAP_root=${cw_BOOTSTRAP_root:-/opt/clusterware}
+export PATH="${cw_BOOTSTRAP_root}"/bin:/usr/sbin:/usr/bin
+export HOME=/root
+
+# for vagrant dev
+export cw_BUILD_source_dir=/media/host/clusterware
+
+main
