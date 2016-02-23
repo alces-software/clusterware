@@ -32,6 +32,8 @@ alces() {
                         eval $(/opt/clusterware/bin/alces "$@") 2>&1
                     elif [ -n "$POSIXLY_CORRECT" ]; then
                         eval $(/opt/clusterware/bin/alces "$@") 2>&1
+                    elif [ "$2" == "load" -o "$2" == "add" ]; then
+                        eval $(/opt/clusterware/bin/alces "$@") 2>&1
                     else
                         eval $(/opt/clusterware/bin/alces "$@" 2> >(less -FRX >&2)) 2>&1
                     fi
@@ -42,7 +44,7 @@ alces() {
             case $2 in
                 dep*)
                     case $3 in
-                        e*|d*)
+                        e*|di*)
                             eval $(/opt/clusterware/bin/alces "$@") 2>&1
                             ;;
                         *)
