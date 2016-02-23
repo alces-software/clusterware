@@ -28,7 +28,7 @@ install_runtime_prerequisites() {
     # s3cmd
     # alces template/howto
     # dns functions (dig)
-    yum -e0 -y install wget sqlite3 patch bzip2 && \
+    yum -e0 -y install wget sqlite3 patch bzip2 xz-utils && \
         yum -e0 -y install tcl && \
         yum -e0 -y install openssl readline zlib libffi gmp && \
         yum -e0 -y install mesa-libGL libXdmcp pixman xorg-x11-fonts-misc && \

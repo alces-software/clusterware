@@ -572,6 +572,8 @@ EOF
                      run(['unzip',package.file,'-d',build_dir])
                    else
                      tar_opts = case ext
+                                when '.xz'
+                                  'J'
                                 when '.bz2'
                                   'j'
                                 when '.gz', '.tgz'
