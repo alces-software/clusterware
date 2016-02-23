@@ -105,6 +105,16 @@ module Alces
             end
           end
           say 'OK'.color(:green)
+          
+          doing 'Dependencies'
+          with_spinner do
+            Dir.glob(File.join(Config.dependencies_dir(depot),"#{type}-#{name}-#{version}*.sh")).each do |f|
+              run('/bin/bash',f) do |r|
+                raise DepotError, "Unable to resolve dependencies for: #{File.basename(f,'.sh')}" unless r.success?
+              end
+            end
+          end
+          say 'OK'.color(:green)
         end
       end
 
@@ -121,6 +131,8 @@ module Alces
         # modify depot in modulefiles
         dest_module_dir = File.join(Config.modules_dir(depot), package_path)
         dest_pkg_dir = File.join(Config.packages_dir(depot), package_path)
+        dest_depends_dir = Config.dependencies_dir(depot)
+
         taggings.each do |tagging|
           condition = catch(:done) do
             title "Processing #{package_path}/#{tagging[:tag]}"
@@ -141,6 +153,7 @@ module Alces
               end
 
               module_file = File.join(dir, ENV['cw_DIST'], 'etc', 'modules', package_path, tagging[:tag])
+              depends_file = File.join(dir, ENV['cw_DIST'], 'etc', 'depends', "#{[type, name, version, tagging[:tag]].join('-')}.sh")
               pkg_dir = File.join(dir, ENV['cw_DIST'], 'pkg', package_path, tagging[:tag])
               s = File.read(module_file).gsub('_DEPOT_',depot_path)
               File.write(module_file,s)
@@ -161,6 +174,9 @@ module Alces
               FileUtils.mv(module_file, dest_module_dir)
               FileUtils.mkdir_p(dest_pkg_dir)
               FileUtils.mv(pkg_dir, dest_pkg_dir)
+              if File.exists?(depends_file)
+                FileUtils.mv(depends_file, dest_depends_dir)
+              end
             end
             nil
           end
@@ -193,6 +209,7 @@ module Alces
             compiler_module_file = File.join(dir, ENV['cw_DIST'], 'etc', 'modules', 'compilers', name, version)
             lib_module_file = File.join(dir, ENV['cw_DIST'], 'etc', 'modules', 'libs', name, version)
             pkg_dir = File.join(dir, ENV['cw_DIST'], 'pkg', 'compilers', name, version)
+            depends_file = File.join(dir, ENV['cw_DIST'], 'etc', 'depends', "#{['compilers', name, version].join('-')}.sh")
             s = File.read(compiler_module_file).gsub('_DEPOT_',depot_path)
             File.write(compiler_module_file,s)
             s = File.read(lib_module_file).gsub('_DEPOT_',depot_path)
@@ -214,6 +231,9 @@ module Alces
             FileUtils.mv(lib_module_file, dest_lib_module_dir)
             FileUtils.mkdir_p(dest_pkg_dir)
             FileUtils.mv(pkg_dir, dest_pkg_dir)
+            if File.exists?(depends_file)
+              FileUtils.mv(depends_file, dest_depends_dir)
+            end
           end
         end
         if exists

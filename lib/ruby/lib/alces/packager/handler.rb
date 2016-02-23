@@ -288,17 +288,17 @@ module Alces
         operation = args[0]
         raise MissingArgumentError, 'Please supply the depot operation' if operation.nil?
         case operation
-        when 'fetch'
+        when 'f', 'fe', 'fet', 'fetc', 'fetch'
           source_url = args[1]
           name = args[2]
           raise MissingArgumentError, 'Please supply a depot source URL' if source_url.nil?
           depot = Depot.new(source_url: source_url, name: name)
           if depot.fetch
-            say "Depot '#{depot.name}' fetched successfully."
+            say "\nDepot '#{depot.name}' fetched successfully."
           else
             raise InvalidSelectionError, "Depot could not be fetched from: #{source_url}"
           end
-        when 'enable'
+        when 'e', 'en', 'ena', 'enab', 'enabl', 'enable'
           target = args[1]
           raise MissingArgumentError, 'Please supply a depot name' if target.nil?
           if depot = Depot.find(target)
@@ -306,7 +306,7 @@ module Alces
           else
             raise InvalidSelectionError, "No such depot: #{target}"
           end
-        when 'disable'
+        when 'di', 'dis', 'disa', 'disab', 'disabl', 'disable'
           target = args[1]
           raise MissingArgumentError, 'Please supply a depot name' if target.nil?
           if depot = Depot.find(target)
@@ -314,8 +314,17 @@ module Alces
           else
             raise InvalidSelectionError, "No such depot: #{target}"
           end
-        when 'list'
+        when 'l', 'li', 'lis', 'list', 'ls'
           Depot.list
+        when 'de', 'dep', 'depe', 'depen', 'depend', 'depends'
+          target = args[1] || options.depot
+          raise MissingArgumentError, 'Please supply a depot name' if target.nil?
+          if depot = Depot.find(target)
+            depot.resolve_depends
+            say "\nDependencies resolved."
+          else
+            raise InvalidSelectionError, "No such depot: #{target}"
+          end
         else
           raise InvalidSelectionError, "No such depot operation: #{operation}"
         end
@@ -496,8 +505,12 @@ module Alces
       end
 
       def with_depot(&block)
-        if Depot.find(options.depot)
-          DataMapper.repository(options.depot, &block)
+        if d = Depot.find(options.depot)
+          if d.enabled?
+            DataMapper.repository(options.depot, &block)
+          else
+            raise DepotError, "Depot is not enabled: #{options.depot}"
+          end
         else
           raise NotFoundError, "Could not find depot: #{options.depot}"
         end
