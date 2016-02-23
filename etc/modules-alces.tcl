@@ -317,3 +317,25 @@ proc ::depend {module {version ""} {specific ""}} {
         }
     }
 }
+
+proc ::assert_packages {} {
+    variable failed
+    if { [module-info mode load] } {
+	set y "[string map [list "/modules/[module-info name]" ""] $::ModulesCurrentModulefile]/depends/[string map {"/" "-"} [module-info name]].sh"
+	if { [file exists $y] } {
+	    if { [alces getenv cw_DEBUG 0] } {
+		puts stderr "Executing deps file: $y"
+	    }
+	    catch {exec >@stderr /bin/bash -x $y} msg
+	    set rc $::errorCode
+	    if { [alces getenv cw_DEBUG 0] } {
+		puts stderr "${msg}"
+	    }
+	    if { $rc != "NONE" } {
+		puts stderr "$failed: unable to load [module-info name]"
+		puts stderr "Installation of required distribution packages failed, please refer to: $y"
+		exit 1
+	    }
+	}
+    }
+}
