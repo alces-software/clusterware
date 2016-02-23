@@ -46,6 +46,10 @@ module Alces
           File.expand_path(File.join(depot_path(depot),'etc/modules'))
         end
 
+        def dependencies_dir(depot)
+          File.expand_path(File.join(depot_path(depot),'etc/depends'))
+        end
+
         def dbroot(depot)
           File.expand_path(File.join(depot_path(depot),'etc'))
         end

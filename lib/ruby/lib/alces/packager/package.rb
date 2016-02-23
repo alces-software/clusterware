@@ -41,6 +41,7 @@ module Alces
         def resolve(descriptor, compiler_tag = nil, all_depots = false)
           if all_depots
             Depot.each do |d|
+              next unless Depot.find(d).enabled?
               res = DataMapper.repository(d) do
                 resolve(descriptor, compiler_tag)
               end

@@ -24,6 +24,7 @@ if { [namespace exists alces] == 0 } {
 	}
 	proc ::alces {_ module} { return $module }
 	proc ::search {_ _ _} { }
+        proc ::assert_packages { }
     }
 }
 
@@ -80,6 +81,8 @@ set     appdir   <%= package_dir %>
 
 <%= dependency_descriptor %>
 module-whatis   "<%= whatis %>"
+
+assert_packages
 
 process {
   conflict compilers

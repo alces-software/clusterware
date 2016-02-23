@@ -169,7 +169,7 @@ EOF
       end
 
       def satisfy_dependencies
-        s = dependency_script
+        s = dependency_script(:build)
         unless s.nil?
           doing 'Dependencies'
           with_spinner do
@@ -190,6 +190,7 @@ EOF
         create_install_dir
         install_package
         install_modulefiles
+        write_dependencies
       end
 
       def compile
@@ -302,6 +303,20 @@ EOF
         say 'OK'.color(:green)
       end
 
+      def write_dependencies
+        if package.metadata[:dependencies]
+          doing 'Dependencies'
+          with_spinner do
+            s = dependency_script(:runtime)
+            if !s.nil?
+              mkdir_p(Config.dependencies_dir(opts[:depot]))
+              File.write(dependency_file, s)
+            end
+          end
+          say 'OK'.color(:green)
+        end
+      end
+      
       def install_modulefiles
         doing 'Module'
         with_spinner do
@@ -382,6 +397,7 @@ EOF
         elsif opts[:noninteractive] != :force
           files = [].tap do |a|
             a << dest_dir if File.directory?(dest_dir)
+            a << dependency_file if File.exists?(dependency_file)
             if m = ModuleTree.find(opts[:depot], modulefile_name)
               a << m 
             end
@@ -556,6 +572,8 @@ EOF
                      run(['unzip',package.file,'-d',build_dir])
                    else
                      tar_opts = case ext
+                                when '.xz'
+                                  'J'
                                 when '.bz2'
                                   'j'
                                 when '.gz', '.tgz'
@@ -633,13 +651,17 @@ EOF
         script(:prepare, 'Prepare', package.archive_dir)
       end
 
-      def dependency_script
+      def dependency_script(phase)
         if package.metadata[:dependencies]
           case ENV['cw_DIST']
           when /^el/
-            generate_dependency_script('el', 'rpm -q %s', 'yum install -y %s')
+            generate_dependency_script(phase, 'el', 'rpm -q %s',
+                                       'yum install -y --quiet %s',
+                                       'yum info %s >/dev/null 2>/dev/null')
           when /^ubuntu/
-            generate_dependency_script('ubuntu', 'dpkg -l %s', 'apt-get install -y %s')
+            generate_dependency_script(phase, 'ubuntu', 'dpkg -l %s',
+                                       'apt-get -qq install -y %s',
+                                       'apt-cache show %s >/dev/null 2>/dev/null')
           end
         end
       end
@@ -665,15 +687,44 @@ EOF
       end
 
       private
-      def generate_dependency_script(stem, check_cmd, install_cmd)
-        deps = [*package.metadata[:dependencies][stem]] +
-               [*package.metadata[:dependencies][ENV['cw_DIST']]]
+      def generate_dependency_script(phase, stem, check_cmd, install_cmd, available_cmd)
+        deps_hashes = [].tap do |a|
+          if package.metadata[:dependencies][phase]
+            a << package.metadata[:dependencies][phase]
+            if phase == :build && package.metadata[:dependencies].key?(:runtime)
+              a << package.metadata[:dependencies][:runtime]
+            end
+          else
+            a << package.metadata[:dependencies]
+          end
+        end
+        deps = deps_hashes.map do |deps_hash|
+          [*deps_hash[stem]] + [*deps_hash[ENV['cw_DIST']]]
+        end.flatten
         unless deps.empty?
           s = %(deps=()\n)
           deps.each do |dep|
-            s << %(if ! #{sprintf(check_cmd,dep)}; then\n  deps+=(#{dep})\nfi\n)
+            s << %(if ! #{sprintf(check_cmd,dep)} >/dev/null; then\n  deps+=(#{dep})\nfi\n)
           end
-          s << %(if [ "${#deps}" -gt 0 ]; then #{sprintf(install_cmd,'"${deps[@]}"')}; fi)
+          s << %(
+if [ "${#deps[@]}" -gt 0 ]; then
+  n=0
+  for a in "${deps[@]}"; do
+    n=$(($n+1))
+    echo -n "Installing distro dependency ($n/${#deps[@]}): ${a} ..."
+    if #{sprintf(available_cmd,'"${a}"')}; then
+      if ! #{sprintf(install_cmd,'"${a}"')}; then
+        echo ' FAILED'
+        exit 1
+      else
+        echo ' OK'
+      fi
+    else
+      echo ' NOT FOUND'
+      exit 1
+    fi
+  done
+fi)
           s.tap { i("Dependencies script"){s} }
         end
       end
@@ -801,6 +852,11 @@ EOF
       end
       memoize :modulefile_name
 
+      def dependency_file
+        File.join(Config.dependencies_dir(opts[:depot]),"#{package_descriptor.join('-')}.sh")
+      end
+      memoize :dependency_file
+      
       def compiler
         # XXX - try deeper in the hash for version-specific options?
         package.metadata[:compilers][opts[:compiler].split('/').first]
@@ -844,13 +900,16 @@ EOF
         supplied = opts[:modules].split(/[ ,]+/)
         packages.each do |descriptor, p|
           if s = supplied_module(supplied, descriptor)
-            modules << [descriptor, Package.resolve(s, compiler_tag)]
+            modules << [descriptor, Package.resolve(s, compiler_tag, opts[:global])]
             supplied -= [s]
           else
             modules << [descriptor, p]
           end
         end
-        overridden = supplied.map{|r| [r, Package.resolve(r,compiler_tag)]} + modules
+        overridden = supplied.map{|r| [r, Package.resolve(r,compiler_tag,opts[:global])]} + modules
+        unless (missing = missing_requirements(overridden)).empty?
+          raise NotFoundError, "Unable to satisfy specified module requirements: #{missing.join(', ')}"
+        end
         # Remove any remaining duplicates
         s = []
         overridden.map do |r, p|

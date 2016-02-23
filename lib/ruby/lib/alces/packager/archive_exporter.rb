@@ -71,23 +71,29 @@ module Alces
         dest_pkg_dir = File.join(dir, ENV['cw_DIST'], 'pkg', 'compilers', @name)
         dest_compiler_module_dir = File.join(dir, ENV['cw_DIST'], 'etc', 'modules', 'compilers', @name)
         dest_lib_module_dir = File.join(dir, ENV['cw_DIST'], 'etc', 'modules', 'libs', @name)
+        dest_depends_dir = File.join(dir, ENV['cw_DIST'], 'etc', 'depends')
         FileUtils.mkdir_p(dest_pkg_dir)
         FileUtils.mkdir_p(dest_compiler_module_dir)
         FileUtils.mkdir_p(dest_lib_module_dir)
+        FileUtils.mkdir_p(dest_depends_dir)
 
         title "Export"
 
         compiler_module_file = File.join(Config.modules_dir(depot), 'compilers', @name, version)
         lib_module_file = File.join(Config.modules_dir(depot), 'libs', @name, version)
         pkg_dir = File.join(package_dir, 'compilers', @name, version)
+        depends_file = File.join(Config.dependencies_dir(depot), "compilers-#{@name}-#{version}.sh")
         dest_compiler_module_file = File.join(dest_compiler_module_dir, version)
         dest_lib_module_file = File.join(dest_lib_module_dir, version)
-
+        
         doing "Prepare"
         with_spinner do
           FileUtils.cp_r(pkg_dir, dest_pkg_dir)
           FileUtils.cp_r(compiler_module_file, dest_compiler_module_dir)
           FileUtils.cp_r(lib_module_file, dest_lib_module_dir)
+          if File.exists?(depends_file)
+            FileUtils.cp_r(depends_file, dest_depends_dir)
+          end
         end
         say 'OK'.color(:green)
 
@@ -117,9 +123,11 @@ module Alces
       def export_package(h, dir)
         dest_pkg_dir = File.join(dir, ENV['cw_DIST'], 'pkg', normalized_package_path)
         dest_module_dir = File.join(dir, ENV['cw_DIST'], 'etc', 'modules', normalized_package_path)
+        dest_depends_dir = File.join(dir, ENV['cw_DIST'], 'etc', 'depends')
 
         FileUtils.mkdir_p(dest_pkg_dir)
         FileUtils.mkdir_p(dest_module_dir)
+        FileUtils.mkdir_p(dest_depends_dir)
 
         basename, variant = @name.split('_')
         md = Repository.map do |r|
@@ -133,6 +141,7 @@ module Alces
 
           fqpn = File.join(normalized_package_path, tag)
           module_file = File.join(Config.modules_dir(depot), fqpn)
+          depends_file = File.join(Config.dependencies_dir(depot), "#{[@type, @name, @version, tag].join('-')}.sh")
           pkg_dir = File.join(package_dir, fqpn)
           dest_module = File.join(dest_module_dir,tag)
 
@@ -140,6 +149,9 @@ module Alces
           with_spinner do
             FileUtils.cp_r(pkg_dir, dest_pkg_dir)
             FileUtils.cp_r(module_file, dest_module_dir)
+            if File.exists?(depends_file)
+              FileUtils.cp_r(depends_file, dest_depends_dir)
+            end
           end
           say 'OK'.color(:green)
 

@@ -121,12 +121,45 @@ module Alces
         cp("#{target}/metadata.yml", File.join(depot_install_path(metadata[:id]), 'metadata.yml'))
         ln_s(depot_install_path(metadata[:id]), depot_path(name))
         say 'OK'.color(:green)
+
+        if metadata[:install]
+          doing 'Install'
+          with_spinner do
+            script = ''.tap do |s|
+              case ENV['cw_DIST']
+              when /^el/
+                if metadata[:install]['el']
+                  s << metadata[:install]['el']
+                  s << "\n"
+                end
+              when /^ubuntu/
+                if metadata[:install]['ubuntu']
+                  s << metadata[:install]['ubuntu']
+                  s << "\n"
+                end
+              end
+              if metadata[:install][ENV['cw_DIST']]
+                s << metadata[:install][ENV['cw_DIST']]
+              end
+            end
+            unless script.empty?
+              i("Depot install script"){t}
+              with_temp_file(script) do |f|
+                run('/bin/bash',f) do |res|
+                  raise DepotError, "Failed to execute install script" unless res.success?
+                end
+              end
+            end
+          end
+          say 'OK'.color(:green)
+        end
+        
+        resolve_depends
         true
       end
 
       def enable
-        target = File.join(depot_path(name), '$cw_DIST', 'etc', 'modules')
-        if all_modulespaths.include?(target)
+        if enabled?
           say("#{"WARNING!".color(:yellow)} Depot already enabled: #{name}")
         else
           title "Enabling depot: #{name}"
@@ -140,8 +173,7 @@ module Alces
       end
 
       def disable
-        target = File.join(depot_path(name), '$cw_DIST', 'etc', 'modules')
-        if !all_modulespaths.include?(target)
+        if !enabled?
           say("#{"WARNING!".color(:yellow)} Depot already disabled: #{name}")
         else
           if Process.euid == 0 || user_modulespaths.include?(target)
@@ -156,7 +188,32 @@ module Alces
         end
       end
 
+      def enabled?
+        all_modulespaths.include?(target)
+      end 
+
+      def resolve_depends
+        depends_dir = Config.dependencies_dir(name)
+        title "Resolving depot dependencies: #{name}"
+        if File.directory?(depends_dir)
+          Dir.glob(File.join(depends_dir,'*.sh')).each do |f|
+            # the following name translation isn't flawless, but it'll do!
+            doing File.basename(f,'.sh').split('-',4).join('/')
+            with_spinner do
+              run('/bin/bash',f) do |r|
+                raise DepotError, "Unable to resolve dependencies." unless r.success?                
+              end
+            end
+            say 'OK'.color(:green)
+          end
+        end
+      end
+      
       private
+      def target
+        @target ||= File.join(depot_path(name), '$cw_DIST', 'etc', 'modules')
+      end
+
       def global_modulespaths
         f = File.join(ENV['cw_ROOT'], 'etc', 'modulespath')
         paths = File.exist?(f) ? File.read(f).split("\n") : []
