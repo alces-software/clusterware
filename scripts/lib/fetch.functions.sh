@@ -20,7 +20,15 @@
 # https://github.com/alces-software/clusterware
 #==============================================================================
 fetch_dist() {
-    local name=$1
+    local name src_name registry_name
+    name="$1"
+    # check registry for update
+    registry_name="cw_SERVICE_registry_${name//-/_}"
+    if [ "${!registry_name}" ]; then
+	src_name="${!registry_name}"
+    else
+	src_name="${name}"
+    fi
     # XXX - compare md5?
     if [ ! -f "${dep_src}/${name}.tar.gz" ]; then
 	if [ -z "${cw_BUILD_noninteractive}" ]; then
@@ -28,7 +36,7 @@ fetch_dist() {
 	else
 	    progress=""
 	fi
-        curl ${progress} -L ${dist_url}/${os}/${name}.tar.gz > "${dep_src}/${name}.tar.gz"
+        curl ${progress} -L ${dist_url}/${os}/${src_name}.tar.gz > "${dep_src}/${name}.tar.gz"
     else
         doing 'Detect'
         say_done $?

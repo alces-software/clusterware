@@ -22,6 +22,7 @@
 #==============================================================================
 source=$(cd "$(dirname "${BASH_SOURCE[0]}")"/.. && pwd)
 source $source/scripts/control.vars.sh
+source $source/scripts/registry.rc
 source $source/scripts/lib/ui.functions.sh
 source $source/scripts/lib/fetch.functions.sh
 source $source/scripts/lib/install.functions.sh
@@ -80,7 +81,9 @@ if [ ! -d "${target}/etc" ]; then
     sed -i -e "s/_OS_/${os}/g" "${target}/etc"/distro.*
     sed -i -e "s,_ROOT_,${target},g" "${target}/etc/ruby.rc" "${target}/etc/modulespath"
     if [ "$cw_BUILD_dist_url" ]; then
-        sed -e "s,^cw_DIST_URL=.*,cw_DIST_URL=${cw_BUILD_dist_url}/,g" -i "${target}/etc"/serviceware.rc
+        sed -e "s,^cw_SERVICE_url=.*,cw_SERVICE_url=${cw_BUILD_dist_url}/,g" -i "${target}/etc"/serviceware.rc
+    else
+	grep "^cw_SERVICE_registry" ${source}/scripts/registry.rc >> "${target}/etc"/serviceware.rc
     fi
     rm -f "${target}"/etc/handlers/.gitkeep
     rm -f "${target}"/etc/session/.gitkeep
