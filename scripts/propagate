@@ -47,7 +47,7 @@ if [ ! -f "${src_dir}"/scripts/control.vars.sh ]; then
     cleanup=true
     src_url_base="${cw_BUILD_source_url:-https://raw.githubusercontent.com/alces-software/clusterware}/${cw_BUILD_source_branch:-master}/scripts"
     mkdir -p "${src_dir}"/scripts/lib
-    for a in bootstrap-node bootstrap control.vars.sh lib/ui.functions.sh lib/fetch.functions.sh; do
+    for a in bootstrap-node bootstrap control.vars.sh registry.rc lib/ui.functions.sh lib/fetch.functions.sh; do
 	curl ${progress} -L "${src_url_base}"/${a} > "${src_dir}"/scripts/$a
     done
     source "${src_dir}"/scripts/control.vars.sh
@@ -61,6 +61,7 @@ fi
 
 source "${src_dir}"/scripts/lib/ui.functions.sh
 source "${src_dir}"/scripts/lib/fetch.functions.sh
+source "${src_dir}"/scripts/registry.rc
 
 cw_src_url_base="https://github.com/alces-software/clusterware/archive"
 cw_src_url_file="${cw_BUILD_source_branch:-master}.tar.gz"
