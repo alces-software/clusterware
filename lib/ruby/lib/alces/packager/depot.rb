@@ -27,7 +27,8 @@ module Alces
   module Packager
     class Depot
       include Alces::Tools::FileManagement
-
+      include Alces::Tools::Logging
+      
       class << self
         def hash_path_for(name)
           depot_path = File.join(Config.depotroot,name)
