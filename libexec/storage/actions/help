@@ -177,6 +177,9 @@ help_for_put() {
      current default (if present) will be used.  Change the default
      with "alces storage use".
 
+    -r, -R
+     Recursively put a local <source> directory to a remote <target>
+     directory.
 EOF
 }
 
@@ -199,6 +202,10 @@ help_for_get() {
      Use storage configuration with <name>.  If not specified, the
      current default (if present) will be used.  Change the default
      with "alces storage use".
+
+    -r, -R
+     Recursively get a remote <source> directory to a local <target>
+     directory.
 
     Refer to storage backend documentation for further
     backend-specific options.
@@ -223,6 +230,13 @@ help_for_rm() {
      current default (if present) will be used.  Change the default
      with "alces storage use".
 
+    -r, -R
+     Recursively remove a remote directory at <path>.  You will be
+     prompted before the command proceeds!
+
+    -f
+     Do not prompt when recursively removing a remote directory. PLEASE
+     EXERCISE CAUTION!
 EOF
 }
 
