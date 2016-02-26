@@ -59,8 +59,7 @@ action_emit() {
 action_warn() {
     local msg
     msg="$1"
-
-    echo "$cw_BINNAME: ${msg}" 1>&2
+    sed "s/^/$cw_BINNAME: /g" <<< "${msg}" 1>&2
 }
 
 action_die() {
