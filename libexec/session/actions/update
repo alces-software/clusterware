@@ -27,7 +27,7 @@ require ui
 require process
 
 main() {
-    local repo url
+    local repo url rev
     if [ "$1" ]; then
         repo="$1"
         url="$2"
@@ -35,6 +35,7 @@ main() {
         repo="${cw_SESSION_DEFAULT_REPO}"
         url="${cw_SESSION_DEFAULT_REPO_URL}"
     fi
+    rev="${cw_SESSION_rev}"
 
     if [ ! -d "${cw_SESSION_REPODIR}/${repo}" ]; then
         if [ -z "$url" ]; then
@@ -42,7 +43,11 @@ main() {
         fi
         echo "Initializing sessions: ${repo}"
         doing 'Clone'
-        git_clone "${url}" "${cw_SESSION_REPODIR}/${repo}"
+	if [ "${rev}" ]; then
+            git_clone_rev "${url}" "${cw_SESSION_REPODIR}/${repo}" "${rev}"
+	else
+            git_clone "${url}" "${cw_SESSION_REPODIR}/${repo}"
+	fi
         say_done $?
     else
         echo "Updating sessions: ${repo}"
