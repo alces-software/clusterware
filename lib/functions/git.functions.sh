@@ -36,3 +36,19 @@ git_clone() {
     mkdir -p "$(dirname ${clonedir})" && \
       "$GIT" clone "${repourl}" "${clonedir}" &>/dev/null
 }
+
+git_clone_rev() {
+    local repourl clonedir rev
+    repourl="$1"
+    clonedir="$2"
+    rev="$3"
+    git_clone "$repourl" "$clonedir"
+    (
+	cd "$clonedir"
+	if "$GIT" checkout "$rev"; then
+	    "$GIT" branch -d master
+	    "$GIT" checkout -b master
+	    "$GIT" branch --set-upstream-to=origin/master master
+	fi
+    ) &>/dev/null
+}

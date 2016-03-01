@@ -20,3 +20,7 @@
 # https://github.com/alces-software/clusterware
 #==============================================================================
 #cw_SERVICE_registry_git="git.20160229"
+cw_HANDLER_rev="ad3a2c51560932ec38dd154e56f43f97b9804507"
+cw_SESSION_rev="bb8313710ee7b0640c0b52241dab1d9fe575eb17"
+cw_SERVICE_rev="114798c69a0a561bf78560f2c7d78286acd81d73"
+cw_STORAGE_rev="2a6bc9b57b96a60b4256d28e9ec5212be9101314"
