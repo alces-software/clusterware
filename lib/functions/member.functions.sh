@@ -1,5 +1,5 @@
 #==============================================================================
-# Copyright (C) 2015 Stephen F. Norledge and Alces Software Ltd.
+# Copyright (C) 2015-2016 Stephen F. Norledge and Alces Software Ltd.
 #
 # This file/package is part of Alces Clusterware.
 #
@@ -86,4 +86,8 @@ member_count() {
 member_quorum() {
     . "${cw_ROOT}"/etc/config/cluster/cluster.vars.sh
     echo "${cw_CLUSTER_quorum}"
+}
+
+member_purge() {
+    rm -rf "${cw_MEMBER_DIR}"/*
 }
