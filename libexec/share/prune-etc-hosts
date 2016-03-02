@@ -1,0 +1,67 @@
+#!/bin/bash
+#==============================================================================
+# Copyright (C) 2016 Stephen F. Norledge and Alces Software Ltd.
+#
+# This file/package is part of Alces Clusterware.
+#
+# Alces Clusterware is free software: you can redistribute it and/or
+# modify it under the terms of the GNU Affero General Public License
+# as published by the Free Software Foundation, either version 3 of
+# the License, or (at your option) any later version.
+#
+# Alces Clusterware is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+# Affero General Public License for more details.
+#
+# You should have received a copy of the GNU Affero General Public License
+# along with this package.  If not, see <http://www.gnu.org/licenses/>.
+#
+# For more information on the Alces Clusterware, please visit:
+# https://github.com/alces-software/clusterware
+#==============================================================================
+main() {
+    local name domainname short_name ip tmpfile includes_fqdn
+    if [ "$1" == "--includes-fqdn" ]; then
+	includes_fqdn=true
+	shift
+    fi
+    
+    name="$1"
+    ip="$2"
+
+    if [ "$includes_fqdn" ]; then
+	short_name=$(echo ${name} | cut -f1 -d'.')
+    else
+	domainname="$(hostname -d)"
+	if [[ "${name}" != *"."* ]]; then
+	    # name is simply "<hostname>"
+	    short_name="${name}"
+	    name="${name}.${domainname}"
+	else
+	    if [[ "${name}" != *".${domainname}" ]]; then
+		# name is "<hostname>.<subdomain>"
+		name="$1.${domainname}"
+	    fi
+	    short_name=$(echo ${name} | cut -f1 -d'.')
+	fi
+    fi
+
+    tmpfile="$(mktemp /tmp/prune-etc-hosts.XXXXXXXX)"
+
+    if egrep -q "\s${name}( .*|$)" /etc/hosts; then
+	echo "Removing /etc/hosts entry for ${name}"
+	egrep -v "\s${name}( .*|$)" /etc/hosts > "${tmpfile}"
+        cat "${tmpfile}" > /etc/hosts
+    fi
+
+    if grep -q "^${ip} " /etc/hosts; then
+	echo "Removing /etc/hosts entry for ${ip}"
+	grep -v "^${ip} " > "${tmpfile}"
+	cat "${tmpfile}" > /etc/hosts
+    fi
+
+    rm -f "${tmpfile}"
+}
+
+main "$@"
