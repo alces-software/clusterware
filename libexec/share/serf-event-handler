@@ -42,6 +42,8 @@ main() {
         event="event-$SERF_USER_EVENT"
     elif [ "$SERF_EVENT" = "query" ]; then
         event="query-$SERF_QUERY_NAME"
+    elif [ "$SERF_EVENT" = "member-failed" ]; then
+	event=member-leave
     else
         event=$SERF_EVENT
     fi
