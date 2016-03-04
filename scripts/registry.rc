@@ -19,9 +19,9 @@
 # For more information on the Alces Clusterware, please visit:
 # https://github.com/alces-software/clusterware
 #==============================================================================
-cw_HANDLER_rev="HEAD"
-cw_SESSION_rev="HEAD"
-cw_SERVICE_rev="HEAD"
-cw_STORAGE_rev="HEAD"
+cw_HANDLER_rev="647d99681e34af9e058a9f95ba3c1458aa09855d"
+cw_SESSION_rev="3cf0e327ab7b5f7247c125710c5ec976fb7318a0"
+cw_SERVICE_rev="78da2f057f0eabd611ef7ddde3ab381710a762d7"
+cw_STORAGE_rev="a4aebf75106c597f13ed87ecdd64177d5725d622"
 cw_SERVICE_registry_galaxy="galaxy-20160301-cw1_3"
 cw_SERVICE_registry_s3cmd="s3cmd-20160302-cw1_3"
