@@ -22,6 +22,7 @@
 #==============================================================================
 source=$(cd "$(dirname "${BASH_SOURCE[0]}")"/.. && pwd)
 source $source/scripts/control.vars.sh
+source $source/scripts/registry.rc
 source $source/scripts/lib/ui.functions.sh
 source $source/scripts/lib/fetch.functions.sh
 source $source/scripts/lib/install.functions.sh
@@ -80,7 +81,9 @@ if [ ! -d "${target}/etc" ]; then
     sed -i -e "s/_OS_/${os}/g" "${target}/etc"/distro.*
     sed -i -e "s,_ROOT_,${target},g" "${target}/etc/ruby.rc" "${target}/etc/modulespath"
     if [ "$cw_BUILD_dist_url" ]; then
-        sed -e "s,^cw_DIST_URL=.*,cw_DIST_URL=${cw_BUILD_dist_url}/,g" -i "${target}/etc"/serviceware.rc
+        sed -e "s,^cw_SERVICE_url=.*,cw_SERVICE_url=${cw_BUILD_dist_url}/,g" -i "${target}/etc"/serviceware.rc
+    else
+	grep "^cw_SERVICE_registry" ${source}/scripts/registry.rc >> "${target}/etc"/serviceware.rc
     fi
     rm -f "${target}"/etc/handlers/.gitkeep
     rm -f "${target}"/etc/session/.gitkeep
@@ -177,6 +180,7 @@ else
         mkdir -p "${target}"/var/lib/handler/repos/base
         tar -C "${target}"/var/lib/handler/repos/base -xvzf "${source}"/clusterware-handlers.tar.gz &> "${dep_logs}/handler-init.log"
     else
+	export cw_HANDLER_rev
         "${target}/bin/alces" handler update &>> "${dep_logs}/handler-init.log"
     fi
 fi
@@ -191,6 +195,7 @@ else
         mkdir -p "${target}"/var/lib/sessions/repos/base
         tar -C "${target}"/var/lib/sessions/repos/base -xvzf "${source}"/clusterware-sessions.tar.gz &> "${dep_logs}/session-init.log"
     else
+	export cw_SESSION_rev
         "${target}/bin/alces" session update &> "${dep_logs}/session-init.log"
     fi
     "${target}/bin/alces" session enable default &>> "${dep_logs}/session-init.log"
@@ -206,6 +211,7 @@ else
         mkdir -p "${target}"/var/lib/services/repos/base
         tar -C "${target}"/var/lib/services/repos/base -xvzf "${source}"/clusterware-services.tar.gz &> "${dep_logs}/services-init.log"
     else
+	export cw_SERVICE_rev
         "${target}/bin/alces" service update &> "${dep_logs}/services-init.log"
     fi
 fi
@@ -220,6 +226,7 @@ else
         mkdir -p "${target}"/var/lib/storage/repos/base
         tar -C "${target}"/var/lib/storage/repos/base -xvzf "${source}"/clusterware-storage.tar.gz &> "${dep_logs}/services-init.log"
     else
+	export cw_STORAGE_rev
         "${target}/bin/alces" storage update &> "${dep_logs}/storage-init.log"
     fi
 fi

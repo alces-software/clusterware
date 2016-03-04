@@ -91,3 +91,21 @@ handler_tee() {
         done
     fi
 }
+
+handler_iptables_insert() {
+    if ! iptables -C "$@" &>/dev/null; then
+        log "Adding iptables rule: $*" "${cw_LOG_default_log}"
+        iptables -I "$@"
+    else
+        log "iptables rule already exists: $*" "${cw_LOG_default_log}"
+    fi
+}
+
+handler_iptables_delete() {
+    if iptables -C "$@" &>/dev/null; then
+        log "Removing iptables rule: $*" "${cw_LOG_default_log}"
+        iptables -D "$@"
+    else
+        log "iptables rule not present: $*" "${cw_LOG_default_log}"
+    fi
+}

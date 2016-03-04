@@ -144,7 +144,7 @@ module Alces
               end
             end
             unless script.empty?
-              i("Depot install script"){t}
+              i("Depot install script"){script}
               with_temp_file(script) do |f|
                 run('/bin/bash',f) do |res|
                   raise DepotError, "Failed to execute install script" unless res.success?

@@ -4,4 +4,6 @@
 ## Copyright (c) 2015 Alces Software Ltd
 ##
 ################################################################################
-cw_DIST_URL=https://s3-eu-west-1.amazonaws.com/packages.alces-software.com/clusterware/dist
+cw_SERVICE_url=https://s3-eu-west-1.amazonaws.com/packages.alces-software.com/clusterware/dist
+# DEPRECATION: cw_DIST_URL will be removed in a future release
+cw_DIST_URL="${cw_SERVICE_url}"

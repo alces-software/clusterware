@@ -47,7 +47,7 @@ if [ ! -f "${src_dir}"/scripts/control.vars.sh ]; then
     cleanup=true
     src_url_base="${cw_BUILD_source_url:-https://raw.githubusercontent.com/alces-software/clusterware}/${cw_BUILD_source_branch:-master}/scripts"
     mkdir -p "${src_dir}"/scripts/lib
-    for a in bootstrap-node bootstrap control.vars.sh lib/ui.functions.sh lib/fetch.functions.sh; do
+    for a in bootstrap-node bootstrap control.vars.sh registry.rc lib/ui.functions.sh lib/fetch.functions.sh; do
 	curl ${progress} -L "${src_url_base}"/${a} > "${src_dir}"/scripts/$a
     done
     source "${src_dir}"/scripts/control.vars.sh
@@ -61,6 +61,7 @@ fi
 
 source "${src_dir}"/scripts/lib/ui.functions.sh
 source "${src_dir}"/scripts/lib/fetch.functions.sh
+source "${src_dir}"/scripts/registry.rc
 
 cw_src_url_base="https://github.com/alces-software/clusterware/archive"
 cw_src_url_file="${cw_BUILD_source_branch:-master}.tar.gz"
@@ -102,31 +103,40 @@ for os in $dists; do
     done
 done
 
+_export_repo() {
+    local name reponame rev
+    name="$1"
+    reponame="$2"
+    rev="$3"
+
+    doing "$name"
+    $GIT clone https://github.com/alces-software/${reponame}.git "${src_dir}"/tmp/repos/${reponame} &>/dev/null
+    if [ "$rev" ]; then
+	(
+	    cd "${src_dir}"/tmp/repos/${reponame}
+	    if "$GIT" checkout "$rev"; then
+		"$GIT" branch -d master
+		"$GIT" checkout -b master
+		"$GIT" branch --set-upstream-to=origin/master master
+	    fi
+	) &>/dev/null
+    fi
+
+    tar --warning=no-file-changed -C "${src_dir}"/tmp/repos/${reponame} -czf "${prop_dir}/${reponame}.tar.gz" . || true
+    say_done $?
+}
+
 title "Preparing public repository contents"
 if [ -d "${src_dir}/tmp/repos" ]; then
     rm -rf "${src_dir}/tmp/repos"
 fi
 mkdir -p "${src_dir}/tmp/repos"
-doing "Handlers"
-$GIT clone https://github.com/alces-software/clusterware-handlers.git "${src_dir}"/tmp/repos/clusterware-handlers &>/dev/null
-tar --warning=no-file-changed -C "${src_dir}"/tmp/repos/clusterware-handlers -czf "${prop_dir}/clusterware-handlers.tar.gz" . || true
-say_done $?
-doing "Gridware"
-$GIT clone https://github.com/alces-software/packager-base.git "${src_dir}"/tmp/repos/packager-base &>/dev/null
-tar --warning=no-file-changed -C "${src_dir}"/tmp/repos/packager-base -czf "${prop_dir}/packager-base.tar.gz" . || true
-say_done $?
-doing "Sessions"
-$GIT clone https://github.com/alces-software/clusterware-sessions.git "${src_dir}"/tmp/repos/clusterware-sessions &>/dev/null
-tar --warning=no-file-changed -C "${src_dir}"/tmp/repos/clusterware-sessions -czf "${prop_dir}/clusterware-sessions.tar.gz" . || true
-say_done $?
-doing "Services"
-$GIT clone https://github.com/alces-software/clusterware-services.git "${src_dir}"/tmp/repos/clusterware-services &>/dev/null
-tar --warning=no-file-changed -C "${src_dir}"/tmp/repos/clusterware-services -czf "${prop_dir}/clusterware-services.tar.gz" . || true
-say_done $?
-doing "Storage"
-$GIT clone https://github.com/alces-software/clusterware-storage.git "${src_dir}"/tmp/repos/clusterware-storage &>/dev/null
-tar --warning=no-file-changed -C "${src_dir}"/tmp/repos/clusterware-storage -czf "${prop_dir}/clusterware-storage.tar.gz" . || true
-say_done $?
+
+_export_repo "Handlers" "clusterware-handlers" "${cw_HANDLER_rev}"
+_export_repo "Sessions" "clusterware-sessions" "${cw_SESSION_rev}"
+_export_repo "Services" "clusterware-services" "${cw_SERVICE_rev}"
+_export_repo "Storage" "clusterware-storage" "${cw_STORAGE_rev}"
+_export_repo "Gridware" "packager-base" 
 
 title "Preparing bootstrap scripts"
 doing "Install"

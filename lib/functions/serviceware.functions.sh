@@ -21,6 +21,7 @@
 #==============================================================================
 require ruby
 require repo
+require distro
 
 cw_SERVICEWARE_REPODIR="${cw_ROOT}/var/lib/services/repos"
 cw_SERVICEWARE_PLUGINDIR="${cw_ROOT}/etc/services"
@@ -117,4 +118,17 @@ serviceware_list_components() {
         fi
     done
     echo "${components[@]}"
+}
+
+serviceware_add() {
+    . "${cw_ROOT}"/etc/serviceware.rc
+    local name registry_name src_name
+    name="$1"
+    registry_name="cw_SERVICE_registry_${name//-/_}"
+    if [ "${!registry_name}" ]; then
+	src_name="${!registry_name}"
+    else
+	src_name="${name}"
+    fi
+    curl -# -L "${cw_SERVICE_url}/${cw_DIST}"/${src_name}.tar.gz | tar -C "${cw_ROOT}" -xz
 }
