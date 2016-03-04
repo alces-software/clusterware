@@ -1,5 +1,5 @@
 #==============================================================================
-# Copyright (C) 2015 Stephen F. Norledge and Alces Software Ltd.
+# Copyright (C) 2015-2016 Stephen F. Norledge and Alces Software Ltd.
 #
 # This file/package is part of Alces Clusterware.
 #
@@ -32,4 +32,10 @@ ruby_bundle_exec() {
         cd "${cw_ROOT}"/lib/ruby
         ${cw_ROOT}/opt/ruby/bin/bundle exec "$@"
     )
+}
+
+ruby_exec() {
+    . "${cw_ROOT}"/etc/ruby.rc
+    export PATH LD_LIBRARY_PATH
+    ${cw_ROOT}/opt/ruby/bin/ruby "$@"
 }
