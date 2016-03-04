@@ -126,3 +126,19 @@ network_has_metadata_service() {
     tmout="${1:-5}"
     curl -f --connect-timeout $tmout http://169.254.169.254/ &>/dev/null
 }
+
+network_get_iface_network() {
+    local target_iface
+    target_iface="$1"
+
+    ip -o -4 route show dev ${target_iface} \
+        | head -n 1 \
+        | sed 's/\(\S*\).*/\1/g'
+}
+
+# Adapted from https://forums.gentoo.org/viewtopic-t-888736-start-0.html
+network_cidr_to_mask() {
+   set -- $(( 5 - ($1 / 8) )) 255 255 255 255 $(( (255 << (8 - ($1 % 8))) & 255 )) 0 0 0
+   [ $1 -gt 1 ] && shift $1 || shift
+   echo ${1-0}.${2-0}.${3-0}.${4-0}
+}
