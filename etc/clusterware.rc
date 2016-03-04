@@ -4,7 +4,7 @@
 ## Copyright (c) 2015-2016 Alces Software Ltd
 ##
 ################################################################################
-cw_RELEASE=2016.04
-cw_VERSION=1.3.0
-cw_CODENAME="Cool Cobra"
+cw_RELEASE=2016.05
+cw_VERSION=1.4.0-dev
+cw_CODENAME="Different Dugong"
 cw_STATUS=unconfigured
