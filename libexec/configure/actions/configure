@@ -1,0 +1,149 @@
+#!/bin/bash
+#==============================================================================
+# Copyright (C) 2016 Stephen F. Norledge and Alces Software Ltd.
+#
+# This file/package is part of Alces Clusterware.
+#
+# Alces Clusterware is free software: you can redistribute it and/or
+# modify it under the terms of the GNU Affero General Public License
+# as published by the Free Software Foundation, either version 3 of
+# the License, or (at your option) any later version.
+#
+# Alces Clusterware is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+# Affero General Public License for more details.
+#
+# You should have received a copy of the GNU Affero General Public License
+# along with this package.  If not, see <http://www.gnu.org/licenses/>.
+#
+# For more information on the Alces Clusterware, please visit:
+# https://github.com/alces-software/clusterware
+#==============================================================================
+require action
+require network
+require process
+
+_write_config() {
+    local name uuid token master_ip role tmp_file intf
+    name="$1"
+    uuid="$2"
+    token="$3"
+    master_ip="$4"
+    role="$5"
+    intf="$6"
+
+    tmp_file=$(mktemp /tmp/clusterware-configure.XXXXXXXX)
+
+    cat <<EOF > "${tmp_file}"
+cluster:
+  uuid: '${uuid}'
+  token: '${token}'
+  name: '${name}'
+  role: '${role}'
+EOF
+    if [ "$master_ip" ]; then
+	echo "  master: '${master_ip}'" >> "${tmp_file}"
+    fi
+    case $role in
+	master)
+	    cat <<EOF >> "${tmp_file}"
+  tags:
+    scheduler_roles: ':master:'
+    storage_roles: ':master:'
+EOF
+	;;
+	slave)
+	    cat <<EOF >> "${tmp_file}"
+  tags:
+    scheduler_roles: ':compute:'
+EOF
+	    ;;
+	*)
+	    action_die "unrecognised role: ${role}"
+	    ;;
+    esac
+
+    if [ "${intf}" ]; then
+	echo "  interface: ${intf}" >> "${tmp_file}"
+    fi
+
+    mv "${tmp_file}" "${cw_ROOT}"/etc/config.yml
+}
+
+main() {
+    if [ -f "${cw_ROOT}"/etc/config.yml ]; then
+	action_die "configuration already exists"
+    fi
+
+    default_name="mycluster"
+    echo -n "Cluster name [${default_name}]: "
+    read name
+    name="${cluster_name:-${default_name}}"
+
+    default_uuid="$(uuid -v4)"
+    while [ -z "$uuid" ]; do
+	echo -n "Cluster UUID [${default_uuid}]: "
+	read uuid
+	uuid="${uuid:-${default_uuid}}"
+	if ! echo "${uuid}" | egrep -q "^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$"; then
+	    echo "Invalid cluster UUID: ${uuid}"
+	    uuid=""
+	fi
+    done
+
+    default_token="$(dd if=/dev/urandom bs=48 count=1 2>/dev/null | base64 | cut -c1-20)"
+    while [ -z "$token" ]; do
+	echo -n "Cluster secret [${default_token}]: "
+	read token
+	token="${token:-${default_token}}"
+	if [ "$(echo "${token}" | wc -c)" -lt 20 ]; then
+	    echo "Invalid cluster secret: ${token}"
+	    token=""
+	fi
+    done
+
+    default_master_ip="none"
+    while [ -z "$master_ip" ]; do
+	echo -n "Master node IP address [<none>]: "
+	read master_ip
+	master_ip="${master_ip:-${default_master_ip}}"
+	if [[ ! "$master_ip" =~ ^((1?[0-9]{1,2}|2[0-4][0-9]|25[0-5])\.){3}(1?[0-9]{1,2}|2[0-4][0-9]|25[0-5])$ ]]; then
+	    if [ "$master_ip" != "none" ]; then
+		echo "Invalid master IP: ${master_ip}"
+		master_ip=""
+	    fi
+	fi
+    done
+
+    if [ "${master_ip}" == "none" ]; then
+	default_role="master"
+	default_intf="$(network_get_first_iface)"
+	master_ip=""
+    else
+	default_role="slave"
+	default_intf="$(network_get_route_iface "${master_ip}")"
+    fi
+
+    while [ -z "$role" ]; do
+	echo -n "Node role [${default_role}]: "
+	read role
+	role="${role:-${default_role}}"
+	if [[ ! "$role" =~ ^(master|slave) ]]; then
+	    echo "Invalid role: ${role}"
+	    role=""
+	fi
+    done
+
+    #echo -n "Cluster network interface [${default_intf}]: "
+    #read intf
+    #intf="${intf:-${default_intf}}"
+
+    _write_config "${name}" "${uuid}" "${token}" "${master_ip}" "${role}" "${intf}"
+
+    action_die "configuration written to ${cw_ROOT}/etc/config.yml" 0
+}
+
+process_reexec_sudo
+
+main "$@"
