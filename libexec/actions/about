@@ -4,7 +4,7 @@
 : VERSION: 1.0.0
 : '
 #==============================================================================
-# Copyright (C) 2015 Stephen F. Norledge and Alces Software Ltd.
+# Copyright (C) 2015-2016 Stephen F. Norledge and Alces Software Ltd.
 #
 # This file/package is part of Alces Clusterware.
 #
@@ -32,8 +32,8 @@ case $action in
     h|he|hel|help)
         exec /bin/bash $cw_ROOT/libexec/about/actions/help "$@"
         ;;
-    e|en|env|envi|envir|enviro|environ|environm|environme|environmen|environment)
-        exec /bin/bash $cw_ROOT/libexec/about/actions/environment "$@"
+    n|no|nod|node)
+        exec /bin/bash $cw_ROOT/libexec/about/actions/node "$@"
         ;;
     *)
         cat <<EOF
@@ -43,7 +43,7 @@ Information about your compute environment.
 Commands:
 EOF
 printf "  %-22s  %s\n" "$cw_BINNAME help" "More help about this command."
-printf "  %-22s  %s\n" "$cw_BINNAME environment" "Display information about the environment."
+printf "  %-22s  %s\n" "$cw_BINNAME node" "Display information about this node/instance."
 cat <<EOF
 
 Please report bugs to support@alces-software.com

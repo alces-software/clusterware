@@ -1,6 +1,6 @@
 #!/bin/bash
 #==============================================================================
-# Copyright (C) 2015 Stephen F. Norledge and Alces Software Ltd.
+# Copyright (C) 2015-2016 Stephen F. Norledge and Alces Software Ltd.
 #
 # This file/package is part of Alces Clusterware.
 #
@@ -27,7 +27,7 @@ main() {
     shift
 
     case $action in
-        help|environment)
+        help|node)
             help_for_${action}
             ;;
         ?*)
@@ -41,15 +41,16 @@ main() {
     esac
 }
 
-help_for_environment() {
+help_for_node() {
     cat <<EOF
   SYNOPSIS:
 
-    alces about environment
+    alces about node
 
   DESCRIPTION:
 
-    Display information about your compute environment.
+    Display information about the networking and software
+    configuration of this node/instance.
 
 EOF
 }
@@ -78,13 +79,13 @@ general_help() {
 
   DESCRIPTION:
 
-    Information about your compute environment.
+    Information about the Clusterware configuration of this system.
 
   COMMANDS:
 
 EOF
 printf "    %-22s  %s\n" "$binname help" "More help about this command."
-printf "    %-22s  %s\n" "$binname environment" "Display information about the environment."
+printf "    %-22s  %s\n" "$binname node" "Display information about this node/instance."
 cat <<EOF
 
 Please report bugs to support@alces-software.com
