@@ -91,3 +91,17 @@ member_quorum() {
 member_purge() {
     rm -rf "${cw_MEMBER_DIR}"/*
 }
+
+member_each() {
+    local callback args base_args member
+    callback="$1"
+    shift
+    base_args=("$@" --)
+    for member in "${cw_MEMBER_DIR}"/*; do
+	args=("${base_args[@]}")
+	args+=($(basename "$member"))
+	. $member
+	args+=("${cw_MEMBER_ip}" "${cw_MEMBER_role}" "${cw_MEMBER_tags}")
+        ${callback} "${args[@]}"
+    done
+}
