@@ -144,6 +144,6 @@ main() {
     action_die "configuration written to ${cw_ROOT}/etc/config.yml" 0
 }
 
-process_reexec_sudo
+process_reexec_sudo "$@"
 
 main "$@"
