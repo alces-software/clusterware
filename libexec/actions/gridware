@@ -40,6 +40,8 @@ if Process.euid != 0
   end
 end
 
+File.umask(0002)
+
 if ARGV[0] == 'init'
   ARGV.shift
   Kernel.exec "#{ENV['cw_ROOT']}/libexec/gridware/init", *ARGV
