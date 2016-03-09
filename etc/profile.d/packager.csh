@@ -44,6 +44,7 @@ if (! $?MODULEPATH ) then
       set usermodulepath = `sed -n 's/[     #].*$//; /./H; $ { x; s/^\n//; s/\n/:/g; p; }' "$HOME/.modulespath"`
       setenv MODULEPATH "$usermodulepath":"$MODULEPATH"
     endif
+    setenv MODULEPATH `eval echo $MODULEPATH`
 endif
 
 if (! $?LOADEDMODULES ) then
