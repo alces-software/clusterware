@@ -37,11 +37,11 @@ setup() {
 }
 
 main() {
-    local event
     if [ "$1" == "--local" ]; then
-	handler_run_hook "$2" "$@"
+	shift
+	handler_run_hook "$@"
     else
-	handler_broadcast "$1" "$@"
+	handler_broadcast "$@"
     fi
 }
 
