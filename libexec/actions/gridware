@@ -50,6 +50,10 @@ else
     v = `source #{ENV['cw_ROOT']}/etc/gridware.rc 2> /dev/null && echo ${cw_GRIDWARE_root}`.chomp
     ENV['cw_GRIDWARE_root'] = v unless v.empty?
   end
+  unless ENV['cw_GRIDWARE_notify']
+    v = `source #{ENV['cw_ROOT']}/etc/gridware.rc 2> /dev/null && echo ${cw_GRIDWARE_notify}`.chomp
+    ENV['cw_GRIDWARE_notify'] = v unless v.empty?
+  end
 
   if ! File.exist?("#{ENV['cw_GRIDWARE_root']}/etc/gridware.yml") &&
      ! File.exist?("#{ENV['cw_ROOT']}/etc/gridware.yml")
