@@ -2,7 +2,7 @@
 
 ## DESCRIPTION
 
-Welcome to your Linux HPC environment!
+Welcome to your Alces Flight Compute environment!
 
 With your user account on the compute environment you can run
 applications, work with files stored within the filesystems of the
@@ -15,13 +15,12 @@ An HPC environment is made up of a number of different machines which
 are typically used for different purposes. Although these can vary,
 most systems have the following types of resources:
 
-  * One or more interactive nodes to provide access to users
   * Compute nodes used for running applications
   * One or more management nodes used to provide services within the
-    compute environment
+    compute environment, as well as providing access to users
 
-As a user, you will normally access the compute environment from an
-interactive node - these may be referred to as login or visualisation
+As a user, you will normally access the compute environment from a
+management node - these may be referred to as login or visualisation
 nodes. Access to the compute nodes is usually controlled by the HPC
 job scheduler, allowing your administrator to control how, when and by
 whom the compute nodes are used. Unless instructed otherwise, you
@@ -53,11 +52,12 @@ environment, please see the "How to run jobs" guide
 
 ## MANAGING DATA
 
-Your compute environment has a number of different areas that can be
-used to store files, each with different performance, capacity, access
-and data rentention characteristics. By choosing the right area to
-store your files, you can ensure that your jobs will perform best, and
-that your data will be protected from automatic deletion.
+Compute environments are typically configured with a number of different 
+areas that can be used to store files - each with different performance,
+capacity, access and data retention characteristics. 
+By choosing the right area to store your files, you can ensure that your
+jobs will perform best, and that your data will be protected from
+automatic deletion.
 
 Common data storage areas for HPC environments include:
 
@@ -99,6 +99,11 @@ Common data storage areas for HPC environments include:
 When you log in to the compute environment for the first time, the
 system may automatically generate links in your home directory to the
 different storage areas available on your machine.
+
+The `alces storage` utility can also assist you in the management and
+usage of the different storage areas including file and object 
+storage types. For more information on the usage of the `alces storage`
+utility - please [refer to the documentation](http://alces-flight-appliance-docs.readthedocs.org/en/latest/clusterware-storage/alces-storage-overview.html#alces-storage-overview)
 
 ## SEE ALSO
 
