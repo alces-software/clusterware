@@ -3,7 +3,7 @@
 All notable changes to this project will be documented in this file.
 This project adheres to [Semantic Versioning](http://semver.org/).
 
-## [Unreleased], 1.4.0
+## [1.4.0] - 2016-03-15
 
 ### Added
 - Handler for firewall configuration on `member-leave`, `member-join` events (clusterware-handlers#17)
@@ -75,7 +75,7 @@ This project adheres to [Semantic Versioning](http://semver.org/).
 
 - Initial release
 
-[Unreleased]: https://github.com/alces-software/clusterware/compare/1.3.0...develop
+[1.4.0]: https://github.com/alces-software/clusterware/compare/1.3.0...1.4.0
 [Core 1.4.0]: https://github.com/alces-software/clusterware/issues?q=milestone%3A1.4.0
 [Handlers 1.4.0]: https://github.com/alces-software/clusterware-handlers/issues?q=milestone%3A1.4.0
 [Services 1.4.0]: https://github.com/alces-software/clusterware-services/issues?q=milestone%3A1.4.0

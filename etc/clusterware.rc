@@ -5,6 +5,6 @@
 ##
 ################################################################################
 cw_RELEASE=2016.05
-cw_VERSION=1.4.0-dev
+cw_VERSION=1.4.0
 cw_CODENAME="Different Dugong"
 cw_STATUS=unconfigured
