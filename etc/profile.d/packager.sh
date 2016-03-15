@@ -1,23 +1,23 @@
 ################################################################################
 ##
 ## Alces Clusterware - Shell configuration
-## Copyright (c) 2008-2015 Alces Software Ltd
+## Copyright (c) 2008-2016 Alces Software Ltd
 ##
 ################################################################################
 for a in modules modulerc; do
     if [ ! -f "$HOME/.$a" ]; then
-        cp /opt/clusterware/etc/skel/$a "$HOME/.$a"
+        cp "$(_cw_root)"/etc/skel/$a "$HOME/.$a"
     fi
 done
 
-if [ -d "/opt/clusterware/opt/Modules" ]; then
+if [ -d "$(_cw_root)"/opt/Modules ]; then
     module() { alces module "$@" ; }
     if [ "$ZSH_VERSION" ]; then
         export module
     else
         export -f module
     fi
-    MODULEPATH=`sed -n 's/[      #].*$//; /./H; $ { x; s/^\n//; s/\n/:/g; p; }' /opt/clusterware/etc/modulespath`
+    MODULEPATH=`sed -n 's/[      #].*$//; /./H; $ { x; s/^\n//; s/\n/:/g; p; }' "$(_cw_root)"/etc/modulespath`
     if [ -f "$HOME/.modulespath" ]; then
         MODULEPATH=`sed -n 's/[     #].*$//; /./H; $ { x; s/^\n//; s/\n/:/g; p; }' "$HOME/.modulespath"`:$MODULEPATH
     fi
@@ -61,7 +61,7 @@ if [ "$BASH_VERSION" ]; then
 # Bash commandline completion (bash 3.0 and above) for Modules 3.2.9
 #
     _module_avail() {
-        "/opt/clusterware/opt/Modules/bin/modulecmd" bash -t avail 2>&1 | sed '
+        "$(_cw_root)"/opt/Modules/bin/modulecmd bash -t avail 2>&1 | sed '
                 /:$/d;
                 /:ERROR:/d;
                 s#^\(.*\)/\(.\+\)(default)#\1\n\1\/\2#;
@@ -70,7 +70,7 @@ if [ "$BASH_VERSION" ]; then
     }
 
     _module_avail_specific() {
-        "/opt/clusterware/opt/Modules/bin/modulecmd" bash -t avail 2>&1 | sed '
+        "$(_cw_root)"/opt/Modules/bin/modulecmd bash -t avail 2>&1 | sed '
                 /:$/d;
                 /:ERROR:/d;
                 s#^\(.*\)/\(.\+\)(default)#\1\/\2#;
@@ -143,7 +143,7 @@ fi;;
     }
 
     _alces_gridware_list() {
-        "/opt/clusterware/bin/alces" gridware list 2>&1 | sed '
+        "$(_cw_root)"/bin/alces gridware list 2>&1 | sed '
                 s#^\(.*\)/\(.\+\)(default)#\1\n\1\/\2#;
                 s#/*$##g;'
     }

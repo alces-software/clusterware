@@ -1,10 +1,6 @@
-: '
-: NAME: about
-: SYNOPSIS: Information about your compute environment
-: VERSION: 1.0.0
-: '
+#!/bin/bash
 #==============================================================================
-# Copyright (C) 2015-2016 Stephen F. Norledge and Alces Software Ltd.
+# Copyright (C) 2016 Stephen F. Norledge and Alces Software Ltd.
 #
 # This file/package is part of Alces Clusterware.
 #
@@ -24,29 +20,35 @@
 # For more information on the Alces Clusterware, please visit:
 # https://github.com/alces-software/clusterware
 #==============================================================================
-action=$1
-shift
-cw_BINNAME="${cw_BINNAME} $(basename "$0")"
+setup() {
+    local a xdg_config
+    IFS=: read -a xdg_config <<< "${XDG_CONFIG_HOME:-$HOME/.config}:${XDG_CONFIG_DIRS:-/etc/xdg}"
+    for a in "${xdg_config[@]}"; do
+        if [ -e "${a}"/clusterware/config.vars.sh ]; then
+            source "${a}"/clusterware/config.vars.sh
+            break
+        fi
+    done
+    if [ -z "${cw_ROOT}" ]; then
+        echo "$0: unable to locate clusterware configuration"
+        exit 1
+    fi
+    kernel_load
+}
 
-case $action in
-    h|he|hel|help)
-        exec /bin/bash $cw_ROOT/libexec/about/actions/help "$@"
-        ;;
-    n|no|nod|node)
-        exec /bin/bash $cw_ROOT/libexec/about/actions/node "$@"
-        ;;
-    *)
-        cat <<EOF
-Usage: $cw_BINNAME COMMAND [[OPTION]... [ARGS]]
-Information about your compute environment.
+main() {
+    if [ "$1" == "--local" ]; then
+	shift
+	handler_run_hook "$@"
+    else
+	handler_broadcast "$@"
+    fi
+}
 
-Commands:
-EOF
-printf "  %-22s  %s\n" "$cw_BINNAME help" "More help about this command."
-printf "  %-22s  %s\n" "$cw_BINNAME node" "Display information about this node/instance."
-cat <<EOF
+setup
+require handler
+require process
 
-Please report bugs to support@alces-software.com
-Alces Software home page: <http://alces-software.com/>
-EOF
-esac
+process_reexec_sudo "$@"
+
+main "$@"

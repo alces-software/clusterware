@@ -1,10 +1,9 @@
 ################################################################################
 ##
 ## Alces Clusterware - Shell configuration
-## Copyright (c) 2015-2016 Alces Software Ltd
+## Copyright (c) 2016 Alces Software Ltd
 ##
 ################################################################################
-cw_RELEASE=2016.05
-cw_VERSION=1.4.0
-cw_CODENAME="Different Dugong"
-cw_STATUS=unconfigured
+if ( -x "$cw_ROOT/libexec/share/setup-sshkey" ) then
+    $cw_ROOT/libexec/share/setup-sshkey
+endif

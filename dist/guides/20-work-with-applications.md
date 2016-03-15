@@ -4,10 +4,14 @@
 
 Applications are installed in a central location within the compute
 environment and are available on all compute nodes. This guide
-explains how to access the applications and the use of the utilities
-provided for doing so.
+explains how to install and access applications, as well as the use
+ of the utilities provided for doing so.
 
 ## OVERVIEW
+
+Through the Alces Gridware utility - applications, compilers
+and accelerated libraries are easily installed and made
+available to your environment for usage with your jobs.
 
 To make application loading as straightforward as possible, whilst
 also allowing installation of multiple versions and compilations of
@@ -15,15 +19,36 @@ the same application, the system makes use of *environment
 modules* (<http://modules.sourceforge.net/>) operated via the `module`
 command.
 
-New applications can be requested and installed within the compute
-environment by speaking to your site administrator.
-
 Most applications are command-line based and so can be run in an
 interactive terminal or script &mdash; see the "How to run jobs" guide
 ([run-jobs](run-jobs)). Some applications require an X Window System
 and must be executed run within a graphical session under qrsh &mdash;
 see the "How to run graphical jobs" guide
 ([run-graphical-jobs](run-graphical-jobs)).
+
+## ALCES GRIDWARE UTILITY
+
+The `alces gridware` utility provides a simple interface for installing
+applications, compilers and accelerated libraries to your environment. 
+Only privileged users of an environment are granted access to the Gridware
+utility.
+
+To view all of the available Gridware packages: 
+
+    alces gridware list
+
+To search for specific Gridware packages by name: 
+
+    alces gridware search --name python
+    base/apps/ipython/2.3.0   base/apps/python/2.7.3    base/apps/python/2.7.5
+    base/apps/python/2.7.8    base/apps/python3/3.2.3   base/apps/python3/3.3.3
+    base/apps/python3/3.4.0   base/apps/python3/3.4.3   base/libs/biopython/1.61
+    base/libs/biopython/1.63
+
+To install an application to your environment, making it 
+immediately available for use via the `module` command:
+
+    alces gridware install apps/memtester/4.3.0
 
 ## THE MODULE COMMAND
 
@@ -155,6 +180,8 @@ loaded, use the `module show` command, e.g.:
 
 For more information regarding environment modules please refer to the
 *environment modules website* (<http://modules.sourceforge.net/>).
+
+For more information on some of the additional application features, please see the [Gridware documentation](http://alces-flight-appliance-docs.readthedocs.org/en/latest/getting-started/environment-usage/environment_usage.html#additional-application-features)
 
 ## SEE ALSO
 

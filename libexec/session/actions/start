@@ -71,7 +71,7 @@ _start_websocket() {
     websockify_log="$_SESSIONDIR/websockify.log"
     files_mark_tempfile "$websockify_log"
 
-    $_WEBSOCKIFY $host:$port localhost:$vncport > "${websockify_log}" 2>&1 &
+    $_WEBSOCKIFY $port localhost:$vncport > "${websockify_log}" 2>&1 &
     service_add 'websockify' $!
 }
 

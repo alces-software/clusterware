@@ -156,6 +156,7 @@ module Alces
         end
         
         resolve_depends
+        notify_depot(name,'disabled')
         true
       end
 
@@ -171,6 +172,7 @@ module Alces
           puts "module use #{depot_path(name)}/$cw_DIST/etc/modules"
           say 'OK'.color(:green)
         end
+        notify_depot(name,'enabled')
       end
 
       def disable
@@ -187,6 +189,7 @@ module Alces
             raise InvalidSelectionError, "Unable to disable repository in global configuration."
           end
         end
+        notify_depot(name,'disabled')
       end
 
       def enabled?
@@ -211,6 +214,21 @@ module Alces
       end
       
       private
+      def notify_depot(name, state)
+        if ENV['cw_GRIDWARE_notify'] == 'true'
+          id = File.basename(File.readlink(depot_path(name)))
+          run(File.join(ENV['cw_ROOT'],'libexec','share','trigger-event'),
+              '--local','nfs-export',depot_install_path(id)) do |r|
+            raise DepotError, "Unable to trigger depot event." unless r.success?
+          end
+          run(File.join(ENV['cw_ROOT'],'libexec','share','trigger-event'),
+              'gridware-depots',
+              "#{id}:#{name}:#{state}") do |r|
+            raise DepotError, "Unable to trigger depot event." unless r.success?
+          end
+        end
+      end
+
       def target
         @target ||= File.join(depot_path(name), '$cw_DIST', 'etc', 'modules')
       end

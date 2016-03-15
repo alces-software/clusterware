@@ -34,7 +34,7 @@ process_wait_for_pid() {
 process_reexec_sudo() {
     local cmd
     if [ "$UID" != "0" ]; then
-        cmd="$(declare -f require); export -f require; exec /bin/bash \"\$0\" \"$@\""
+        cmd="$(declare -f require); export -f require; exec /bin/bash \"\$0\" \"\$@\""
         cw_BINNAME="${cw_BINNAME% *}"
         exec sudo -E /bin/bash -c "${cmd}" "$0" "$@"
     fi
@@ -44,7 +44,7 @@ process_reexec_su() {
     local uname cmd
     uname="$1"
     if [ "$UID" != "$(id -u ${uname})" ]; then
-        cmd="$(declare -f require); export -f require; exec /bin/bash \"\$0\" \"$@\""
+        cmd="$(declare -f require); export -f require; exec /bin/bash \"\$0\" \"\$@\""
         cw_BINNAME="${cw_BINNAME% *}"
         exec sudo -u ${uname} -E /bin/bash -c "${cmd}" "$0" "$@"
     fi
