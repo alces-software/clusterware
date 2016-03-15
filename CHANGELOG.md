@@ -10,21 +10,25 @@ This project adheres to [Semantic Versioning](http://semver.org/).
 - Support for Flight Access appliance
 - Tool for manually initiating Clusterware configuration (#61)
 - Increase coverage/utility of tab-completion under `bash` (#56)
-- Add locking when nodes are being added/removed from SGE configuration (alces-software/clusterware-handlers#18)
-- Deferred configuration of Gridware tree (alces-software/clusterware-handlers#16)
-- Send additional messages to Alces Flight service to improve orchestration feedback (alces-software/clusterware-handlers#15)
-- Inform/reconfigure slave nodes when a Gridware depot is fetched/enabled/disabled on a Gridware master node (alces-software/clusterware-handlers#14)
+- Add locking when nodes are being added/removed from SGE configuration (clusterware-handlers#18)
+- Deferred configuration of Gridware tree (clusterware-handlers#16)
+- Send additional messages to Alces Flight service to improve orchestration feedback (clusterware-handlers#15)
+- Inform/reconfigure slave nodes when a Gridware depot is fetched/enabled/disabled on a Gridware master node (clusterware-handlers#14)
 
 ### Changed
 - `alces about environment` command renamed to `alces about node` (#64)
-- Improve SGE templates and howto guides (alces-software/clusterware-services#14)
+- Improve SGE templates and howto guides (clusterware-services#14)
 
 ### Fixed
 - Support cluster SSH key generation under `tcsh` (#69)
 - Initialize `MODULEPATH` correctly under `tcsh` (#67)
 - Correct permissions on Gridware directories (#66)
-- Correct regex that was preventing nodes from being added to `genders` file (alces-software/clusterware-handlers#18)
-- Patch `s3cmd` so DNS style bucket names work reliably over SSL (alces-software/clusterware-storage#3)
+- Correct regex that was preventing nodes from being added to `genders` file (clusterware-handlers#18)
+- Patch `s3cmd` so DNS style bucket names work reliably over SSL (clusterware-storage#3)
+
+#### Issues/PRs
+
+[Core 1.4.0](https://github.com/alces-software/clusterware/milestones/1.4.0), [Handlers 1.4.0](https://github.com/alces-software/clusterware-handlers/milestones/1.4.0), [Services 1.4.0](https://github.com/alces-software/clusterware-services/milestones/1.4.0), [Storage 1.4.0](https://github.com/alces-software/clusterware-storage/milestones/1.4.0), [Sessions 1.4.0](https://github.com/alces-software/clusterware-sessions/milestones/1.4.0)
 
 ## [1.3.0] - 2016-03-04
 
@@ -33,21 +37,25 @@ This project adheres to [Semantic Versioning](http://semver.org/).
 - Clean up when hosts leaving the cluster service ring (#58)
 - Allow Serviceware to be pinned to specific versions (#57)
 - Recursive get/put for `alces storage` utility (#55)
-- Galaxy FTP support PASV mode when running on NAT-ed instance (alces-software/clusterware-services#9)
-- OpenVPN Serviceware pack and Clusterware handlers (alces-software/clusterware-services#8)
-- Automatically initialize Gridware tree when installing `cluster-gridware` handler (alces-software/clusterware-handlers#12)
-- Additional session types, including lighter weight sessions (alces-software/clusterware-sessions#2)
+- Galaxy FTP support PASV mode when running on NAT-ed instance (clusterware-services#9)
+- OpenVPN Serviceware pack and Clusterware handlers (clusterware-services#8)
+- Automatically initialize Gridware tree when installing `cluster-gridware` handler (clusterware-handlers#12)
+- Additional session types, including lighter weight sessions (clusterware-sessions#2)
 
 ### Changed
-- Update Galaxy Serviceware pack for EL6 (alces-software/clusterware-services#13)
-- Upgrade s3cmd to 1.6.1 release (alces-software/clusterware-services#12)
+- Update Galaxy Serviceware pack for EL6 (clusterware-services#13)
+- Upgrade s3cmd to 1.6.1 release (clusterware-services#12)
 
 ### Fixed
-- Galaxy compute instance failures (alces-software/clusterware-services#11)
+- Galaxy compute instance failures (clusterware-services#11)
   - Install Java on Galaxy compute instance
   - Relocate Pulsar working directory into shared data area 
-- Galaxy FTP access when configured for shared data (alces-software/clusterware-services#10)
-- Galaxy compute hosts added on each boot (alces-software/clusterware-handlers#13)
+- Galaxy FTP access when configured for shared data (clusterware-services#10)
+- Galaxy compute hosts added on each boot (clusterware-handlers#13)
+
+#### Issues/PRs
+
+[Core 1.3.0](https://github.com/alces-software/clusterware/milestones/1.3.0), [Handlers 1.3.0](https://github.com/alces-software/clusterware-handlers/milestones/1.3.0), [Services 1.3.0](https://github.com/alces-software/clusterware-services/milestones/1.3.0), [Storage 1.3.0](https://github.com/alces-software/clusterware-storage/milestones/1.3.0), [Sessions 1.3.0](https://github.com/alces-software/clusterware-sessions/milestones/1.3.0)
 
 ## [1.2.1] - 2016-02-25
 
@@ -71,3 +79,4 @@ This project adheres to [Semantic Versioning](http://semver.org/).
 [1.2.1]: https://github.com/alces-software/clusterware/compare/1.2.0...1.2.1
 [1.2.0]: https://github.com/alces-software/clusterware/compare/1.1.0...1.2.0
 [1.1.0]: https://github.com/alces-software/clusterware/compare/1.0.0...1.1.0
+[1.0.0]: https://github.com/alces-software/clusterware/compare/0.0.0...1.0.0
