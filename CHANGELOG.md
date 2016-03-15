@@ -6,6 +6,7 @@ This project adheres to [Semantic Versioning](http://semver.org/).
 ## [Unreleased], 1.4.0
 
 ### Added
+- Handler for firewall configuration on `member-leave`, `member-join` events (clusterware-handlers#17)
 - This CHANGELOG file! (#71)
 - Support for Flight Access appliance
 - Tool for manually initiating Clusterware configuration (#61)
