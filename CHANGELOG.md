@@ -3,7 +3,7 @@
 All notable changes to this project will be documented in this file.
 This project adheres to [Semantic Versioning](http://semver.org/).
 
-## [Unreleased]
+## [Unreleased] (1.4.0)
 
 ### Added
 - This CHANGELOG file! (#71)
@@ -28,7 +28,7 @@ This project adheres to [Semantic Versioning](http://semver.org/).
 
 #### Issues/PRs
 
-[Core 1.4.0](https://github.com/alces-software/clusterware/milestones/1.4.0), [Handlers 1.4.0](https://github.com/alces-software/clusterware-handlers/milestones/1.4.0), [Services 1.4.0](https://github.com/alces-software/clusterware-services/milestones/1.4.0), [Storage 1.4.0](https://github.com/alces-software/clusterware-storage/milestones/1.4.0), [Sessions 1.4.0](https://github.com/alces-software/clusterware-sessions/milestones/1.4.0)
+[Core 1.4.0], [Handlers 1.4.0], [Services 1.4.0], [Storage 1.4.0], [Sessions 1.4.0]
 
 ## [1.3.0] - 2016-03-04
 
@@ -55,7 +55,7 @@ This project adheres to [Semantic Versioning](http://semver.org/).
 
 #### Issues/PRs
 
-[Core 1.3.0](https://github.com/alces-software/clusterware/milestones/1.3.0), [Handlers 1.3.0](https://github.com/alces-software/clusterware-handlers/milestones/1.3.0), [Services 1.3.0](https://github.com/alces-software/clusterware-services/milestones/1.3.0), [Storage 1.3.0](https://github.com/alces-software/clusterware-storage/milestones/1.3.0), [Sessions 1.3.0](https://github.com/alces-software/clusterware-sessions/milestones/1.3.0)
+[Core 1.3.0], [Handlers 1.3.0], [Services 1.3.0], [Storage 1.3.0], [Sessions 1.3.0]
 
 ## [1.2.1] - 2016-02-25
 
@@ -75,7 +75,17 @@ This project adheres to [Semantic Versioning](http://semver.org/).
 - Initial release
 
 [Unreleased]: https://github.com/alces-software/clusterware/compare/1.3.0...develop
+[Core 1.4.0]: https://github.com/alces-software/clusterware/issues?q=milestone%3A1.4.0
+[Handlers 1.4.0]: https://github.com/alces-software/clusterware-handlers/issues?q=milestone%3A1.4.0
+[Services 1.4.0]: https://github.com/alces-software/clusterware-services/issues?q=milestone%3A1.4.0
+[Storage 1.4.0]: https://github.com/alces-software/clusterware-storage/issues?q=milestone%3A1.4.0
+[Sessions 1.4.0]: https://github.com/alces-software/clusterware-sessions/issues?q=milestone%3A1.4.0
 [1.3.0]: https://github.com/alces-software/clusterware/compare/1.2.0...1.3.0
+[Core 1.3.0]: https://github.com/alces-software/clusterware/issues?q=milestone%3A1.3.0
+[Handlers 1.3.0]: https://github.com/alces-software/clusterware-handlers/issues?q=milestone%3A1.3.0
+[Services 1.3.0]: https://github.com/alces-software/clusterware-services/issues?q=milestone%3A1.3.0
+[Storage 1.3.0]: https://github.com/alces-software/clusterware-storage/issues?q=milestone%3A1.3.0
+[Sessions 1.3.0]: https://github.com/alces-software/clusterware-sessions/issues?q=milestone%3A1.3.0
 [1.2.1]: https://github.com/alces-software/clusterware/compare/1.2.0...1.2.1
 [1.2.0]: https://github.com/alces-software/clusterware/compare/1.1.0...1.2.0
 [1.1.0]: https://github.com/alces-software/clusterware/compare/1.0.0...1.1.0
