@@ -93,6 +93,7 @@ if [ ! -d "${target}/etc" ]; then
     chmod 0600 "${target}"/etc/naming.rc
     sed -e "s,_SECRET_,${cw_BUILD_naming_auth},g" \
 	-i "${target}"/etc/naming.rc
+    cp -R "${source}/dist/distro/${os}" "${target}"/etc/distro
 fi
 mkdir -p /var/log/clusterware
 mkdir -p /var/cache/gridware/{archives,archives/depots,src} /var/log/gridware
