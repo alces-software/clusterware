@@ -1,5 +1,5 @@
 #==============================================================================
-# Copyright (C) 2015 Stephen F. Norledge and Alces Software Ltd.
+# Copyright (C) 2016 Stephen F. Norledge and Alces Software Ltd.
 #
 # This file/package is part of Alces Clusterware.
 #
@@ -19,8 +19,40 @@
 # For more information on the Alces Clusterware, please visit:
 # https://github.com/alces-software/clusterware
 #==============================================================================
-deps="git libyaml ruby bundler modules genders pdsh components tigervnc xwd serf pluginhook websockify jq jo"
-serviceware="gridscheduler aws s3cmd galaxy simp_le alces-storage-manager-daemon clusterware-dropbox-cli"
-dists="el6 el7"
-dist_url=${cw_BUILD_dist_url:-https://s3-eu-west-1.amazonaws.com/packages.alces-software.com/clusterware/dist}
-target=${cw_BUILD_target_dir:-/opt/clusterware}
+detect_jo() {
+    [ -d "${target}/opt/jo" ]
+}
+
+fetch_jo() {
+    title "Fetching jo"
+    if fetch_handling_is_source; then
+        fetch_source https://github.com/jpmens/jo/releases/download/v1.0/jo-1.0.tar.gz "jo-source.tar.gz"
+    else
+        fetch_dist jo
+    fi
+}
+
+install_jo() {
+    title "Installing jo"
+    if fetch_handling_is_source; then
+        doing 'Extract'
+        tar -C "${dep_build}" -xzf "${dep_src}/jo-source.tar.gz"
+        say_done $?
+
+        cd "${dep_build}"/jo-*
+
+        doing 'Configure'
+        ./configure --prefix="${target}/opt/jo" &> "${dep_logs}/jo-configure.log"
+        say_done $?
+
+        doing 'Compile'
+        make &> "${dep_logs}/jo-make.log"
+        say_done $?
+
+        doing 'Install'
+        make install &> "${dep_logs}/jo-install.log"
+        say_done $?
+    else
+        install_dist jo
+    fi
+}
