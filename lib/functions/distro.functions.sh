@@ -37,7 +37,7 @@ distro_start_service() {
     local service
     service="$1"
     if [ "${cw_DIST}" == "el7" ]; then
-        systemctl start ${service}
+        systemctl --no-block start ${service}
     elif [ "${cw_DIST}" == "el6" ]; then
         service ${service} start
     fi
@@ -47,7 +47,7 @@ distro_restart_service() {
     local service
     service="$1"
     if [ "${cw_DIST}" == "el7" ]; then
-        systemctl restart ${service}
+        systemctl --no-block restart ${service}
     elif [ "${cw_DIST}" == "el6" ]; then
         service ${service} restart
     fi

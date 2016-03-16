@@ -49,15 +49,15 @@ main() {
 
     tmpfile="$(mktemp /tmp/prune-etc-hosts.XXXXXXXX)"
 
-    if egrep -q "\s${name}( .*|$)" /etc/hosts; then
+    if egrep -q "\s\b${name}\b" /etc/hosts; then
 	echo "Removing /etc/hosts entry for ${name}"
-	egrep -v "\s${name}( .*|$)" /etc/hosts > "${tmpfile}"
+	egrep -v "\s\b${name}\b" /etc/hosts > "${tmpfile}"
         cat "${tmpfile}" > /etc/hosts
     fi
 
-    if grep -q "^${ip} " /etc/hosts; then
+    if grep -q "^${ip}\b" /etc/hosts; then
 	echo "Removing /etc/hosts entry for ${ip}"
-	grep -v "^${ip} " > "${tmpfile}"
+	grep -v "^${ip}\b" > "${tmpfile}"
 	cat "${tmpfile}" > /etc/hosts
     fi
 

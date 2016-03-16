@@ -37,6 +37,7 @@ setup() {
 }
 
 main() {
+    echo "$$" > /var/run/clusterware-configurator.pid
     files_load_config --optional configurator
     if [ "${cw_CONFIGURATOR_skip}" == true ]; then
 	action_die "skipping configurator execution" 0

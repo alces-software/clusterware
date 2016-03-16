@@ -29,17 +29,17 @@ main() {
 
     tmpfile="$(mktemp /tmp/update-etc-hosts.XXXXXXXX)"
 
-    if ! grep -q "${ip}.*${name}" /etc/hosts; then
+    if ! grep -q "^${ip}\b.*\b${name}\b" /etc/hosts; then
 	# no applicable entry yet.
-	if grep -q "${ip}" /etc/hosts; then
+	if grep -q "^${ip}\b" /etc/hosts; then
             # IP present, but not this name: sed
 	    echo "Adding to existing /etc/hosts entry for ${ip}: ${name} -> ${ip}"
-            sed -e "s/${ip} \(.*\)/${ip} ${name} ${short_name} \1/g" -i /etc/hosts
-	elif grep -q "${name}" /etc/hosts; then
+            sed -e "s/^${ip} \(.*\)/${ip} ${name} ${short_name} \1/g" -i /etc/hosts
+	elif grep -q "\s\b${name}\b" /etc/hosts; then
             # name present, but not this IP: sed out the existing name
 	    echo "Replacing existing /etc/hosts entry for ${name}: ${name} -> ${ip}"
-            sed -re "s/(.*)\s${name}( .*|$)/\1 \2/g" /etc/hosts | \
-		sed -re "s/(.*)\s${short_name}( .*|$)/\1 \2/g" | \
+            sed -re "s/^(.*)\s\b${name}\b(.*)/\1 \2/g" /etc/hosts | \
+		sed -re "s/^(.*)\s\b${short_name}\b(.*)/\1 \2/g" | \
 		egrep -v "^(\S+)\s*$" > "${tmpfile}"
             cat "${tmpfile}" > /etc/hosts
             echo "${ip} ${name} ${short_name}" >> /etc/hosts
