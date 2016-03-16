@@ -3,6 +3,15 @@
 All notable changes to this project will be documented in this file.
 This project adheres to [Semantic Versioning](http://semver.org/).
 
+## [1.4.1] - 2016-03-16
+
+### Added
+- If the configurator is no longer running after manual configuration, restart it. (#80)
+
+### Fixed
+- Correct additions to `/etc/hosts` if the IP address to add is a partial match with an existing IP address. (#81)
+- Use the cluster name specified for manual configuration. (#77)
+
 ## [1.4.0] - 2016-03-15
 
 ### Added
@@ -75,6 +84,7 @@ This project adheres to [Semantic Versioning](http://semver.org/).
 
 - Initial release
 
+[1.4.1]: https://github.com/alces-software/clusterware/compare/1.4.0...1.4.1
 [1.4.0]: https://github.com/alces-software/clusterware/compare/1.3.0...1.4.0
 [Core 1.4.0]: https://github.com/alces-software/clusterware/issues?q=milestone%3A1.4.0
 [Handlers 1.4.0]: https://github.com/alces-software/clusterware-handlers/issues?q=milestone%3A1.4.0
