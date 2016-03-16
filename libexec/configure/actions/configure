@@ -23,6 +23,7 @@
 require action
 require network
 require process
+require distro
 
 _write_config() {
     local name uuid token master_ip role tmp_file intf
@@ -69,6 +70,14 @@ EOF
     fi
 
     mv "${tmp_file}" "${cw_ROOT}"/etc/config.yml
+}
+
+_configurator_running() {
+    if [ -f /var/run/clusterware-configurator.pid ]; then
+	[ -d /proc/$(cat /var/run/clusterware-configurator.pid) ]
+    else
+	return 1
+    fi
 }
 
 main() {
@@ -140,6 +149,8 @@ main() {
     #intf="${intf:-${default_intf}}"
 
     _write_config "${name}" "${uuid}" "${token}" "${master_ip}" "${role}" "${intf}"
+
+    _configurator_running || distro_restart_service clusterware-configurator
 
     action_die "configuration written to ${cw_ROOT}/etc/config.yml" 0
 }
