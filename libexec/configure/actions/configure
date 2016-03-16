@@ -79,7 +79,7 @@ main() {
     default_name="mycluster"
     echo -n "Cluster name [${default_name}]: "
     read name
-    name="${cluster_name:-${default_name}}"
+    name="${name:-${default_name}}"
 
     default_uuid="$(uuid -v4)"
     while [ -z "$uuid" ]; do
