@@ -98,10 +98,49 @@ member_each() {
     shift
     base_args=("$@" --)
     for member in "${cw_MEMBER_DIR}"/*; do
-	args=("${base_args[@]}")
-	args+=($(basename "$member"))
-	. $member
-	args+=("${cw_MEMBER_ip}" "${cw_MEMBER_role}" "${cw_MEMBER_tags}")
+        args=("${base_args[@]}")
+        args+=($(basename "$member"))
+        . $member
+        args+=("${cw_MEMBER_ip}" "${cw_MEMBER_role}" "${cw_MEMBER_tags}")
         ${callback} "${args[@]}"
     done
+}
+
+member_load_vars() {
+    local member
+    member="$1"
+    . "${cw_MEMBER_DIR}/${member}"
+}
+
+member_ip() {
+    member_load_vars "$@"
+    echo "${cw_MEMBER_ip}"
+}
+
+member_tags() {
+    member_load_vars "$@"
+    echo "${cw_MEMBER_tags}"
+}
+
+member_find_tag() {
+    local needle haystack tags tag tuple key value
+    needle="$1"
+    haystack="$2"
+    IFS=',' read -a tags <<< "${haystack}"
+    for tag in "${tags[@]}"; do
+        IFS='=' read -a tuple <<< "${tag}"
+        key=${tuple[0]}
+        value=${tuple[1]}
+        if [ "$key" == "$needle" ]; then
+            echo "${value}"
+            break
+        fi
+    done
+}
+
+member_get_member_tag() {
+    local member needle tags tag tuple key value
+    member="$1"
+    needle="$2"
+    member_find_tag "${needle}" "$(member_tags ${member})"
 }
