@@ -149,7 +149,10 @@ module Alces
                 req if Package.resolve(req, tagging[:compiler_tag]).nil?
               end.compact
               if unresolved.any?
-                throw :done, [:unresolved, unresolved]
+                # XXX - attempt to resolve automatically here...
+                if true
+                  throw :done, [:unresolved, unresolved]
+                end
               end
 
               module_file = File.join(dir, ENV['cw_DIST'], 'etc', 'modules', package_path, tagging[:tag])
@@ -175,6 +178,7 @@ module Alces
               FileUtils.mkdir_p(dest_pkg_dir)
               FileUtils.mv(pkg_dir, dest_pkg_dir)
               if File.exists?(depends_file)
+                FileUtils.mkdir_p(dest_depends_dir)
                 FileUtils.mv(depends_file, dest_depends_dir)
               end
             end
