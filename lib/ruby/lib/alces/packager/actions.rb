@@ -973,7 +973,9 @@ end
 
       def handle_failure!(res, operation)
         msg = "Package #{operation} failed"
-        msg << "\n\n   Extract of #{operation} script error output:\n   > " << res.stderr.split("\n")[-10..-1].reject{|x| !opts[:verbose] && x[0] == '+'}.map(&:strip).join("\n   > ")
+        err_lines = res.stderr.split("\n")
+        max_lines = err_lines.length > 10 ? 10 : err_lines.length
+        msg << "\n\n   Extract of #{operation} script error output:\n   > " << err_lines[-max_lines..-1].reject{|x| !opts[:verbose] && x[0] == '+'}.map(&:strip).join("\n   > ")
         latest_log_file = log_files.reverse.find{|f|File.exists?(f)}
         unless latest_log_file.nil?
           msg << "\n\n   More information may be available in the log file:\n     #{latest_log_file}"
