@@ -80,7 +80,13 @@ module Alces
         else
           glob = args.first || '*'
           d 'package list requested'
-          pkgs = definitions.sort.map { |p| colored_path(p) }
+          pkgs = definitions.sort.sort do |a,b|
+            begin
+              Semver.new(a.version) <=> Semver.new(b.version)
+            rescue
+              a.version <=> b.version
+            end
+          end.map { |p| colored_path(p) }
           mode = options.oneline == true || !STDOUT.tty? ? ':rows' : ':columns_across'
           Alces::Packager::CLI.send(:enable_paging)
           say <<-ERB.chomp
