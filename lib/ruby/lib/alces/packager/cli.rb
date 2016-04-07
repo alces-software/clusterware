@@ -190,11 +190,24 @@ module Alces
       end
       set_aliases(:depot, min: 3)
 
+      command :requires do |c|
+        c.syntax = 'alces gridware requires <package>'
+        c.description = "Display requirements for package <package>"
+        c.action HandlerProxy, :requires
+        add_package_options(c)
+        add_depot_options(c)
+        c.option '--tree', 'Display dependency tree for package'
+        c.option '--ignore-satisfied', 'Only display unsatisfied dependencies'
+      end
+      set_aliases(:requires, extra: :reqs)
+
       command :export do |c|
         c.syntax = 'alces gridware export <package path>'
         c.description = "Export gridware package <package path> to a tarball"
         add_depot_options(c)
         c.option '--ignore-bad', 'Allow packages containing hard coded paths to be exported'
+        c.option '--accept-bad PATTERN(S)', String, 'Allow packages containing hard coded paths in matching files to be exported (comma-separated glob patterns)'
+        c.option '--accept-elf', 'Allow ELF files with acceptable hard coded search path to be exported'
         c.action HandlerProxy, :export
       end
       set_aliases(:export)

@@ -68,6 +68,26 @@ module Alces
         def all
           @all ||= repo_paths.map { |path| new(path) }
         end
+
+        def find_definitions(a)
+          map do |r|
+            r.packages.select do |p|
+              if (parts = a.split('/')).length == 1
+                File.fnmatch?(a, p.name, File::FNM_CASEFOLD)
+              elsif parts.length == 2
+                # one of repo/type, type/name or name/version
+                File.fnmatch?(a, "#{p.repo.name}/#{p.type}", File::FNM_CASEFOLD) || File.fnmatch?(a, "#{p.type}/#{p.name}", File::FNM_CASEFOLD) || File.fnmatch?(a, "#{p.name}/#{p.version}", File::FNM_CASEFOLD)
+              elsif parts.length == 3
+                # one of repo/type/name or type/name/version
+                File.fnmatch?(a, "#{p.repo.name}/#{p.type}/#{p.name}", File::FNM_CASEFOLD) || File.fnmatch?(a, "#{p.type}/#{p.name}/#{p.version}", File::FNM_CASEFOLD)
+              elsif parts.length == 4
+                if File.fnmatch?(a, p.path, File::FNM_CASEFOLD)
+                  true
+                end
+              end
+            end
+          end.flatten
+        end
       end
       
       include Alces::Tools::Logging

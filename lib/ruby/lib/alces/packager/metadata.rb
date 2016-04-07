@@ -37,7 +37,9 @@ module Alces
       end
 
       def path
-        @path ||= "#{repo.name}/#{type}/#{name}/#{version}"
+        @path ||= "#{repo.name}/#{type}/#{name}".tap do |s|
+          s << "/#{version}" unless version.empty?
+        end
       end
 
       def method_missing(s,*a,&b)
@@ -77,7 +79,7 @@ module Alces
       end
 
       def variant_requirements(variant, phase)
-        retrieve([]) do 
+        retrieve([]) do
           requirements_from(metadata[:variants][variant][:requirements], phase)
         end
       end

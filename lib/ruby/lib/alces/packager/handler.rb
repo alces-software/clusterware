@@ -29,6 +29,7 @@ require 'alces/packager/archive_exporter'
 require 'alces/packager/archive_importer'
 require 'alces/packager/errors'
 require 'alces/packager/io_handler'
+require 'alces/packager/dependency_handler'
 require 'terminal-table'
 require 'memoist'
 
@@ -127,7 +128,7 @@ module Alces
           ERB
         end
       end
-      
+
       def details(packages, highlights = [])
         highlighter = lambda do |s,t|
           if t
@@ -179,7 +180,7 @@ module Alces
           say "\n  #{'Version'.underline}\n    #{m.version}"
           say "\n  #{'Compatible compilers'.underline} (--compiler)\n    "
           say m.compilers.keys.join("\n    ")
-          
+
           unless m.metadata[:variants].nil?
             say "\n  #{'Available variants'.underline} (--variant)\n    "
             say m.variants.keys.join("\n    ")
@@ -196,19 +197,48 @@ module Alces
 
       def install
         with_depot do
-          return unless validate_metadata!
+          return unless validate_metadata!(:install)
+          say "Preparing to install #{colored_path(metadata)}"
 
           #Validate the package before going any further
-          say "Installing #{colored_path(metadata)}"
           metadata.validate!
           if metadata.metadata[:variants] && variant == 'all'
             metadata.metadata[:variants].keys.each do |v|
+              install_dependencies(v)
+              say "Installing #{colored_path(metadata)} (#{v})"
               Actions.install(metadata, action_opts(:install).merge(variant: v), IoHandler)
             end
           else
+            install_dependencies
+            say "Installing #{colored_path(metadata)}"
             Actions.install(metadata, action_opts(:install), IoHandler)
           end
           puts "\nInstallation complete."
+        end
+      end
+
+      def requires
+        with_depot do
+          return unless validate_metadata!(:requires)
+          dh = DependencyHandler.new(metadata, options.compiler, options.variant, options.global, options.ignore_satisfied)
+          if options.tree
+            dh.print_requirements_tree
+          else
+            rows = []
+            dh.resolve_requirements_tree.each do |req, pkg, installed, build_arg_hash|
+              build_args = build_arg_hash.map {|k,v| "#{k}: #{v}"}.join(', ')
+              build_args = "-" if build_args == ''
+              pkg_path = installed ? colored_path(pkg) + " \u2713".color(:green).bold : colored_path(pkg) + " \u2717".color(:red).bold
+              rows << [colored_path(req), pkg_path, build_args]
+            end
+            headings = ['Requirement','Package','Build arguments']
+            Alces::Packager::CLI.send(:enable_paging)
+            cols = $terminal.output_cols
+            say Terminal::Table.new(title: "Requirements for #{colored_path(metadata)}", 
+                                    headings: headings,
+                                    rows: rows
+                                   ).to_s
+          end
         end
       end
 
@@ -229,7 +259,7 @@ module Alces
             end
           rescue
             args.unshift(package_name)
-            validate_metadata!
+            validate_metadata!(:clean)
             say "Cleaning up #{colored_path(metadata)}"
             Actions.clean(metadata, action_opts(:clean), IoHandler)
           end
@@ -276,7 +306,7 @@ module Alces
         with_depot do
           package_path = args[0]
           raise MissingArgumentError, 'Please supply a package path' if package_path.nil? || !package_path.include?('/')
-          ArchiveExporter.export(package_path, options.depot, IoHandler, options.ignore_bad)
+          ArchiveExporter.export(package_path, options.depot, IoHandler, options.ignore_bad, options.accept_elf, ignore_pattern)
         end
       end
 
@@ -337,11 +367,70 @@ module Alces
       end
 
       private
+      def install_dependencies(variant = options.variant)
+        dh = DependencyHandler.new(metadata, options.compiler, variant, options.global, options.ignore_satisfied)
+        missing = dh.resolve_requirements_tree.reject { |_, _, installed, _| installed }
+        missing.pop
+        return unless missing.any?
+
+        missing_str = missing.map do |_, pkg, _, build_arg_hash|
+          colored_path(pkg).tap do |s|
+            if build_arg_hash[:variant] && build_arg_hash[:variant] != 'default' 
+              s << " (#{build_arg_hash[:variant]})"
+            end
+          end
+        end.join(', ')
+        msg = <<EOF
+
+#{'WARNING'.color(:yellow)}: Package requires the installation of the following:
+  #{missing_str}
+
+Install these dependencies first?
+EOF
+        if yes || (!non_interactive && IoHandler.confirm(msg))
+          missing_params = {}
+          missing.each do |_, pkg, _, build_arg_hash|
+            (build_arg_hash[:params] || '').split(',').each do |p|
+              if !params[p.to_sym]
+                (missing_params[pkg] ||= []) << p
+              end
+            end
+          end
+          if missing_params.any?
+            say "\n#{"ERROR".color(:red).underline}: Required build parameters must be supplied for dependencies:\n\n"
+            missing_params.each do |pkg, params|
+              say "For #{colored_path(pkg)}:"
+              print_params_help(pkg)
+              say "\n"
+            end
+            raise InvalidParameterError, "No values specified for required parameters: #{missing_params.map(&:last).flatten.join(', ')}"
+          end
+
+          missing.each do |_, pkg, _, build_arg_hash|
+            opts = Commander::Command::Options.new
+            opts.verbose = verbose
+            opts.non_interactive = non_interactive
+            opts.yes = yes
+            opts.global = options.global
+            opts.depot = options.depot
+            opts.variant = build_arg_hash[:variant] if build_arg_hash[:variant]
+            build_params = [].tap do |a|
+              (build_arg_hash[:params] || '').split(',').each do |p|
+                a << "#{p}=#{params[p.to_sym]}"
+              end
+            end
+            Handler.new([pkg.path, *build_params],opts).install
+          end
+        else
+          raise NotFoundError, "Aborting installation due to missing dependencies: #{missing_str}"
+        end
+      end
+
       def colored_path(p)
         IoHandler.colored_path(p)
       end
 
-      def validate_metadata!
+      def validate_metadata!(action = :install)
         if args.first.nil?
           raise MissingArgumentError, 'Please supply a package name'
         end
@@ -355,7 +444,7 @@ module Alces
         else
           # set compiler to first available if we're using the default
           options.compiler = metadata.compilers.keys.first if options.compiler == :first
-          validate_variant
+          validate_variant(action)
           validate_compiler
           true
         end
@@ -420,13 +509,19 @@ module Alces
         raise InvalidSelectionError, "Invalid compiler '#{compiler}' for package '#{metadata.name}' - please choose from: #{metadata.compilers.keys.join(', ')}" unless metadata.compilers.include?(compiler.split('/').first)
       end
 
-      def validate_variant
+      def validate_variant(action)
         if metadata.metadata[:variants].nil? || metadata.metadata[:variants].empty?
           raise InvalidSelectionError, "Invalid variant '#{variant}' for package '#{metadata.name}' - this package has no variants." if variant
         elsif !variant.nil?
-          raise InvalidSelectionError, "Invalid variant '#{variant}' for package '#{metadata.name}' - please choose from: #{metadata.variants.keys.join(', ')}" unless variant == 'all' || metadata.variants.include?(variant)
+          unless metadata.variants.include?(variant)
+            raise InvalidSelectionError, "Invalid variant '#{variant}' for package '#{metadata.name}' - please choose from: #{metadata.variants.keys.join(', ')}" unless action == :install && variant == 'all'
+          end
         elsif variant.nil?
-          raise InvalidSelectionError, "Select a variant to build for package '#{metadata.name}' - please choose from: #{metadata.variants.keys.join(', ')} (or pass 'all' to build all variants)"
+          if action == :requires
+            raise InvalidSelectionError, "Select a variant for package '#{metadata.name}' - please choose from: #{metadata.variants.keys.join(', ')}"
+          else
+            raise InvalidSelectionError, "Select a variant to build for package '#{metadata.name}' - please choose from: #{metadata.variants.keys.join(', ')} (or pass 'all' to build all variants)"
+          end
         end
       end
 
@@ -446,7 +541,7 @@ module Alces
       end
 
       def definitions
-        @definitions ||= find_metadata(package_name || '*')
+        @definitions ||= Repository.find_definitions(package_name || '*')
       end
 
       def package
@@ -475,32 +570,7 @@ module Alces
           end
         end.flatten
       end
-      
-      def find_metadata(a)
-        Repository.map do |r|
-          r.packages.select do |p|
-            if (parts = a.split('/')).length == 1
-              File.fnmatch?(a, p.name, File::FNM_CASEFOLD)
-            elsif parts.length == 2
-              # one of repo/type, type/name or name/version
-              File.fnmatch?(a, "#{p.repo.name}/#{p.type}", File::FNM_CASEFOLD) || File.fnmatch?(a, "#{p.type}/#{p.name}", File::FNM_CASEFOLD) || File.fnmatch?(a, "#{p.name}/#{p.version}", File::FNM_CASEFOLD)
-            elsif parts.length == 3
-              # one of repo/type/name or type/name/version
-              File.fnmatch?(a, "#{p.repo.name}/#{p.type}/#{p.name}", File::FNM_CASEFOLD) || File.fnmatch?(a, "#{p.type}/#{p.name}/#{p.version}", File::FNM_CASEFOLD)
-            elsif parts.length == 4
-              if File.fnmatch?(a, p.path, File::FNM_CASEFOLD)
-                true
-              else
-                if File.fnmatch?(parts[0..2].join('/'), "#{p.type}/#{p.name}/#{p.version}", File::FNM_CASEFOLD)
-                  options.tag = parts[3]
-                  true
-                end
-              end
-            end
-          end
-        end.flatten
-      end
-      
+
       def print_params_help(m)
         if m.metadata[:params] && m.metadata[:params].any?
           say "\n  #{'Required parameters'.underline} (param=value)\n\n"
@@ -519,6 +589,13 @@ module Alces
           end
         else
           raise NotFoundError, "Could not find depot: #{options.depot}"
+        end
+      end
+
+      def ignore_pattern
+        return nil unless options.accept_bad
+        lambda do |f|
+          options.accept_bad.split(',').any? {|glob| File.fnmatch?(glob, f)}
         end
       end
     end

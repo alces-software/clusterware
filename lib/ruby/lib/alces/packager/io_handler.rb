@@ -24,12 +24,12 @@ require 'alces/tools/logging'
 module Alces
   module Packager
     module IoHandler
-      class << self
-        PRIM = 'rgb_' + [64,136,184].map {|i| sprintf('%02x', i) }.join
-        SEC1 = 'rgb_' + [77,91,194].map {|i| sprintf('%02x', i) }.join
-        SEC2 = 'rgb_' + [255,206,78].map {|i| sprintf('%02x', i) }.join
-        COMP = 'rgb_' + [255,177,78].map {|i| sprintf('%02x', i) }.join
+      PRIM = 'rgb_' + [64,136,184].map {|i| sprintf('%02x', i) }.join
+      SEC1 = 'rgb_' + [77,91,194].map {|i| sprintf('%02x', i) }.join
+      SEC2 = 'rgb_' + [255,206,78].map {|i| sprintf('%02x', i) }.join
+      COMP = 'rgb_' + [255,177,78].map {|i| sprintf('%02x', i) }.join
 
+      class << self
         include Alces::Tools::Logging
 
         def utter(msg, &block)
@@ -80,7 +80,8 @@ module Alces
               s << "/#{p.tag.color(SEC1)}" unless p.tag.blank?
             end
           when String
-            parts = p.split('/')
+            parts, vers = p.split(' ',2)
+            parts = parts.split('/')
             "#{parts[0].color(:magenta)}".tap do |s|
               if parts.length > 1
                 s << '/' << parts[1].color(COMP)
@@ -92,6 +93,9 @@ module Alces
                 3.upto(parts.length-1) do |n|
                   s << '/' << parts[n].color(SEC1)
                 end
+              end
+              if vers
+                s << ' ' << vers.color(PRIM)
               end
             end
           else
