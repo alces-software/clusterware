@@ -109,6 +109,9 @@ member_each() {
 member_load_vars() {
     local member
     member="$1"
+    if [ ! -f "${cw_MEMBER_DIR}/${member}" ]; then
+        member=${member%%.*}
+    fi
     . "${cw_MEMBER_DIR}/${member}"
 }
 
