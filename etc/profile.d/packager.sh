@@ -173,7 +173,7 @@ fi;;
                     COMPREPLY=( $(compgen -W "$(_module_avail_specific)" -- "$cur") )
                     ;;
                 dep*)
-                    COMPREPLY=( $(compgen -W "fetch list enable disable" -- "$cur") )
+                    COMPREPLY=( $(compgen -W "list enable disable update info install purge init" -- "$cur") )
                     ;;
                 *)
                     # for purge, clean and default, we provide a module list

@@ -34,13 +34,12 @@ module Alces
 
       include Alces::Tools::Execution
 
-      attr_accessor :package_path, :depot, :io, :ignore_bad_package, :ignore_elf, :ignore_pattern
-      delegate :say, :with_spinner, :doing, :title, :colored_path, :to => :io
+      attr_accessor :package_path, :depot, :ignore_bad_package, :ignore_elf, :ignore_pattern
+      delegate :say, :with_spinner, :doing, :title, :colored_path, :to => IoHandler
 
-      def initialize(package_path, depot, io, ignore_bad_package, ignore_elf, ignore_pattern)
+      def initialize(package_path, depot, ignore_bad_package, ignore_elf, ignore_pattern)
         self.package_path = package_path.gsub(/([\[\]\{\}\*\?\\])/, '\\\\\1')
         self.depot = depot
-        self.io = io
         self.ignore_bad_package = ignore_bad_package
         self.ignore_elf = ignore_elf
         self.ignore_pattern = ignore_pattern
@@ -240,7 +239,6 @@ module Alces
             end
             [rewritten_files,bad_files]
           else
-            say 'OK'.color(:green)
             [[],[]]
           end
         end

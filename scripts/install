@@ -143,7 +143,7 @@ find "${access_targets[@]}" -type d -exec chmod 2775 {} \;
 chgrp -R gridware "${access_targets[@]}"
 say_done $?
 
-title "Setting up gridware base repository"
+title "Setting up gridware base package repository"
 if [ -d "${target}/var/lib/gridware/repos" ]; then
     doing 'Detect'
 else
@@ -170,6 +170,36 @@ EOF
     chmod -R g+rw "${target}"/var/lib/gridware/repos/base/pkg
     find "${target}"/var/lib/gridware/repos/base/pkg -type d -exec chmod 2775 {} \;
     chgrp -R gridware "${target}"/var/lib/gridware/repos/base/pkg
+fi
+say_done $?
+
+title "Setting up gridware base depot repository"
+if [ -d "${target}/var/lib/gridware/depots" ]; then
+    doing 'Detect'
+else
+    doing 'Initialize'
+    if [ ! -f "${target}"/var/lib/gridware/depots/base/repo.yml ]; then
+        mkdir -p "${target}"/var/lib/gridware/depots/base
+	cp "${source}"/dist/depots/base/repo.yml "${target}"/var/lib/gridware/depots/base/repo.yml
+    fi
+
+    if [ "$cw_BUILD_depots_url" ]; then
+        mkdir -p "${target}"/var/lib/gridware/depots/base/data
+        tar -C "${target}"/var/lib/gridware/depots/base/data -xvzf "${source}"/gridware-depots.tar.gz &> "${dep_logs}/gridware-depots-init.log"
+    else
+	cat <<EOF > "${target}"/etc/gridware.yml
+:dbroot: ${dep_build}
+:log_root: ${dep_build}
+:depot_repo_paths:
+ - ${target}/var/lib/gridware/depots/base
+EOF
+        "${target}/bin/alces" gridware depot update base &> "${dep_logs}/gridware-depots-init.log"
+	rm -f "${target}"/etc/gridware.yml
+    fi
+
+    chmod -R g+rw "${target}"/var/lib/gridware/depots/base/data
+    find "${target}"/var/lib/gridware/depots/base/data -type d -exec chmod 2775 {} \;
+    chgrp -R gridware "${target}"/var/lib/gridware/depots/base/data
 fi
 say_done $?
 

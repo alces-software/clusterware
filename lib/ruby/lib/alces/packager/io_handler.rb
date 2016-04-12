@@ -66,7 +66,12 @@ module Alces
         end
 
         def tty?
-          STDOUT.tty? && STDERR.tty?
+          stream.tty?
+          #STDOUT.tty? && STDERR.tty?
+        end
+
+        def stream
+          ($terminal.instance_variable_get :@output)
         end
 
         def colored_path(p)
@@ -108,12 +113,12 @@ module Alces
             block.call
           else
             begin
-              print ' '
+              stream.print ' '
               spinner = Thread.new do
                 spin = '|/-\\'
                 i = 0
                 loop do
-                  print "\b#{spin[i]}"
+                  stream.print "\b#{spin[i]}"
                   sleep 0.2
                   i = 0 if (i += 1) == 4
                 end
@@ -121,7 +126,7 @@ module Alces
               block.call
             ensure
               spinner.kill
-              print "\b \b"
+              stream.print "\b \b"
             end
           end
         end

@@ -25,8 +25,21 @@ module Alces
   module Packager
     class DependencyHandler
       extend Memoist
+      class << self
+        def find_definition(req)
+          name, op, vers = req.split(' ')
+          definitions = Repository.find_definitions(name)
+          resolved = Package.resolve_for_version(definitions, op || '>', vers || '0')
+          if resolved.nil? && op.nil? && vers.nil?
+            definitions.first
+          else
+            resolved
+          end
+        end
+      end
 
       attr_accessor :metadata, :compiler, :variant, :global, :ignore_satisfied
+      delegate :find_definition, to: self
 
       def initialize(metadata, compiler, variant, global, ignore_satisfied)
         self.metadata = metadata
@@ -140,17 +153,6 @@ module Alces
 
         node.children do |child|
           print_requirements_tree(child, mask + (node.is_last_sibling? ? ' ' : '.'))
-        end
-      end
-
-      def find_definition(req)
-        name, op, vers = req.split(' ')
-        definitions = Repository.find_definitions(name)
-        resolved = Package.resolve_for_version(definitions, op || '>', vers || '0')
-        if resolved.nil? && op.nil? && vers.nil?
-          definitions.first
-        else
-          resolved
         end
       end
 

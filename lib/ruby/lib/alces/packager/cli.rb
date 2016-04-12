@@ -117,8 +117,8 @@ module Alces
         c.syntax = 'alces gridware list'
         c.description = 'Lists available packages'
         c.action HandlerProxy, :list
-        c.option '-f', '--full', 'list full details'
-        c.option '-1', '--oneline', 'list one package per line'
+        c.option '-f', '--full', 'List full details'
+        c.option '-1', '--oneline', 'List one package per line'
       end
       set_aliases(:list, extra: :ls)
 
@@ -126,11 +126,11 @@ module Alces
         c.syntax = 'alces gridware search'
         c.description = 'Search available packages'
         c.action HandlerProxy, :search
-        c.option '-f', '--full', 'list full details'
-        c.option '-1', '--oneline', 'list one package per line'
-        c.option '-g', '--groups', 'search package groups'
-        c.option '-d', '--descriptions', 'search package summaries and descriptions'
-        c.option '-n', '--names', 'search package names'
+        c.option '-f', '--full', 'List full details'
+        c.option '-1', '--oneline', 'List one package per line'
+        c.option '-g', '--groups', 'Search package groups'
+        c.option '-d', '--descriptions', 'Search package summaries and descriptions'
+        c.option '-n', '--names', 'Search package names'
       end
       set_aliases(:search)
 
@@ -149,6 +149,8 @@ module Alces
         add_depot_options(c)
         c.option '-g', '--global', 'Allow use of packages across all depots'
         c.option '-m', '--modules STRING', String, 'Specify modules to load before build'
+        c.option '-b', '--binary', 'Prefer binary packages when available'
+        c.option '--binary-depends', 'Prefer binary packages for dependencies when available'
       end
       set_aliases(:install, min: 3)
 
@@ -184,8 +186,23 @@ module Alces
       set_aliases(:default, min: 3)
 
       command :depot do |c|
-        c.syntax = 'alces gridware depot <fetch|list|enable|disable> [<param>]'
-        c.description = "Perform depot operations"
+        c.syntax = 'alces gridware depot <operation> [<param>]'
+        c.option '-d', '--depot STRING', String, 'Specify target depot [install]'
+        c.option '-1', '--oneline', 'List one depot per line [list]'
+        c.option '--disabled', "Don't enable depot [init]"
+        c.option '-c', '--compile', "Compile depot content from source"
+        c.description = <<-EOF
+Perform a depot operation. Supported operations:
+
+  disable <depot> Disable <depot> making contained packages unavailable
+  enable <depot>  Enable <depot> making contained packages available
+  info <depot>    Display information about <depot>
+  init <depot>    Initialize new, empty <depot>
+  install <depot> Install <depot>
+  list            List available depots
+  purge <depot>   Remove installed <depot> and contained packages
+  update [<repo>] Update list of available depots (for <repo>)
+        EOF
         c.action HandlerProxy, :depot
       end
       set_aliases(:depot, min: 3)
@@ -215,6 +232,7 @@ module Alces
       command :import do |c|
         c.syntax = 'alces gridware import <archive file>'
         c.description = "Import gridware package held in tarball <archive file> to a depot"
+        c.option '-c', '--compile', "Compile dependencies from source even if binaries available"
         add_depot_options(c)
         c.action HandlerProxy, :import
       end
@@ -222,5 +240,3 @@ module Alces
     end
   end
 end
-
-
