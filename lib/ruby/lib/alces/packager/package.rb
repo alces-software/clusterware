@@ -113,18 +113,30 @@ module Alces
                 io.puts "module-alias #{k} #{v}"
               end
               if p.type == 'compilers'
-                if Package.count(name: p.name) > 1 && p.default?
+                package_count = Package.count(name: p.name)
+                if package_count > 1 && p.default?
                   io.puts "module-version #{p.path} default"
+                  io.puts "module-alias #{[p.type, p.name, p.version].join('-')} #{p.path}"
+                elsif package_count == 1
+                  io.puts "module-alias #{[p.type, p.name, p.version].join('-')} #{p.path}"
                 end
               else
-                if Package.count(name: p.name, version: p.version) > 1 && p.default?
+                package_count = Package.count(name: p.name, version: p.version)
+                if package_count > 1 && p.default?
                   io.puts "module-version #{p.path} default"
+                  io.puts "module-alias #{[p.type, p.name, p.version].join('-')} #{p.path}"
+                elsif package_count == 1
+                  io.puts "module-alias #{[p.type, p.name, p.version].join('-')} #{p.path}"
                 end
               end
             end
             Version.all.each do |v|
-              if Version.all(path: v.path).length > 1 && v.default?
+              version_count = Version.all(path: v.path).length
+              if version_count > 1 && v.default?
                 io.puts "# module-version #{v.path}/#{v.version} default"
+                io.puts "module-alias #{v.path.tr('/','-')} #{v.path}/#{v.version}"
+              elsif version_count == 1
+                io.puts "module-alias #{v.path.tr('/','-')} #{v.path}/#{v.version}"
               end
             end
           end
