@@ -34,11 +34,12 @@ module Alces
           handler_opts.args = options.args[1..-1]
           handler = new(handler_opts)
           instance_methods(false).each do |m|
-            if [:info, :init, :install].include?(m) && op.length < 3
-              raise DepotError, "Ambiguous depot operation: #{op} (maybe: info, init, install?)"
-            elsif [:export, :enable].include?(m) && op.length < 2
-              raise DepotError, "Ambiguous depot operation: #{op} (maybe: enable, export?)"
-            elsif m =~ /^#{op}/
+            if m =~ /^#{op}/ || m == :list && op == 'ls'
+              if [:info, :init, :install].include?(m) && op.length < 3
+                raise DepotError, "Ambiguous depot operation: #{op} (maybe: info, init, install?)"
+              elsif [:export, :enable].include?(m) && m =~ op.length < 2
+                raise DepotError, "Ambiguous depot operation: #{op} (maybe: enable, export?)"
+              end
               handler.send(m)
               return
             end
