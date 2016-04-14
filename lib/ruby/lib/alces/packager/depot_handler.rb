@@ -28,6 +28,7 @@ module Alces
     class DepotHandler
       class << self
         def handle(options)
+          ENV['cw_GRIDWARE_notify'] = 'false' unless options.notify
           handler_opts = OptionSet.new(options)
           op = options.args.first
           handler_opts.args = options.args[1..-1]

@@ -203,6 +203,7 @@ module Alces
         c.option '-g', '--global', 'Allow use of packages across all depots when resolving missing dependencies [install]'
         c.option '-b', '--binary', 'Prefer binary downloads when resolving missing dependencies [install]'
         c.option '-1', '--oneline', 'List one depot per line [list]'
+        c.option '--[no-]notify', "(Dis)allow clusterware notifications (default: allow) [init, install, enable, disable, purge]"
         c.summary = "Perform a depot operation"
         c.description = <<-EOF
 Perform a depot operation. Supported operations:
