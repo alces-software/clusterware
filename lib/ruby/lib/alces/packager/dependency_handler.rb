@@ -45,6 +45,7 @@ module Alces
         self.metadata = metadata
         self.compiler = compiler
         self.variant = variant
+        self.global = global
         self.ignore_satisfied = ignore_satisfied
       end
 
@@ -182,7 +183,15 @@ module Alces
 
       def package_or_definition(name, variant = 'default')
         if installed?(name, variant)
-          Package.resolve(name, compiler_tag, global)
+          descriptor =
+            if variant == 'default'
+              name
+            else
+              name.split(' ')
+                .tap {|a| a[0] = "#{a[0]}_#{variant}"}
+                .join(' ')
+            end
+          Package.resolve(descriptor, compiler_tag, global)
         else
           find_definition(name)
         end
