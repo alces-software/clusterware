@@ -122,6 +122,7 @@ module Alces
           disable
         else
           puts "module use #{depot_path(name)}/$cw_DIST/etc/modules"
+          notify_depot(name,'enabled')
         end
       end
 

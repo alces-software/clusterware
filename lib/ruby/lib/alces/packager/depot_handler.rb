@@ -194,7 +194,7 @@ EOF
           if !options.explicit_depot
             # initialize new live depot
             Depot.new(depot_name).tap do |d|
-              d.init
+              d.init(options.disabled)
               say "\n"
               Dao.initialize!
               Dao.finalize!

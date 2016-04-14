@@ -197,10 +197,10 @@ module Alces
         c.option '-o', '--output DIRECTORY', 'Write exported depot to directory (default: /tmp/<depot>) [export]'
         c.option '--[no-]packages', "Toggle package export (default: true) [export]"
         add_export_options(c, :depot)
+        c.option '--disabled', "Don't enable depot [init, install]"
         c.option '-c', '--compile', "Compile depot content from source [install]"
         c.option '-d', '--depot STRING', String, 'Specify target depot [install]'
         c.option '-1', '--oneline', 'List one depot per line [list]'
-        c.option '--disabled', "Don't enable depot [init]"
         c.summary = "Perform a depot operation"
         c.description = <<-EOF
 Perform a depot operation. Supported operations:
