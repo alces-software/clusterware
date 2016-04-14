@@ -200,6 +200,8 @@ module Alces
         c.option '--disabled', "Don't enable depot [init, install]"
         c.option '-c', '--compile', "Compile depot content from source [install]"
         c.option '-d', '--depot STRING', String, 'Specify target depot [install]'
+        c.option '-g', '--global', 'Allow use of packages across all depots when resolving missing dependencies [install]'
+        c.option '-b', '--binary', 'Prefer binary downloads when resolving missing dependencies [install]'
         c.option '-1', '--oneline', 'List one depot per line [list]'
         c.summary = "Perform a depot operation"
         c.description = <<-EOF

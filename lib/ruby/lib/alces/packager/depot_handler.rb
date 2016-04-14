@@ -220,10 +220,11 @@ EOF
                 parts[1] = parts[1].split('_').first
               end.join('/')
             )
+            definition = Repository.find_definitions(pkg).first
             o = OptionSet.new(options)
+            variant = 'default' if definition.metadata[:variants] && variant.nil?
             o.variant = variant
             o.depot = target_depot.name
-            definition = Repository.find_definitions(pkg).first
             DefinitionHandler.install(definition,o)
           end
         end
@@ -232,7 +233,7 @@ EOF
       # Remove a depot from the installation
       def purge
         $terminal.instance_variable_set :@output, STDERR
-        live_depot.purge
+        live_depot.purge(options.yes ? :force : options.non_interactive)
       end
 
       def enable

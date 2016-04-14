@@ -126,14 +126,20 @@ module Alces
         end
       end
 
-      def purge
+      def purge(non_interactive = false)
         say "Purging depot: #{name.color(:magenta).bold}"
         files = [Depot.hash_path_for(name), depot_path(name)]
         msg = <<EOF
 Purge operation will remove the following files/directories:
   #{files.join("\n  ")}
 EOF
-        return false unless confirm(msg)
+        if non_interactive
+          if non_interactive != :force
+            raise InstallDirectoryError, "Refusing to purge non-interactively; supply the --yes option to override"
+          end
+        else
+          return false unless confirm(msg)
+        end
         disable if enabled?
         title "Removing depot"
         doing "Purge"
