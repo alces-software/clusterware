@@ -25,13 +25,27 @@ module Alces
   module Packager
     class DependencyHandler
       extend Memoist
+      class << self
+        def find_definition(req)
+          name, op, vers = req.split(' ')
+          definitions = Repository.find_definitions(name)
+          resolved = Package.resolve_for_version(definitions, op || '>', vers || '0')
+          if resolved.nil? && op.nil? && vers.nil?
+            definitions.first
+          else
+            resolved
+          end
+        end
+      end
 
       attr_accessor :metadata, :compiler, :variant, :global, :ignore_satisfied
+      delegate :find_definition, to: self
 
       def initialize(metadata, compiler, variant, global, ignore_satisfied)
         self.metadata = metadata
         self.compiler = compiler
         self.variant = variant
+        self.global = global
         self.ignore_satisfied = ignore_satisfied
       end
 
@@ -143,17 +157,6 @@ module Alces
         end
       end
 
-      def find_definition(req)
-        name, op, vers = req.split(' ')
-        definitions = Repository.find_definitions(name)
-        resolved = Package.resolve_for_version(definitions, op || '>', vers || '0')
-        if resolved.nil? && op.nil? && vers.nil?
-          definitions.first
-        else
-          resolved
-        end
-      end
-
       def compiler_tag
         ctype, cvers = compiler.split('/')
         if ctype == 'noarch' || ctype == 'bin'
@@ -180,7 +183,15 @@ module Alces
 
       def package_or_definition(name, variant = 'default')
         if installed?(name, variant)
-          Package.resolve(name, compiler_tag, global)
+          descriptor =
+            if variant == 'default'
+              name
+            else
+              name.split(' ')
+                .tap {|a| a[0] = "#{a[0]}_#{variant}"}
+                .join(' ')
+            end
+          Package.resolve(descriptor, compiler_tag, global)
         else
           find_definition(name)
         end

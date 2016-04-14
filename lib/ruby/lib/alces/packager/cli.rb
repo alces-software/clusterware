@@ -79,6 +79,13 @@ module Alces
           c.option '-d', '--depot STRING', String, 'Specify depot'
         end
 
+        def add_export_options(c, command = :export)
+          suffix = command == :depot ? ' [export]' : ''
+          c.option '--ignore-bad', "Allow packages containing hard coded paths to be exported#{suffix}"
+          c.option '--accept-bad PATTERN(S)', String, "Allow packages containing hard coded paths in matching files to be exported (comma-separated glob patterns)#{suffix}"
+          c.option '--accept-elf', "Allow ELF files with acceptable hard coded search path to be exported#{suffix}"
+        end
+
         def set_aliases(target, opts = {})
           opts = {min: 1}.merge(opts)
           s = target.to_s
@@ -117,8 +124,8 @@ module Alces
         c.syntax = 'alces gridware list'
         c.description = 'Lists available packages'
         c.action HandlerProxy, :list
-        c.option '-f', '--full', 'list full details'
-        c.option '-1', '--oneline', 'list one package per line'
+        c.option '-f', '--full', 'List full details'
+        c.option '-1', '--oneline', 'List one package per line'
       end
       set_aliases(:list, extra: :ls)
 
@@ -126,11 +133,11 @@ module Alces
         c.syntax = 'alces gridware search'
         c.description = 'Search available packages'
         c.action HandlerProxy, :search
-        c.option '-f', '--full', 'list full details'
-        c.option '-1', '--oneline', 'list one package per line'
-        c.option '-g', '--groups', 'search package groups'
-        c.option '-d', '--descriptions', 'search package summaries and descriptions'
-        c.option '-n', '--names', 'search package names'
+        c.option '-f', '--full', 'List full details'
+        c.option '-1', '--oneline', 'List one package per line'
+        c.option '-g', '--groups', 'Search package groups'
+        c.option '-d', '--descriptions', 'Search package summaries and descriptions'
+        c.option '-n', '--names', 'Search package names'
       end
       set_aliases(:search)
 
@@ -149,6 +156,8 @@ module Alces
         add_depot_options(c)
         c.option '-g', '--global', 'Allow use of packages across all depots'
         c.option '-m', '--modules STRING', String, 'Specify modules to load before build'
+        c.option '-b', '--binary', 'Prefer binary packages when available'
+        c.option '--binary-depends', 'Prefer binary packages for dependencies when available'
       end
       set_aliases(:install, min: 3)
 
@@ -184,8 +193,31 @@ module Alces
       set_aliases(:default, min: 3)
 
       command :depot do |c|
-        c.syntax = 'alces gridware depot <fetch|list|enable|disable> [<param>]'
-        c.description = "Perform depot operations"
+        c.syntax = 'alces gridware depot <operation> [<param>]'
+        c.option '-o', '--output DIRECTORY', 'Write exported depot to directory (default: /tmp/<depot>) [export]'
+        c.option '--[no-]packages', "Toggle package export (default: true) [export]"
+        add_export_options(c, :depot)
+        c.option '--disabled', "Don't enable depot [init, install]"
+        c.option '-c', '--compile', "Compile depot content from source [install]"
+        c.option '-d', '--depot STRING', String, 'Specify target depot [install]'
+        c.option '-g', '--global', 'Allow use of packages across all depots when resolving missing dependencies [install]'
+        c.option '-b', '--binary', 'Prefer binary downloads when resolving missing dependencies [install]'
+        c.option '-1', '--oneline', 'List one depot per line [list]'
+        c.option '--[no-]notify', "(Dis)allow clusterware notifications (default: allow) [init, install, enable, disable, purge]"
+        c.summary = "Perform a depot operation"
+        c.description = <<-EOF
+Perform a depot operation. Supported operations:
+
+  disable <depot> Disable <depot> making contained packages unavailable
+  enable <depot>  Enable <depot> making contained packages available
+  export <depot>  Export <depot>
+  info <depot>    Display information about <depot>
+  init <depot>    Initialize new empty <depot>
+  install <depot> Install <depot>
+  list            List available depots
+  purge <depot>   Remove installed <depot> and contained packages
+  update [<repo>] Update list of available depots (for <repo>)
+        EOF
         c.action HandlerProxy, :depot
       end
       set_aliases(:depot, min: 3)
@@ -205,9 +237,8 @@ module Alces
         c.syntax = 'alces gridware export <package path>'
         c.description = "Export gridware package <package path> to a tarball"
         add_depot_options(c)
-        c.option '--ignore-bad', 'Allow packages containing hard coded paths to be exported'
-        c.option '--accept-bad PATTERN(S)', String, 'Allow packages containing hard coded paths in matching files to be exported (comma-separated glob patterns)'
-        c.option '--accept-elf', 'Allow ELF files with acceptable hard coded search path to be exported'
+        add_export_options(c)
+        c.option '-o', '--output DIRECTORY', String, 'Directory to which exported package should be written'
         c.action HandlerProxy, :export
       end
       set_aliases(:export)
@@ -215,6 +246,7 @@ module Alces
       command :import do |c|
         c.syntax = 'alces gridware import <archive file>'
         c.description = "Import gridware package held in tarball <archive file> to a depot"
+        c.option '-c', '--compile', "Compile dependencies from source even if binaries available"
         add_depot_options(c)
         c.action HandlerProxy, :import
       end
@@ -222,5 +254,3 @@ module Alces
     end
   end
 end
-
-

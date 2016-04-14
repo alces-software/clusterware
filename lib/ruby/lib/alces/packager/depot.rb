@@ -1,5 +1,5 @@
 #==============================================================================
-# Copyright (C) 2007-2015 Stephen F. Norledge and Alces Software Ltd.
+# Copyright (C) 2015-2016 Stephen F. Norledge and Alces Software Ltd.
 #
 # This file/package is part of Alces Clusterware.
 #
@@ -28,7 +28,7 @@ module Alces
     class Depot
       include Alces::Tools::FileManagement
       include Alces::Tools::Logging
-      
+
       class << self
         def hash_path_for(name)
           depot_path = File.join(Config.depotroot,name)
@@ -43,7 +43,7 @@ module Alces
           # special cases
           return if name == 'depots' || name == 'etc'
           if File.symlink?(File.join(Config.depotroot,name))
-            Depot.new(name: name)
+            Depot.new(name)
           end
         end
 
@@ -64,100 +64,11 @@ module Alces
         end
       end
 
-      attr_accessor :source_url, :name, :io, :metadata
-      delegate :utter, :say, :warning, :with_spinner, :doing, :title, :tty?, :colored_path, :to => :io
+      attr_accessor :name
+      delegate :colored_path, :confirm, :say, :with_spinner, :doing, :title, :to => IoHandler
 
-      def initialize(source_url: nil, name: nil)
-        self.source_url = source_url
-        self.name = name || File.basename(source_url)
-        self.io = IoHandler
-      end
-
-      def fetch
-        if source_url.nil?
-          raise DepotError, "No source URL was supplied."
-        elsif exists?(name)
-          raise DepotError, "Depot already exists: #{name}"
-        end
-        target = File.expand_path(File.join(Config.archives_dir,'depots',name))
-        timeout = (Config.fetch_timeout rescue nil) || 10
-        title 'Fetching depot'
-
-        doing 'Metadata'
-        mkdir_p(target)
-        with_spinner do
-          run(['wget',"#{source_url}/metadata.yml",'-T',timeout.to_s,'-t','1','-O',"#{target}/metadata.yml"]) do |r|
-            raise DepotError, "Unable to download metadata." unless r.success?
-          end
-        end
-        load_metadata("#{target}/metadata.yml")
-        if metadata[:id].nil? || metadata[:name].nil?
-          raise DepotError, "Invalid or corrupted depot metadata detected."
-        elsif depot_exists?(metadata[:id])
-          raise DepotError, "Depot already exists: #{metadata[:name]}:#{metadata[:id]}"
-        end
-        say 'OK'.color(:green)
-
-        doing 'Content'
-        with_spinner do
-          run(['wget',"#{source_url}/content.#{ENV['cw_DIST']}.tgz",'-T',timeout.to_s,'-O',"#{target}/content.tgz"]) do |r|
-            unless r.success?
-              run(['wget',"#{source_url}/content.tgz",'-T',timeout.to_s,'-O',"#{target}/content.tgz"]) do |r2|
-                raise DepotError, "Unable to download content." unless r2.success?
-              end
-            end
-          end
-        end
-        say 'OK'.color(:green)
-
-        doing 'Extract'
-        with_spinner do
-          run(['tar',"-zxf","#{target}/content.tgz",'-C',depot_root]) do |r|
-            raise DepotError, "Unable to extract content." unless r.success?
-          end
-        end
-        say 'OK'.color(:green)
-
-        doing 'Link'
-        cp("#{target}/metadata.yml", File.join(depot_install_path(metadata[:id]), 'metadata.yml'))
-        ln_s(depot_install_path(metadata[:id]), depot_path(name))
-        say 'OK'.color(:green)
-
-        if metadata[:install]
-          doing 'Install'
-          with_spinner do
-            script = ''.tap do |s|
-              case ENV['cw_DIST']
-              when /^el/
-                if metadata[:install]['el']
-                  s << metadata[:install]['el']
-                  s << "\n"
-                end
-              when /^ubuntu/
-                if metadata[:install]['ubuntu']
-                  s << metadata[:install]['ubuntu']
-                  s << "\n"
-                end
-              end
-              if metadata[:install][ENV['cw_DIST']]
-                s << metadata[:install][ENV['cw_DIST']]
-              end
-            end
-            unless script.empty?
-              i("Depot install script"){script}
-              with_temp_file(script) do |f|
-                run('/bin/bash',f) do |res|
-                  raise DepotError, "Failed to execute install script" unless res.success?
-                end
-              end
-            end
-          end
-          say 'OK'.color(:green)
-        end
-        
-        resolve_depends
-        notify_depot(name,'disabled')
-        true
+      def initialize(name)
+        self.name = name
       end
 
       def enable
@@ -194,25 +105,107 @@ module Alces
 
       def enabled?
         all_modulespaths.include?(target)
-      end 
+      end
 
-      def resolve_depends
-        depends_dir = Config.dependencies_dir(name)
-        title "Resolving depot dependencies: #{name}"
-        if File.directory?(depends_dir)
-          Dir.glob(File.join(depends_dir,'*.sh')).each do |f|
-            # the following name translation isn't flawless, but it'll do!
-            doing File.basename(f,'.sh').split('-',4).join('/')
-            with_spinner do
-              run('/bin/bash',f) do |r|
-                raise DepotError, "Unable to resolve dependencies." unless r.success?                
-              end
+      def init(disabled = false)
+        title "Initializing depot: #{name}"
+        doing "Initialize"
+        with_spinner do
+          run([ENV["cw_ROOT"],'bin','alces'].join('/'),'gridware','init',Config.depotroot,name) do |res|
+            unless res.success?
+              raise DepotError, "Unable to initialize depot."
             end
-            say 'OK'.color(:green)
           end
         end
+        say 'OK'.color(:green)
+        if disabled
+          disable
+        else
+          puts "module use #{depot_path(name)}/$cw_DIST/etc/modules"
+          notify_depot(name,'enabled')
+        end
       end
-      
+
+      def purge(non_interactive = false)
+        say "Purging depot: #{name.color(:magenta).bold}"
+        files = [Depot.hash_path_for(name), depot_path(name)]
+        msg = <<EOF
+Purge operation will remove the following files/directories:
+  #{files.join("\n  ")}
+EOF
+        if non_interactive
+          if non_interactive != :force
+            raise InstallDirectoryError, "Refusing to purge non-interactively; supply the --yes option to override"
+          end
+        else
+          return false unless confirm(msg)
+        end
+        disable if enabled?
+        title "Removing depot"
+        doing "Purge"
+        with_spinner do
+          files.each(&method(:rm_r))
+        end
+        say 'OK'.color(:green)
+      end
+
+      def export(options)
+        say "Exporting depot: #{name.color(:magenta).bold}"
+        output_dir = options.output || "/tmp/#{name}"
+        if File.exists?(output_dir)
+          raise InvalidSelectionError, "Output directory already exists: #{output_dir}"
+        end
+        yaml = {}.tap do |h|
+          h[:title] = name
+          h[:summary] = "Summary of #{name}"
+          h[:description] = "Description of #{name}"
+          h[:root] = Config.default_binary_url
+          h[:content] = []
+          DataMapper.repository(name) do
+            Package.each do |p|
+              next if p.path == 'compilers/gcc/system'
+              path = p.path.split('/').tap {|a| a.pop }.join('/')
+              if path =~ %r{(\S*)/(\S*)_(\S*)/(\S*)}
+                path = "#{$1}/#{$2}/#{$4}"
+                variant = $3
+              else
+                path = path
+                variant = 'default'
+              end
+
+              defns = Repository.find_definitions(path)
+              # Check this definition exists on this system precisely once.
+              raise DepotError, "Ambiguous package definition found: #{defns.map{|d| colored_path(d.path)}.join(', ')}" if defns.length > 1
+              raise DepotError, "No package definition found: #{path}" if defns.length == 0
+
+              defn = defns.first
+              dh = DependencyHandler.new(defn, 'gcc', variant, false, false)
+              dh.resolve_requirements_tree(dh.requirements_tree(true)).each do |_, pkg, _, _|
+                if pkg.type == 'compilers'
+                  h[:content] << pkg.path
+                else
+                  h[:content] << pkg.path.split('/').tap {|a| a.pop}.join('/')
+                end
+              end
+              h[:content].uniq!
+            end
+            if options.packages
+              FileUtils.mkdir_p(File.join(output_dir,'dist'))
+              h[:content].each do |pkg|
+                export_opts = OptionSet.new(options)
+                export_opts.output = File.join(output_dir,'dist')
+                export_opts.depot = name
+                ArchiveExporter.new(pkg, export_opts).export
+              end
+            else
+              FileUtils.mkdir_p(output_dir)
+            end
+          end
+        end.to_yaml
+        File.write(File.join(output_dir,"#{name}.yml"), yaml)
+        say "Export of depot '#{name}' complete: #{output_dir}"
+      end
+
       private
       def notify_depot(name, state)
         if ENV['cw_GRIDWARE_notify'] == 'true'
@@ -259,14 +252,6 @@ module Alces
         end
       end
 
-      def exists?(name)
-        File.exist?(depot_path(name))
-      end
-
-      def depot_exists?(id)
-        File.exist?(depot_install_path(id))
-      end
-
       def depot_path(name)
         File.join(Config.depotroot,name)
       end
@@ -277,10 +262,6 @@ module Alces
 
       def depot_install_path(identifier)
         File.join(depot_root,identifier.to_s)
-      end
-
-      def load_metadata(f)
-        self.metadata = (YAML.load_file(f) rescue {})
       end
     end
   end

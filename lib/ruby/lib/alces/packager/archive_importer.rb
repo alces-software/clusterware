@@ -34,17 +34,16 @@ module Alces
 
       include Alces::Tools::Execution
 
-      attr_accessor :archive_path, :depot, :io
-      delegate :say, :with_spinner, :doing, :title, :colored_path, :to => :io
-      
-      def initialize(archive_path, depot, io)
+      attr_accessor :archive_path, :options
+      delegate :say, :with_spinner, :doing, :title, :colored_path, :to => IoHandler
+
+      def initialize(archive_path, options)
         self.archive_path = archive_path
-        self.depot = depot
-        self.io = io
+        self.options = options
       end
 
       def import
-        say "Importing #{archive_path.color(:cyan)}"
+        say "Importing #{File.basename(archive_path).color(:cyan)}"
 
         if archive_path[0..4] == 'http:' || 
            archive_path[0..5] == 'https:'
@@ -99,16 +98,16 @@ module Alces
           doing 'Update'
           with_spinner do
             ModuleTree.safely do
-              Version.write_defaults!(depot)
-              Package.write_defaults!(depot)
-              Package.write_aliases!(depot)
+              Version.write_defaults!(options.depot)
+              Package.write_defaults!(options.depot)
+              Package.write_aliases!(options.depot)
             end
           end
           say 'OK'.color(:green)
           
           doing 'Dependencies'
           with_spinner do
-            Dir.glob(File.join(Config.dependencies_dir(depot),"#{type}-#{name}-#{version}*.sh")).each do |f|
+            Dir.glob(File.join(Config.dependencies_dir(options.depot),"#{type}-#{name}-#{version}*.sh")).each do |f|
               run('/bin/bash',f) do |r|
                 raise DepotError, "Unable to resolve dependencies for: #{File.basename(f,'.sh')}" unless r.success?
               end
@@ -129,32 +128,50 @@ module Alces
       private
       def import_package(dir)
         # modify depot in modulefiles
-        dest_module_dir = File.join(Config.modules_dir(depot), package_path)
-        dest_pkg_dir = File.join(Config.packages_dir(depot), package_path)
-        dest_depends_dir = Config.dependencies_dir(depot)
+        dest_module_dir = File.join(Config.modules_dir(options.depot), package_path)
+        dest_pkg_dir = File.join(Config.packages_dir(options.depot), package_path)
+        dest_depends_dir = Config.dependencies_dir(options.depot)
 
         taggings.each do |tagging|
           condition = catch(:done) do
             title "Processing #{package_path}/#{tagging[:tag]}"
+            doing 'Preparing'
+            # verify not already installed!
+            p = Package.first(name: name, type: type, version: version, tag: tagging[:tag])
+            if !p.nil?
+              throw :done, [:exists, p]
+            end
+
+            # verify dependencies are available
+            unresolved = (tagging[:requirements] || []).map do |req|
+              req if Package.resolve(req, tagging[:compiler_tag]).nil?
+            end.compact
+            if unresolved.any?
+              say "#{'NOTICE'.color(:yellow)}: #{options.compile ? 'building' : 'importing'} requirements"
+              say "-" * 80
+              unresolved.each do |req|
+                if req =~ /(\S*)_(\S*)( .*)?/
+                  req = "#{$1}#{$3}"
+                  variant = $2
+                else
+                  variant = 'default'
+                end
+                defn = DependencyHandler.find_definition(req)
+                install_opts = OptionSet.new(options)
+                if defn.metadata[:variants] || variant != 'default'
+                  install_opts.variant = variant
+                end
+                install_opts.binary = true unless options.compile
+                DefinitionHandler.install(defn, install_opts)
+              end
+              say "-" * 80
+              say "#{'NOTICE'.color(:yellow)}: requirements for #{package_path} satisfied; proceeding to import"
+            else
+              say 'OK'.color(:green)
+            end
+
             doing "Importing"
             with_spinner do
-              # verify not already installed!
-              p = Package.first(name: name, type: type, version: version, tag: tagging[:tag])
-              if !p.nil?
-                throw :done, [:exists, p]
-              end
-
-              # verify dependencies are available
-              unresolved = (tagging[:requirements] || []).map do |req|
-                req if Package.resolve(req, tagging[:compiler_tag]).nil?
-              end.compact
-              if unresolved.any?
-                # XXX - attempt to resolve automatically here...
-                if true
-                  throw :done, [:unresolved, unresolved]
-                end
-              end
-
               module_file = File.join(dir, ENV['cw_DIST'], 'etc', 'modules', package_path, tagging[:tag])
               depends_file = File.join(dir, ENV['cw_DIST'], 'etc', 'depends', "#{[type, name, version, tagging[:tag]].join('-')}.sh")
               pkg_dir = File.join(dir, ENV['cw_DIST'], 'pkg', package_path, tagging[:tag])
@@ -196,9 +213,9 @@ module Alces
 
       def import_compiler(dir)
         # modify depot in modulefiles
-        dest_compiler_module_dir = File.join(Config.modules_dir(depot), 'compilers', name)
-        dest_lib_module_dir = File.join(Config.modules_dir(depot), 'libs', name)
-        dest_pkg_dir = File.join(Config.packages_dir(depot), 'compilers', name)
+        dest_compiler_module_dir = File.join(Config.modules_dir(options.depot), 'compilers', name)
+        dest_lib_module_dir = File.join(Config.modules_dir(options.depot), 'libs', name)
+        dest_pkg_dir = File.join(Config.packages_dir(options.depot), 'compilers', name)
         title "Processing #{package_path}"
         doing "Importing"
         exists = false
@@ -260,7 +277,7 @@ module Alces
       end
       
       def depot_path
-        @depot_path ||= Depot.hash_path_for(depot)
+        @depot_path ||= Depot.hash_path_for(options.depot)
       end
     end
   end

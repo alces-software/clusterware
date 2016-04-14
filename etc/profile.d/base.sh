@@ -52,7 +52,7 @@ alces() {
             case $2 in
                 dep*)
                     case $3 in
-                        e*|di*)
+                        en*|d*|p*|ini*|ins*)
                             eval $("${_cw_ROOT}"/bin/alces "$@") 2>&1
                             ;;
                         *)

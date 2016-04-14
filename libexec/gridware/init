@@ -79,11 +79,15 @@ _create_gridware_configuration() {
 :repo_paths:
  - ${cw_ROOT}/var/lib/gridware/repos/base
  - ${cw_GRIDWARE_root}/etc/repos/local
+:depot_repo_paths:
+ - ${cw_ROOT}/var/lib/gridware/depots/base
+ - ${cw_GRIDWARE_root}/etc/depots/local
 :depotroot: ${cw_GRIDWARE_root}
 :default_depot: ${cw_GRIDWARE_default_depot:-local}
 :archives_dir: /var/cache/gridware/archives
 :buildroot: /var/cache/gridware/src
 :fallback_package_url: https://s3-eu-west-1.amazonaws.com/packages.alces-software.com/gridware
+:default_binary_url: https://s3-eu-west-1.amazonaws.com/packages.alces-software.com/gridware/%24dist
 :fetch_timeout: 10
 EOF
 }
@@ -186,6 +190,19 @@ main() {
 	chgrp -R gridware "${cw_GRIDWARE_root}"/etc
 	chgrp gridware "${cw_GRIDWARE_root}" "${cw_GRIDWARE_root}"/depots
 	chmod g+rws "${cw_GRIDWARE_root}" "${cw_GRIDWARE_root}"/depots
+    fi
+    say_done $?
+
+    title "Setting up local depot repository"
+    if [ -d "${cw_GRIDWARE_root}/etc/depots" ]; then
+	doing 'Detect'
+    else
+	doing 'Configure'
+	mkdir -p "${cw_GRIDWARE_root}/etc/depots"
+	cp -R "${cw_ROOT}/etc/gridware/reposkel.depots" "${cw_GRIDWARE_root}/etc/depots/local"
+	chmod -R g+rw "${cw_GRIDWARE_root}"/etc/depots
+	find "${cw_GRIDWARE_root}"/etc/depots -type d -exec chmod 2775 {} \;
+	chgrp -R gridware "${cw_GRIDWARE_root}"/etc/depots
     fi
     say_done $?
 }
