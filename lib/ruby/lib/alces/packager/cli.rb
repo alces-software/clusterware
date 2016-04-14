@@ -79,6 +79,13 @@ module Alces
           c.option '-d', '--depot STRING', String, 'Specify depot'
         end
 
+        def add_export_options(c, command = :export)
+          suffix = command == :depot ? ' [export]' : ''
+          c.option '--ignore-bad', "Allow packages containing hard coded paths to be exported#{suffix}"
+          c.option '--accept-bad PATTERN(S)', String, "Allow packages containing hard coded paths in matching files to be exported (comma-separated glob patterns)#{suffix}"
+          c.option '--accept-elf', "Allow ELF files with acceptable hard coded search path to be exported#{suffix}"
+        end
+
         def set_aliases(target, opts = {})
           opts = {min: 1}.merge(opts)
           s = target.to_s
@@ -187,17 +194,22 @@ module Alces
 
       command :depot do |c|
         c.syntax = 'alces gridware depot <operation> [<param>]'
+        c.option '-o', '--output DIRECTORY', 'Write exported depot to directory (default: /tmp/<depot>) [export]'
+        c.option '--[no-]packages', "Toggle package export (default: true) [export]"
+        add_export_options(c, :depot)
+        c.option '-c', '--compile', "Compile depot content from source [install]"
         c.option '-d', '--depot STRING', String, 'Specify target depot [install]'
         c.option '-1', '--oneline', 'List one depot per line [list]'
         c.option '--disabled', "Don't enable depot [init]"
-        c.option '-c', '--compile', "Compile depot content from source"
+        c.summary = "Perform a depot operation"
         c.description = <<-EOF
 Perform a depot operation. Supported operations:
 
   disable <depot> Disable <depot> making contained packages unavailable
   enable <depot>  Enable <depot> making contained packages available
+  export <depot>  Export <depot>
   info <depot>    Display information about <depot>
-  init <depot>    Initialize new, empty <depot>
+  init <depot>    Initialize new empty <depot>
   install <depot> Install <depot>
   list            List available depots
   purge <depot>   Remove installed <depot> and contained packages
@@ -222,9 +234,8 @@ Perform a depot operation. Supported operations:
         c.syntax = 'alces gridware export <package path>'
         c.description = "Export gridware package <package path> to a tarball"
         add_depot_options(c)
-        c.option '--ignore-bad', 'Allow packages containing hard coded paths to be exported'
-        c.option '--accept-bad PATTERN(S)', String, 'Allow packages containing hard coded paths in matching files to be exported (comma-separated glob patterns)'
-        c.option '--accept-elf', 'Allow ELF files with acceptable hard coded search path to be exported'
+        add_export_options(c)
+        c.option '-o', '--output DIRECTORY', String, 'Directory to which exported package should be written'
         c.action HandlerProxy, :export
       end
       set_aliases(:export)

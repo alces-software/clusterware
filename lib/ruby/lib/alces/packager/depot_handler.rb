@@ -35,6 +35,8 @@ module Alces
           instance_methods(false).each do |m|
             if [:info, :init, :install].include?(m) && op.length < 3
               raise DepotError, "Ambiguous depot operation: #{op} (maybe: info, init, install?)"
+            elsif [:export, :enable].include?(m) && op.length < 2
+              raise DepotError, "Ambiguous depot operation: #{op} (maybe: enable, export?)"
             elsif m =~ /^#{op}/
               handler.send(m)
               return
@@ -248,6 +250,10 @@ EOF
         raise MissingArgumentError, 'Please supply a depot name' if depot_name.nil?
         raise DepotError, "Depot already exists: #{depot_name}" if Depot.find(depot_name)
         Depot.new(depot_name).init(options.disabled)
+      end
+
+      def export
+        live_depot.export(options)
       end
 
       private

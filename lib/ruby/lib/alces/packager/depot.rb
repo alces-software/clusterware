@@ -65,7 +65,7 @@ module Alces
       end
 
       attr_accessor :name
-      delegate :confirm, :say, :with_spinner, :doing, :title, :to => IoHandler
+      delegate :colored_path, :confirm, :say, :with_spinner, :doing, :title, :to => IoHandler
 
       def initialize(name)
         self.name = name
@@ -140,6 +140,63 @@ EOF
           files.each(&method(:rm_r))
         end
         say 'OK'.color(:green)
+      end
+
+      def export(options)
+        say "Exporting depot: #{name.color(:magenta).bold}"
+        output_dir = options.output || "/tmp/#{name}"
+        if File.exists?(output_dir)
+          raise InvalidSelectionError, "Output directory already exists: #{output_dir}"
+        end
+        yaml = {}.tap do |h|
+          h[:title] = name
+          h[:summary] = "Summary of #{name}"
+          h[:description] = "Description of #{name}"
+          h[:root] = Config.default_binary_url
+          h[:content] = []
+          DataMapper.repository(name) do
+            Package.each do |p|
+              next if p.path == 'compilers/gcc/system'
+              path = p.path.split('/').tap {|a| a.pop }.join('/')
+              if path =~ %r{(\S*)/(\S*)_(\S*)/(\S*)}
+                path = "#{$1}/#{$2}/#{$4}"
+                variant = $3
+              else
+                path = path
+                variant = 'default'
+              end
+
+              defns = Repository.find_definitions(path)
+              # Check this definition exists on this system precisely once.
+              raise DepotError, "Ambiguous package definition found: #{defns.map{|d| colored_path(d.path)}.join(', ')}" if defns.length > 1
+              raise DepotError, "No package definition found: #{path}" if defns.length == 0
+
+              defn = defns.first
+              dh = DependencyHandler.new(defn, 'gcc', variant, false, false)
+              dh.resolve_requirements_tree(dh.requirements_tree(true)).each do |_, pkg, _, _|
+                if pkg.type == 'compilers'
+                  h[:content] << pkg.path
+                else
+                  h[:content] << pkg.path.split('/').tap {|a| a.pop}.join('/')
+                end
+              end
+              h[:content].uniq!
+            end
+            if options.packages
+              FileUtils.mkdir_p(File.join(output_dir,'dist'))
+              h[:content].each do |pkg|
+                export_opts = OptionSet.new(options)
+                export_opts.output = File.join(output_dir,'dist')
+                export_opts.depot = name
+                ArchiveExporter.new(pkg, export_opts).export
+              end
+            else
+              FileUtils.mkdir_p(output_dir)
+            end
+          end
+        end.to_yaml
+        File.write(File.join(output_dir,"#{name}.yml"), yaml)
+        say "Export of depot '#{name}' complete: #{output_dir}"
       end
 
       private

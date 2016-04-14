@@ -94,7 +94,7 @@ module Alces
       def export
         with_depot do
           raise MissingArgumentError, 'Please supply a package path' if package_path.nil? || !package_path.include?('/')
-          ArchiveExporter.export(package_path, options.depot, options.ignore_bad, options.accept_elf, ignore_pattern)
+          ArchiveExporter.export(package_path, options)
         end
       end
 
@@ -251,13 +251,6 @@ module Alces
                         ps = Package.all(:path.like => "#{package_path}")
                         ps.empty? ? Package.all(:path.like => "#{package_path}%") : ps
                       end
-      end
-
-      def ignore_pattern
-        return nil unless options.accept_bad
-        lambda do |f|
-          options.accept_bad.split(',').any? {|glob| File.fnmatch?(glob, f)}
-        end
       end
     end
   end
