@@ -140,7 +140,7 @@ module Alces
 
       def update
         # update the specified repo, or 'base' if none specified
-        repo_name = args.first || 'base'
+        repo_name = options.args.first || 'base'
         repo = Repository.find { |r| r.name == repo_name }
         raise NotFoundError, "Repository #{repo_name} not found" if repo.nil?
         say "Updating repository: #{repo_name}"
