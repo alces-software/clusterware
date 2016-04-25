@@ -22,6 +22,7 @@
 require 'alces/tools/execution'
 require 'alces/packager/package'
 require 'alces/packager/errors'
+require 'find'
 
 module Alces
   module Packager
@@ -104,7 +105,7 @@ module Alces
             end
           end
           say 'OK'.color(:green)
-          
+
           doing 'Dependencies'
           with_spinner do
             Dir.glob(File.join(Config.dependencies_dir(options.depot),"#{type}-#{name}-#{version}*.sh")).each do |f|
@@ -204,13 +205,36 @@ module Alces
             end
             nil
           end
-          if condition && condition.first == :exists
-            say 'EXISTS'.color(:yellow)
-          elsif condition && condition.first == :unresolved
-            say "#{'MISSING'.color(:red)}\n\n#{'ERROR'.color(:red).underline}: Unable to satisfy runtime requirements: #{condition[1].join(', ')}"
+          if condition
+            if condition.first == :exists
+              say 'EXISTS'.color(:yellow)
+            elsif condition.first == :unresolved
+              say "#{'MISSING'.color(:red)}\n\n#{'ERROR'.color(:red).underline}: Unable to satisfy runtime requirements: #{condition[1].join(', ')}"
+            else
+              say "#{'BAD'.color(:red)}\n\n#{'ERROR'.color(:red).underline}: Unable to import due to failure condition: #{condition}"
+            end
+            return
           else
             say 'OK'.color(:green)
           end
+
+          doing 'Permissions'
+          with_spinner do
+            # fix permissions on:
+            #   - modulefile
+            #   - depends file
+            #   - package tree
+            tgt_module_file = File.join(dest_module_dir, tagging[:tag])
+            tgt_depends_file = File.join(dest_depends_dir, "#{[type, name, version, tagging[:tag]].join('-')}.sh")
+            tgt_pkg_dir = File.join(dest_pkg_dir, tagging[:tag])
+
+            FileUtils.chown(nil, 'gridware', tgt_depends_file) if File.exists?(tgt_depends_file)
+            FileUtils.chown(nil, 'gridware', tgt_module_file)
+            FileUtils.chown_R(nil, 'gridware', tgt_pkg_dir)
+            FileUtils.chmod_R("g+w", tgt_pkg_dir)
+            FileUtils.chmod("g+xs", directories_within(tgt_pkg_dir))
+          end
+          say 'OK'.color(:green)
         end
       end
 
@@ -219,6 +243,8 @@ module Alces
         dest_compiler_module_dir = File.join(Config.modules_dir(options.depot), 'compilers', name)
         dest_lib_module_dir = File.join(Config.modules_dir(options.depot), 'libs', name)
         dest_pkg_dir = File.join(Config.packages_dir(options.depot), 'compilers', name)
+        dest_depends_dir = Config.dependencies_dir(options.depot)
+
         title "Processing #{package_path}"
         doing "Importing"
         exists = false
@@ -238,7 +264,7 @@ module Alces
             File.write(compiler_module_file,s)
             s = File.read(lib_module_file).gsub('_DEPOT_',depot_path)
             File.write(lib_module_file,s)
-            (rewritten || []).each do |f|
+            (@metadata[:rewritten] || []).each do |f|
               fname = File.join(dir, ENV['cw_DIST'], 'pkg', 'compilers', name, version, f)
               s = File.read(fname).gsub('_DEPOT_',depot_path)
               File.write(fname,s)
@@ -266,9 +292,30 @@ module Alces
         end
         if exists
           say 'EXISTS'.color(:yellow)
+          return
         else
           say 'OK'.color(:green)
         end
+
+        doing 'Permissions'
+        with_spinner do
+          # fix permissions on:
+          #   - modulefiles
+          #   - depends file
+          #   - package tree
+          tgt_compiler_module_file = File.join(dest_compiler_module_dir, version)
+          tgt_lib_module_file = File.join(dest_lib_module_dir, version)
+          tgt_depends_file = File.join(dest_depends_dir, "#{['compilers', name, version].join('-')}.sh")
+          tgt_pkg_dir = File.join(dest_pkg_dir, version)
+
+          FileUtils.chown(nil, 'gridware', tgt_depends_file) if File.exists?(tgt_depends_file)
+          FileUtils.chown(nil, 'gridware', tgt_compiler_module_file)
+          FileUtils.chown(nil, 'gridware', tgt_lib_module_file)
+          FileUtils.chown_R(nil, 'gridware', tgt_pkg_dir)
+          FileUtils.chmod_R("g+w", tgt_pkg_dir)
+          FileUtils.chmod("g+xs", directories_within(tgt_pkg_dir))
+        end
+        say 'OK'.color(:green)
       end
 
       def load_metadata(dir)
@@ -285,6 +332,15 @@ module Alces
       
       def depot_path
         @depot_path ||= Depot.hash_path_for(options.depot)
+      end
+
+      def directories_within(base)
+        dots = ['.','..']
+        [].tap do |a|
+          Find.find(base) do |f|
+            a << f if File.directory?(f) && !(dots.include?(File.basename(f)))
+          end
+        end
       end
     end
   end
