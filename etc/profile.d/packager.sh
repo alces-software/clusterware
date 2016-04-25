@@ -17,7 +17,7 @@ if [ -d "$(_cw_root)"/opt/Modules ]; then
     else
         export -f module
     fi
-    MODULEPATH=`sed -n 's/[      #].*$//; /./H; $ { x; s/^\n//; s/\n/:/g; p; }' "$(_cw_root)"/etc/modulespath`
+    MODULEPATH=`sed -n 's/[      #].*$//; /./H; $ { x; s/^\n//; s/\n/:/g; p; }' "$(_cw_root)"/etc/gridware/global/modulespath`
     if [ -f "$HOME/.modulespath" ]; then
         MODULEPATH=`sed -n 's/[     #].*$//; /./H; $ { x; s/^\n//; s/\n/:/g; p; }' "$HOME/.modulespath"`:$MODULEPATH
     fi

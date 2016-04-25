@@ -90,21 +90,17 @@ module Alces
         if !enabled?
           say("#{"WARNING!".color(:yellow)} Depot already disabled: #{name}")
         else
-          if Process.euid == 0 || user_modulespaths.include?(target)
-            title "Disabling depot: #{name}"
-            doing 'Disable'
-            modulespaths { |paths| paths.reject! {|p| p == target} }
-            puts "module unuse #{target}"
-            say 'OK'.color(:green)
-          else
-            raise InvalidSelectionError, "Unable to disable repository in global configuration."
-          end
+          title "Disabling depot: #{name}"
+          doing 'Disable'
+          modulespaths { |paths| paths.reject! {|p| p == target} }
+          puts "module unuse #{target}"
+          say 'OK'.color(:green)
         end
         notify_depot(name,'disabled')
       end
 
       def enabled?
-        all_modulespaths.include?(target)
+        global_modulespaths.include?(target)
       end
 
       def init(disabled = false)
@@ -227,25 +223,12 @@ EOF
       end
 
       def global_modulespaths
-        f = File.join(ENV['cw_ROOT'], 'etc', 'modulespath')
+        f = File.join(ENV['cw_ROOT'], 'etc', 'gridware', 'global', 'modulespath')
         paths = File.exist?(f) ? File.read(f).split("\n") : []
-      end
-
-      def user_modulespaths
-        f = File.join(ENV['HOME'],'.modulespath')
-        paths = File.exist?(f) ? File.read(f).split("\n") : []
-      end
-
-      def all_modulespaths
-        global_modulespaths + user_modulespaths
       end
 
       def modulespaths(&block)
-        f = if Process.euid == 0
-              File.join(ENV['cw_ROOT'], 'etc', 'modulespath')
-            else
-              File.join(ENV['HOME'],'.modulespath')
-            end
+        f = File.join(ENV['cw_ROOT'], 'etc', 'gridware', 'global', 'modulespath')
         paths = File.exist?(f) ? File.read(f).split("\n") : []
         if block.call(paths)
           File.write(f, paths.join("\n"))

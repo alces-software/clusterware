@@ -81,7 +81,8 @@ if [ ! -d "${target}/etc" ]; then
     cp -R "${source}/etc" "${target}"
     sed -i -e "s/_OS_/${os}/g" "${target}/etc"/distro.*
     sed -i -e "s,_ROOT_,${target},g" "${target}/etc/ruby.rc" \
-        "${target}/etc/modulespath" \
+        "${target}/etc/gridware/global/modulespath" \
+        "${target}/etc/profile.d/packager.csh" \
         "${target}"/etc/sudoers.d/*
     if [ "$cw_BUILD_dist_url" ]; then
         sed -e "s,^cw_SERVICE_url=.*,cw_SERVICE_url=${cw_BUILD_dist_url}/,g" -i "${target}/etc"/serviceware.rc
@@ -141,7 +142,7 @@ say_done $?
 
 title "Updating gridware permissions"
 doing 'Configure'
-access_targets=(/var/cache/gridware /var/log/gridware)
+access_targets=(/var/cache/gridware /var/log/gridware "${target}"/etc/gridware/global)
 chmod -R g+rw "${access_targets[@]}"
 find "${access_targets[@]}" -type d -exec chmod 2775 {} \;
 chgrp -R gridware "${access_targets[@]}"

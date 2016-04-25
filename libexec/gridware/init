@@ -77,10 +77,11 @@ _create_gridware_configuration() {
 ---
 :log_root: /var/log/gridware
 :repo_paths:
- - ${cw_ROOT}/var/lib/gridware/repos/base
+ - ${cw_ROOT}/var/lib/gridware/repos/main
+# - ${cw_ROOT}/var/lib/gridware/repos/volatile
  - ${cw_GRIDWARE_root}/etc/repos/local
 :depot_repo_paths:
- - ${cw_ROOT}/var/lib/gridware/depots/base
+ - ${cw_ROOT}/var/lib/gridware/depots/official
  - ${cw_GRIDWARE_root}/etc/depots/local
 :depotroot: ${cw_GRIDWARE_root}
 :default_depot: ${cw_GRIDWARE_default_depot:-local}
@@ -95,9 +96,9 @@ EOF
 _update_modulespath() {
     local name
     name="$1"
-    if ! grep -q '${cw_GRIDWARE_root}/${name}/\$cw_DIST/etc/modules' "${cw_ROOT}"/etc/modulespath; then
+    if ! grep -q '${cw_GRIDWARE_root}/${name}/\$cw_DIST/etc/modules' "${cw_ROOT}"/etc/gridware/global/modulespath; then
 	sed -e "/^#=Alces Gridware Depots/a ${cw_GRIDWARE_root}/${name}/\$cw_DIST/etc/modules" \
-            -i "${cw_ROOT}"/etc/modulespath
+            -i "${cw_ROOT}"/etc/gridware/global/modulespath
     fi
 }
 
