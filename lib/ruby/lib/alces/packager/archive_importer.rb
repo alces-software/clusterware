@@ -195,6 +195,9 @@ module Alces
               FileUtils.mkdir_p(dest_pkg_dir)
               FileUtils.mv(pkg_dir, dest_pkg_dir)
               if File.exists?(depends_file)
+                s = File.read(depends_file)
+                # XXX - bit of a hack!
+                File.write(depends_file,s.gsub('if ! yum install', 'if ! sudo /usr/bin/yum install'))
                 FileUtils.mkdir_p(dest_depends_dir)
                 FileUtils.mv(depends_file, dest_depends_dir)
               end
@@ -253,6 +256,10 @@ module Alces
             FileUtils.mkdir_p(dest_pkg_dir)
             FileUtils.mv(pkg_dir, dest_pkg_dir)
             if File.exists?(depends_file)
+              s = File.read(depends_file)
+              # XXX - bit of a hack!
+              File.write(depends_file,s.gsub('if ! yum install', 'if ! sudo /usr/bin/yum install'))
+              FileUtils.mkdir_p(dest_depends_dir)
               FileUtils.mv(depends_file, dest_depends_dir)
             end
           end

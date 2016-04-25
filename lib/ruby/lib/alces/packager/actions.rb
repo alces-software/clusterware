@@ -656,11 +656,11 @@ EOF
           case ENV['cw_DIST']
           when /^el/
             generate_dependency_script(phase, 'el', 'rpm -q %s',
-                                       'yum install -y --quiet %s',
+                                       'sudo /usr/bin/yum install -y --quiet %s',
                                        'yum info %s >/dev/null 2>/dev/null')
           when /^ubuntu/
             generate_dependency_script(phase, 'ubuntu', 'dpkg -l %s',
-                                       'apt-get -qq install -y %s',
+                                       'sudo /usr/bin/apt-get -qq install -y %s',
                                        'apt-cache show %s >/dev/null 2>/dev/null')
           end
         end

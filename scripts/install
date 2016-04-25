@@ -80,19 +80,23 @@ cp -R "${source}/bin" "${source}/lib" "${source}/libexec" "${target}"
 if [ ! -d "${target}/etc" ]; then
     cp -R "${source}/etc" "${target}"
     sed -i -e "s/_OS_/${os}/g" "${target}/etc"/distro.*
-    sed -i -e "s,_ROOT_,${target},g" "${target}/etc/ruby.rc" "${target}/etc/modulespath"
+    sed -i -e "s,_ROOT_,${target},g" "${target}/etc/ruby.rc" \
+        "${target}/etc/modulespath" \
+        "${target}"/etc/sudoers.d/*
     if [ "$cw_BUILD_dist_url" ]; then
         sed -e "s,^cw_SERVICE_url=.*,cw_SERVICE_url=${cw_BUILD_dist_url}/,g" -i "${target}/etc"/serviceware.rc
     else
-	grep "^cw_SERVICE_registry" ${source}/scripts/registry.rc >> "${target}/etc"/serviceware.rc
+        grep "^cw_SERVICE_registry" ${source}/scripts/registry.rc >> "${target}/etc"/serviceware.rc
     fi
     rm -f "${target}"/etc/handlers/.gitkeep
     rm -f "${target}"/etc/session/.gitkeep
     rm -f "${target}"/etc/services/.gitkeep
     rm -f "${target}"/etc/storage/.gitkeep
     chmod 0600 "${target}"/etc/naming.rc
+    chmod 0400 "${target}"/etc/sudoers.d/*
+    chmod 0750 "${target}"/etc/sudoers.d
     sed -e "s,_SECRET_,${cw_BUILD_naming_auth},g" \
-	-i "${target}"/etc/naming.rc
+        -i "${target}"/etc/naming.rc
     cp -R "${source}/dist/distro/${os}" "${target}"/etc/distro
 fi
 mkdir -p /var/log/clusterware
@@ -150,21 +154,21 @@ else
     doing 'Initialize'
     if [ ! -f "${target}"/var/lib/gridware/repos/base/repo.yml ]; then
         mkdir -p "${target}"/var/lib/gridware/repos/base
-	cp "${source}"/dist/repos/base/repo.yml "${target}"/var/lib/gridware/repos/base/repo.yml
+        cp "${source}"/dist/repos/base/repo.yml "${target}"/var/lib/gridware/repos/base/repo.yml
     fi
 
     if [ "$cw_BUILD_repos_url" ]; then
         mkdir -p "${target}"/var/lib/gridware/repos/base/pkg
         tar -C "${target}"/var/lib/gridware/repos/base/pkg -xvzf "${source}"/packager-base.tar.gz &> "${dep_logs}/gridware-init.log"
     else
-	cat <<EOF > "${target}"/etc/gridware.yml
+        cat <<EOF > "${target}"/etc/gridware.yml
 :dbroot: ${dep_build}
 :log_root: ${dep_build}
 :repo_paths:
  - ${target}/var/lib/gridware/repos/base
 EOF
         "${target}/bin/alces" gridware update base &> "${dep_logs}/gridware-init.log"
-	rm -f "${target}"/etc/gridware.yml
+        rm -f "${target}"/etc/gridware.yml
     fi
 
     chmod -R g+rw "${target}"/var/lib/gridware/repos/base/pkg
@@ -180,21 +184,21 @@ else
     doing 'Initialize'
     if [ ! -f "${target}"/var/lib/gridware/depots/base/repo.yml ]; then
         mkdir -p "${target}"/var/lib/gridware/depots/base
-	cp "${source}"/dist/depots/base/repo.yml "${target}"/var/lib/gridware/depots/base/repo.yml
+        cp "${source}"/dist/depots/base/repo.yml "${target}"/var/lib/gridware/depots/base/repo.yml
     fi
 
     if [ "$cw_BUILD_depots_url" ]; then
         mkdir -p "${target}"/var/lib/gridware/depots/base/data
         tar -C "${target}"/var/lib/gridware/depots/base/data -xvzf "${source}"/gridware-depots.tar.gz &> "${dep_logs}/gridware-depots-init.log"
     else
-	cat <<EOF > "${target}"/etc/gridware.yml
+        cat <<EOF > "${target}"/etc/gridware.yml
 :dbroot: ${dep_build}
 :log_root: ${dep_build}
 :depot_repo_paths:
  - ${target}/var/lib/gridware/depots/base
 EOF
         "${target}/bin/alces" gridware depot update base &> "${dep_logs}/gridware-depots-init.log"
-	rm -f "${target}"/etc/gridware.yml
+        rm -f "${target}"/etc/gridware.yml
     fi
 
     chmod -R g+rw "${target}"/var/lib/gridware/depots/base/data
@@ -212,7 +216,7 @@ else
         mkdir -p "${target}"/var/lib/handler/repos/base
         tar -C "${target}"/var/lib/handler/repos/base -xvzf "${source}"/clusterware-handlers.tar.gz &> "${dep_logs}/handler-init.log"
     else
-	export cw_HANDLER_rev
+        export cw_HANDLER_rev
         "${target}/bin/alces" handler update &>> "${dep_logs}/handler-init.log"
     fi
 fi
@@ -227,7 +231,7 @@ else
         mkdir -p "${target}"/var/lib/sessions/repos/base
         tar -C "${target}"/var/lib/sessions/repos/base -xvzf "${source}"/clusterware-sessions.tar.gz &> "${dep_logs}/session-init.log"
     else
-	export cw_SESSION_rev
+        export cw_SESSION_rev
         "${target}/bin/alces" session update &> "${dep_logs}/session-init.log"
     fi
     "${target}/bin/alces" session enable default &>> "${dep_logs}/session-init.log"
@@ -243,7 +247,7 @@ else
         mkdir -p "${target}"/var/lib/services/repos/base
         tar -C "${target}"/var/lib/services/repos/base -xvzf "${source}"/clusterware-services.tar.gz &> "${dep_logs}/services-init.log"
     else
-	export cw_SERVICE_rev
+        export cw_SERVICE_rev
         "${target}/bin/alces" service update &> "${dep_logs}/services-init.log"
     fi
 fi
@@ -258,7 +262,7 @@ else
         mkdir -p "${target}"/var/lib/storage/repos/base
         tar -C "${target}"/var/lib/storage/repos/base -xvzf "${source}"/clusterware-storage.tar.gz &> "${dep_logs}/services-init.log"
     else
-	export cw_STORAGE_rev
+        export cw_STORAGE_rev
         "${target}/bin/alces" storage update &> "${dep_logs}/storage-init.log"
     fi
 fi
@@ -281,14 +285,23 @@ say_done $?
 
 title "Installing logrotate hooks"
 doing 'Install'
-cp "${source}/dist/logrotate/clusterware" /etc/logrotate.d
+sed -e "s,_ROOT_,${target},g" "${source}/dist/logrotate/clusterware" > /etc/logrotate.d/clusterware
+say_done $?
+
+title "Installing sudoers hooks"
+doing 'Install'
+for a in "${source}"/dist/sudoers/*; do
+    t="/etc/sudoers.d/$(basename "${a}")"
+    sed -e "s,_ROOT_,${target},g" "${a}" > "${t}"
+    chmod 0400 "${t}"
+done
 say_done $?
 
 title "Updating system files"
 doing 'Update'
 if ! grep -q 'account \[default=ignore success=1\] pam_succeed_if.so quiet user ingroup adm' /etc/pam.d/sshd; then
     sed -i '/^account\s*required\s*pam_nologin.so/i account [default=ignore success=1] pam_succeed_if.so quiet user ingroup adm' \
-	/etc/pam.d/sshd
+        /etc/pam.d/sshd
 fi
 say_done $?
 

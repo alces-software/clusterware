@@ -210,11 +210,11 @@ EOF
       def notify_depot(name, state)
         if ENV['cw_GRIDWARE_notify'] == 'true'
           id = File.basename(File.readlink(depot_path(name)))
-          run(File.join(ENV['cw_ROOT'],'libexec','share','trigger-event'),
-              '--local','nfs-export',depot_install_path(id)) do |r|
+          run(File.join(ENV['cw_ROOT'],'libexec','share','trigger-depot-event'),
+              'nfs-export',depot_install_path(id)) do |r|
             raise DepotError, "Unable to trigger depot event." unless r.success?
           end
-          run(File.join(ENV['cw_ROOT'],'libexec','share','trigger-event'),
+          run(File.join(ENV['cw_ROOT'],'libexec','share','trigger-depot-event'),
               'gridware-depots',
               "#{id}:#{name}:#{state}") do |r|
             raise DepotError, "Unable to trigger depot event." unless r.success?
