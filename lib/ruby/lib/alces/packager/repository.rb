@@ -125,27 +125,41 @@ module Alces
 
       def update!
         if metadata.key?(:source)
-          r = Alces.git.sync(package_path, metadata[:source])
-          case r
-          when /^Branch master set up/, /^Updating/
+          case Alces.git.sync(repo_path, metadata[:source])
+          when /^Branch master set up/
             # force reload of packages if needed
             @packages = nil
-            :ok
+            [:ok, head_revision]
+          when /^Updating (\S*)\.\.(\S*)/
+            cur = $1
+            tgt = $2
+            head_rev = head_revision
+            if head_rev != tgt
+              [:outofsync, head_rev]
+            else
+              # force reload of packages if needed
+              @packages = nil
+              [:ok, tgt]
+            end
           when /^Already up-to-date./
-            :uptodate
+            [:uptodate, head_revision]
           else
             raise "Unrecognized response from synchronization: #{r.chomp}"
           end
         else
-          :not_updateable
+          [:not_updateable, nil]
         end
       rescue
         raise "Unable to sync repo: '#{name}' (#{$!.message})"
       end
 
       private
+      def repo_path
+        @repo_path ||= metadata[:schema] == 1 ? package_path : path
+      end
+
       def head_revision
-        Alces.git.head_revision(package_path)[0..6] rescue 'unknown'
+        Alces.git.head_revision(repo_path)[0..6] rescue 'unknown'
       end
 
       def load_packages

@@ -66,7 +66,7 @@ module Alces
       end
 
       def sync(path, url, branch = 'master')
-        if File.directory?(path)
+        if File.directory?(File.join(path,'.git'))
           if File.writable?(path)
             with_remote(Grit::Repo.new(path), url) do |repo, remote|
               pull(repo, remote, branch)
@@ -89,3 +89,15 @@ module Alces
     end
   end
 end
+
+# Grit does not support Ruby 2.0 right now
+class String
+  if self.method_defined?(:ord)
+    def getord(offset); self[offset].ord; end
+  else
+    alias :getord :[]
+  end
+end
+
+Object.send(:remove_const,:PACK_IDX_SIGNATURE)
+PACK_IDX_SIGNATURE = "\377tOc".b

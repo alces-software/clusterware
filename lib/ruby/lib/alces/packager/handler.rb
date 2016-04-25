@@ -139,20 +139,23 @@ module Alces
       end
 
       def update
-        # update the specified repo, or 'base' if none specified
-        repo_name = options.args.first || 'base'
+        # update the specified repo, or 'main' if none specified
+        repo_name = options.args.first || 'main'
         repo = Repository.find { |r| r.name == repo_name }
         raise NotFoundError, "Repository #{repo_name} not found" if repo.nil?
         say "Updating repository: #{repo_name}"
         doing 'Update'
         begin
-          case repo.update!
+          status, rev = repo.update!
+          case status
           when :ok
-            say 'OK'.color(:green)
+            say "#{'OK'.color(:green)} (At: #{rev})"
           when :uptodate
-            say "#{'OK'.color(:green)} (Already up-to-date)"
+            say "#{'OK'.color(:green)} (Up-to-date: #{rev})"
           when :not_updateable
             say "#{'SKIP'.color(:yellow)} (Not updateable, no remote configured)"
+          when :outofsync
+            say "#{'SKIP'.color(:yellow)} (Out of sync: #{rev})"
           end
         rescue
           say "#{'FAIL'.color(:red)} (#{$!.message})"

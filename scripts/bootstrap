@@ -80,7 +80,9 @@ EOF
         curl ${progress} -L "${cw_BUILD_repos_url}/clusterware-sessions.tar.gz" > "${src_dir}/clusterware-sessions.tar.gz"
         curl ${progress} -L "${cw_BUILD_repos_url}/clusterware-services.tar.gz" > "${src_dir}/clusterware-services.tar.gz"
         curl ${progress} -L "${cw_BUILD_repos_url}/clusterware-storage.tar.gz" > "${src_dir}/clusterware-storage.tar.gz"
-        curl ${progress} -L "${cw_BUILD_repos_url}/packager-base.tar.gz" > "${src_dir}/packager-base.tar.gz"
+        curl ${progress} -L "${cw_BUILD_repos_url}/gridware-packages-main.tar.gz" > "${src_dir}/gridware-packages-main.tar.gz"
+        curl ${progress} -L "${cw_BUILD_repos_url}/gridware-packages-volatile.tar.gz" > "${src_dir}/gridware-packages-volatile.tar.gz"
+        curl ${progress} -L "${cw_BUILD_repos_url}/gridware-depots.tar.gz" > "${src_dir}/gridware-depots.tar.gz"
     fi
 fi
 

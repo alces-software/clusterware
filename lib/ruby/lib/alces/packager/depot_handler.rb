@@ -71,8 +71,8 @@ module Alces
       end
 
       def update
-        # update the specified repo, or 'base' if none specified
-        depot_repo_name = options.args.first || 'base'
+        # update the specified repo, or 'official' if none specified
+        depot_repo_name = options.args.first || 'official'
         repo = DepotRepo.get(depot_repo_name)
         raise NotFoundError, "Repository '#{depot_repo_name}' not found" if repo.nil?
         say "Updating depot repository: #{depot_repo_name}"
