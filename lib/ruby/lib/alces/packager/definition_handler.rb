@@ -115,16 +115,9 @@ module Alces
         say("Installing #{colored_path(defn)}".tap do |s|
           s << " (#{variant})" unless variant.nil?
             end)
-        if options.binary
-          # try for a binary version first
-          archive_name = [defn.type, defn.name, defn.version].tap do |a|
-            a[1] = "#{defn.name}_#{variant}" if variant && variant != 'default'
-          end.join('/')
-          archive_path = DepotHandler.archive_path_for(Config.default_binary_url,archive_name)
-          if DepotHandler.remote_package_exists?(archive_path)
-            ArchiveImporter.new(archive_path, options).import
-            return
-          end
+        if options.binary && archive_path = binary_path(defn, variant)
+          ArchiveImporter.new(archive_path, options).import
+          return
         end
         opts = install_opts.tap do |h|
           h[:variant] = variant unless variant.nil?
@@ -155,9 +148,11 @@ EOF
         if options.yes || (!options.non_interactive && confirm(msg))
           missing_params = {}
           missing.each do |_, pkg, _, build_arg_hash|
-            (build_arg_hash[:params] || '').split(',').each do |p|
-              if !params(defn)[p.to_sym]
-                (missing_params[pkg] ||= []) << p
+            unless (options.binary || options.binary_depends) && binary_available?(pkg, build_arg_hash[:variant])
+              (build_arg_hash[:params] || '').split(',').each do |p|
+                if !params(defn)[p.to_sym]
+                  (missing_params[pkg] ||= []) << p
+                end
               end
             end
           end
@@ -229,6 +224,21 @@ EOF
           params: params,
           modules: options.modules
         }
+      end
+
+      def binary_available?(pkg, variant)
+        !binary_path(pkg, variant).nil?
+      end
+
+      def binary_path(pkg, variant)
+        # try for a binary version first
+        archive_name = [pkg.type, pkg.name, pkg.version].tap do |a|
+          a[1] = "#{pkg.name}_#{variant}" if variant && variant != 'default'
+        end.join('/')
+        archive_path = DepotHandler.archive_path_for(Config.default_binary_url,archive_name)
+        if DepotHandler.remote_package_exists?(archive_path)
+          archive_path
+        end
       end
     end
   end
