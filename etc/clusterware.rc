@@ -4,7 +4,7 @@
 ## Copyright (c) 2015-2016 Alces Software Ltd
 ##
 ################################################################################
-cw_RELEASE=2016.06
+cw_RELEASE=2016.2
 cw_VERSION=1.5.0
 cw_CODENAME="Envious Eagle"
 cw_STATUS=unconfigured
