@@ -64,6 +64,7 @@ module Alces
             variant = (rest.first =~ /^[A-Za-z]/ ? rest.shift : 'default')
             path = [path, *rest].join(' ')
             req = package_or_definition(path, variant)
+            raise NotFoundError, "Couldn't resolve a package for #{path} (#{variant})" if req.nil?
             reqs.delete_if {|e| e[1] == req}
             reqs.unshift(
               [
