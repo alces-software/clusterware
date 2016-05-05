@@ -20,6 +20,10 @@ This project adheres to [Semantic Versioning](http://semver.org/).
 - The AWS CLI utility now has a serviceware modulefile and is loaded for users by default (clusterware-services#16)
 - The Gridware repository has been split into "main" and "volatile" repositories; the "volatile" repository (which is disabled by default) contains all existing Gridware and the "main" repository contains Gridware that has undergone verification for use on Clusterware systems (#89)
 - Enhanced the login banner to incorporate an Alces Flight logo in the medium of ASCII art (#102)
+- Added `alces configure autoscaling` action (#128)
+- If autoscaling is active, show a message at login (#129)
+- Depot and package repositories are updated at boot (#132)
+- Distro dependency installation for Gridware packages is now available in `/var/log/gridware/depends.log` (#133)
 
 ### Changed
 - The algorithm for determining the memory limit (`vmem`) for SGE execution hosts has been updated so as not to exceed total RAM + swap (clusterware-handlers#22)
@@ -28,6 +32,8 @@ This project adheres to [Semantic Versioning](http://semver.org/).
 - Version comparisons have been enhanced to deal more intelligently with package versions that don't conform to sematic versioning (#98)
 - When updating package a repository, better feedback is now provided regarding what revision has been selected, or if the local tree has become out of sync with the upstream repository somehow (#109)
 - Gridware operations that could cause errors when being executed under non-superuser accounts have been made available to all users within the `gridware` group (#88)
+- `alces configure` is now `alces configure node` (#83)
+- The default memory limit for SGE jobs has been increased from 1GiB to 1.5GiB (clusterware-services#23)
 
 ### Fixed
 - Correctly parse output from packager scripts when output is less than 10 lines long (#96)
@@ -36,6 +42,7 @@ This project adheres to [Semantic Versioning](http://semver.org/).
 - Prevent dependency data from being installed in the wrong place if a package is imported before any others hae been built (#94)
 - Set permissions correctly to provide access to `gridware` group members when packages are imported (#105)
 - Remove hard-coded path in the Clusterware configuration files for `logrotate` (#104)
+- Allow Gridware distro dependencies to be installed while an `apps/python` module is loaded (#131)
 
 #### Issues/PRs
 
