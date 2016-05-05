@@ -149,7 +149,7 @@ module Alces
           when Metadata
             req.version.bold
           when Package
-            req.version.color(IoHandler::PRIM) + '/' + req.tag.color(IoHandler::SEC1)
+            req.version.color(IoHandler.color(:prim)) + '/' + req.tag.color(IoHandler.color(:sec1))
           end
         puts '' << prefix << ' ' << colored_path(node.name) << " -#{installed?(path, variant) ? "-" : "\u2717"}->".color(installed?(path, variant) ? :green : :red).bold << " " << p
 
