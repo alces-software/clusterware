@@ -229,7 +229,7 @@ module Alces
             FileUtils.chown(nil, 'gridware', tgt_depends_file) if File.exists?(tgt_depends_file)
             FileUtils.chown(nil, 'gridware', tgt_module_file)
             FileUtils.chown_R(nil, 'gridware', tgt_pkg_dir)
-            FileUtils.chmod_R("g+w", tgt_pkg_dir)
+            FileUtils.chmod_R("g+w", tgt_pkg_dir, force: true)
             FileUtils.chmod("g+xs", directories_within(tgt_pkg_dir))
           end
           say 'OK'.color(:green)
@@ -308,7 +308,7 @@ module Alces
           FileUtils.chown(nil, 'gridware', tgt_compiler_module_file)
           FileUtils.chown(nil, 'gridware', tgt_lib_module_file)
           FileUtils.chown_R(nil, 'gridware', tgt_pkg_dir)
-          FileUtils.chmod_R("g+w", tgt_pkg_dir)
+          FileUtils.chmod_R("g+w", tgt_pkg_dir, force: true)
           FileUtils.chmod("g+xs", directories_within(tgt_pkg_dir))
         end
         say 'OK'.color(:green)
