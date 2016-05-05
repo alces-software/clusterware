@@ -1,0 +1,15 @@
+################################################################################
+##
+## Alces Clusterware - Clusterware MOTD banner
+## Copyright (c) 2016 Stephen F. Norledge and Alces Software Ltd
+##
+################################################################################
+TIPS:
+
+'module avail'            - show available application environments
+'module add <modulename>' - add a module to your current environment
+
+'alces session'           - start and manage interactive sessions
+'alces gridware'          - manage software for your environment
+'alces howto'             - guides on how to use your research environment
+'alces template'          - tailored job script templates
