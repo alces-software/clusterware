@@ -24,6 +24,8 @@ This project adheres to [Semantic Versioning](http://semver.org/).
 - If autoscaling is active, show a message at login (#129)
 - Depot and package repositories are updated at boot (#132)
 - Distro dependency installation for Gridware packages is now available in `/var/log/gridware/depends.log` (#133)
+- Allow users to configure how noisy their login banners are (#108)
+- User-selectible theme for dark/light terminals (#103)
 
 ### Changed
 - The algorithm for determining the memory limit (`vmem`) for SGE execution hosts has been updated so as not to exceed total RAM + swap (clusterware-handlers#22)
