@@ -27,6 +27,14 @@ main() {
     shift
 
     case $action in
+        help|node|autoscaling)
+            help_for_${action}
+            ;;
+        ?*)
+            echo "${cw_BINNAME}: no such topic: ${action}"
+            echo ""
+            general_help
+            ;;
         *)
             general_help
             ;;
@@ -43,17 +51,59 @@ general_help() {
 
   DESCRIPTION:
 
-    Configure your Alces Clusterware environment.
+    Perform configuration tasks.
 
   COMMANDS:
 
 EOF
-printf "    %-22s  %s\n" "$binname help" "More help about this command."
-printf "    %-22s  %s\n" "$binname" "Perform configuration."
+printf "    %-28s  %s\n" "$binname help" "More help about this command."
+printf "    %-28s  %s\n" "$binname node" "Perform initial node setup."
+printf "    %-28s  %s\n" "$binname autoscaling" "Control autoscaling behaviour."
 cat <<EOF
 
 Please report bugs to support@alces-software.com
 Alces Software home page: <http://alces-software.com>
+EOF
+}
+
+help_for_node() {
+    cat <<EOF
+  SYNOPSIS:
+
+    alces configure node
+
+  DESCRIPTION:
+
+    Perform initial node configuration.
+
+EOF
+}
+
+help_for_autoscaling() {
+    cat <<EOF
+  SYNOPSIS:
+
+    alces configure autoscaling [enable|disable|status]
+
+  DESCRIPTION:
+
+    Change or retrieve autoscaling behaviour.  If no action is
+    specified, display autoscaling status.
+
+EOF
+}
+
+help_for_help() {
+    cat <<EOF
+  SYNOPSIS:
+
+    alces configure help [<command>]
+
+  DESCRIPTION:
+
+    Get help with configure commands.  If no <command> is specified,
+    show some general help.
+
 EOF
 }
 
