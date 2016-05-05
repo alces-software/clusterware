@@ -45,6 +45,7 @@ This project adheres to [Semantic Versioning](http://semver.org/).
 - Set permissions correctly to provide access to `gridware` group members when packages are imported (#105)
 - Remove hard-coded path in the Clusterware configuration files for `logrotate` (#104)
 - Allow Gridware distro dependencies to be installed while an `apps/python` module is loaded (#131)
+- Tolerate broken links when updating file modes during import (#135)
 
 #### Issues/PRs
 
