@@ -34,18 +34,20 @@ main() {
     operation="$1"
     if files_load_config --optional instance-aws config/cluster; then
         if _can_autoscale; then
-            if [ "$operation" == "status" ]; then
+            if [ -z "$operation" -o "$operation" == "status" ]; then
                 echo "Autoscaling: ${cw_INSTANCE_aws_autoscaling}"
             elif [ "$operation" == "enable" ]; then
                 if [ "${cw_INSTANCE_aws_autoscaling}" == "disabled" ]; then
-                    sed -i -e 's/^cw_INSTANCE_aws_autoscaling=.*/cw_INSTANCE_aws_autoscaling=enabled/'
+                    sed -i -e 's/^cw_INSTANCE_aws_autoscaling=.*/cw_INSTANCE_aws_autoscaling=enabled/' \
+                        "${cw_ROOT}"/etc/config/cluster/instance-aws.rc
                     action_die "autoscaling enabled" 0
                 else
                     action_die "autoscaling already enabled" 0
                 fi
             elif [ "$operation" == "disable" ]; then
                 if [ "${cw_INSTANCE_aws_autoscaling}" == "enabled" ]; then
-                    sed -i -e 's/^cw_INSTANCE_aws_autoscaling=.*/cw_INSTANCE_aws_autoscaling=disabled/'
+                    sed -i -e 's/^cw_INSTANCE_aws_autoscaling=.*/cw_INSTANCE_aws_autoscaling=disabled/' \
+                        "${cw_ROOT}"/etc/config/cluster/instance-aws.rc
                     action_die "autoscaling disabled" 0
                 else
                     action_die "autoscaling already disabled" 0
