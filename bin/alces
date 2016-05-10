@@ -106,6 +106,10 @@ setup() {
         exit 1
     fi
     kernel_load
+    test_vars=$(declare | grep '^cw_TEST_.*=' | cut -f1 -d'=')
+    if [ "${test_vars}" ]; then
+        export ${test_vars}
+    fi
     export cw_BINNAME="alces"
     export cw_CMDDIR="$cw_ROOT/libexec/actions"
     if [ -t 2 ]; then
