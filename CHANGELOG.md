@@ -26,6 +26,8 @@ This project adheres to [Semantic Versioning](http://semver.org/).
 - Distro dependency installation for Gridware packages is now available in `/var/log/gridware/depends.log` (#133)
 - Allow users to configure how noisy their login banners are (#108)
 - User-selectible theme for dark/light terminals (#103)
+- Show shorter banner/login messages for non-master instances (#137)
+- Created `cluster-customizer` handler to allow additional scripts to be executed during node lifecycle (clusterware-handlers#25, #113)
 
 ### Changed
 - The algorithm for determining the memory limit (`vmem`) for SGE execution hosts has been updated so as not to exceed total RAM + swap (clusterware-handlers#22)
