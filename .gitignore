@@ -4,3 +4,8 @@
 lib/ruby/vendor/ruby
 tmp
 *.pyc
+
+# Created by `scripts/develop`.
+bin/bin
+lib/lib
+libexec/libexec
