@@ -4,7 +4,7 @@
 ## Copyright (c) 2015-2016 Alces Software Ltd
 ##
 ################################################################################
-cw_RELEASE=2016.07
+cw_RELEASE=2016.3-alpha
 cw_VERSION=1.6.0-dev
 cw_CODENAME="Fluffy Falcon"
 cw_STATUS=unconfigured

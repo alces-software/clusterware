@@ -24,10 +24,29 @@ require 'alces/tools/logging'
 module Alces
   module Packager
     module IoHandler
-      PRIM = 'rgb_' + [64,136,184].map {|i| sprintf('%02x', i) }.join
-      SEC1 = 'rgb_' + [77,91,194].map {|i| sprintf('%02x', i) }.join
-      SEC2 = 'rgb_' + [255,206,78].map {|i| sprintf('%02x', i) }.join
-      COMP = 'rgb_' + [255,177,78].map {|i| sprintf('%02x', i) }.join
+      THEMES = {
+        'dark' => {
+          prim: 'rgb_' + [64,136,184].map {|i| sprintf('%02x', i) }.join,
+          sec1: 'rgb_' + [77,91,194].map {|i| sprintf('%02x', i) }.join,
+          sec2: 'rgb_' + [255,206,78].map {|i| sprintf('%02x', i) }.join,
+          mid: 'rgb_' + [140,0,140].map {|i| sprintf('%02x', i) }.join,
+          comp: 'rgb_' + [255,177,78].map {|i| sprintf('%02x', i) }.join
+        },
+        'light' => {
+          prim: 'rgb_' + [32,102,152].map {|i| sprintf('%02x', i) }.join,
+          sec1: 'rgb_' + [45,59,162].map {|i| sprintf('%02x', i) }.join,
+          sec2: 'rgb_' + [177,128,0].map {|i| sprintf('%02x', i) }.join,
+          mid: 'rgb_' + [96,0,96].map {|i| sprintf('%02x', i) }.join,
+          comp: 'rgb_' + [177,99,0].map {|i| sprintf('%02x', i) }.join
+        },
+        'standard' => {
+          prim: 'rgb_' + [48,118,168].map {|i| sprintf('%02x', i) }.join,
+          sec1: 'rgb_' + [77,91,194].map {|i| sprintf('%02x', i) }.join,
+          sec2: 'rgb_' + [193,144,16].map {|i| sprintf('%02x', i) }.join,
+          mid: 'rgb_' + [128,0,128].map {|i| sprintf('%02x', i) }.join,
+          comp: 'rgb_' + [193,115,16].map {|i| sprintf('%02x', i) }.join
+        }
+      }
 
       class << self
         include Alces::Tools::Logging
@@ -77,30 +96,30 @@ module Alces
         def colored_path(p)
           case p
           when Metadata
-            "#{p.repo.name.color(SEC1)}/#{p.type.color(:magenta)}/#{p.name.color(COMP)}".tap do |s|
-              s << "/#{p.version.color(PRIM)}" unless p.version.blank?
+            "#{p.repo.name.color(color(:sec1))}/#{p.type.color(color(:mid))}/#{p.name.color(color(:comp))}".tap do |s|
+              s << "/#{p.version.color(color(:prim))}" unless p.version.blank?
             end
           when Package
-            "#{p.type.color(:magenta)}/#{p.name.color(COMP)}/#{p.version.color(PRIM)}".tap do |s|
-              s << "/#{p.tag.color(SEC1)}" unless p.tag.blank?
+            "#{p.type.color(color(:mid))}/#{p.name.color(color(:comp))}/#{p.version.color(color(:prim))}".tap do |s|
+              s << "/#{p.tag.color(color(:sec1))}" unless p.tag.blank?
             end
           when String
             parts, vers = p.split(' ',2)
             parts = parts.split('/')
-            "#{parts[0].color(:magenta)}".tap do |s|
+            "#{parts[0].color(color(:mid))}".tap do |s|
               if parts.length > 1
-                s << '/' << parts[1].color(COMP)
+                s << '/' << parts[1].color(color(:comp))
               end
               if parts.length > 2
-                s << '/' << parts[2].color(PRIM)
+                s << '/' << parts[2].color(color(:prim))
               end
               if parts.length > 3
                 3.upto(parts.length-1) do |n|
-                  s << '/' << parts[n].color(SEC1)
+                  s << '/' << parts[n].color(:white)
                 end
               end
               if vers
-                s << ' ' << vers.color(PRIM)
+                s << ' ' << vers.color(color(:prim))
               end
             end
           else
@@ -129,6 +148,17 @@ module Alces
               stream.print "\b \b"
             end
           end
+        end
+
+        def color(c)
+          theme[c]
+        end
+
+        def theme
+          @theme ||= begin
+                       theme = ENV['cw_SETTINGS_theme']
+                       THEMES.key?(theme) ? THEMES[theme] : THEMES['standard']
+                     end
         end
       end
     end

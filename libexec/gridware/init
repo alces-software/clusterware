@@ -40,9 +40,9 @@ _detect_depot() {
     local name
     name="$1"
     if [ -L "${cw_GRIDWARE_root}"/${name} ]; then
-	readlink "${cw_GRIDWARE_root}"/${name}
+        readlink "${cw_GRIDWARE_root}"/${name}
     else
-	echo "${cw_GRIDWARE_root}/depots/$(uuid -v4 | cut -f1 -d'-')"
+        echo "${cw_GRIDWARE_root}/depots/$(uuid -v4 | cut -f1 -d'-')"
     fi
 }
 
@@ -51,7 +51,7 @@ _link_depot() {
     depot="$1"
     name="$2"
     if ! _depot_exists "${name}"; then
-	ln -snf "${depot}" "${cw_GRIDWARE_root}/${name}"
+        ln -snf "${depot}" "${cw_GRIDWARE_root}/${name}"
     fi
 }
 
@@ -97,7 +97,7 @@ _update_modulespath() {
     local name
     name="$1"
     if ! grep -q '${cw_GRIDWARE_root}/${name}/\$cw_DIST/etc/modules' "${cw_ROOT}"/etc/gridware/global/modulespath; then
-	sed -e "/^#=Alces Gridware Depots/a ${cw_GRIDWARE_root}/${name}/\$cw_DIST/etc/modules" \
+        sed -e "/^#=Alces Gridware Depots/a ${cw_GRIDWARE_root}/${name}/\$cw_DIST/etc/modules" \
             -i "${cw_ROOT}"/etc/gridware/global/modulespath
     fi
 }
@@ -109,8 +109,9 @@ _initialize_depot() {
 
     mkdir -p "${depot}/${cw_DIST}/pkg" "${depot}/${cw_DIST}/etc"
     cp -R "${cw_ROOT}/etc/gridware/depotskel"/* "${depot}"/${cw_DIST}/etc
+    export HOME=${HOME:-$(eval echo "~$(whoami)")}
 
-    cat <<RUBY | ruby_run 
+    cat <<RUBY | ruby_run
 ENV['BUNDLE_GEMFILE'] ||= "${cw_ROOT}/lib/ruby/Gemfile"
 \$: << "${cw_ROOT}/lib/ruby/lib"
 
@@ -144,66 +145,66 @@ main() {
     shift
     
     while [ "$1" ]; do
-	cw_GRIDWARE_depots="${cw_GRIDWARE_depots} $1"
-	shift
+        cw_GRIDWARE_depots="${cw_GRIDWARE_depots} $1"
+        shift
     done
     
     mkdir -p "${cw_GRIDWARE_root}"
     _create_default_depot
 
     if [ ! -f "${cw_GRIDWARE_root}"/etc/gridware.yml ]; then
-	mkdir -p "${cw_GRIDWARE_root}"/etc
-	_create_gridware_configuration
+        mkdir -p "${cw_GRIDWARE_root}"/etc
+        _create_gridware_configuration
     fi
 
     for name in ${cw_GRIDWARE_default_depot:-local} ${cw_GRIDWARE_depots}; do
-	depot="$(_detect_depot "${name}")"
+        depot="$(_detect_depot "${name}")"
 
-	title "Performing initial configuration for '${name}' depot"
-	if _depot_exists "${name}"; then
-	    doing 'Detect'
-	else
-	    doing "Configure"
-	    _link_depot "${depot}" "${name}"
-	    _update_modulespath "${name}"
-	fi
-	say_done $?
+        title "Performing initial configuration for '${name}' depot"
+        if _depot_exists "${name}"; then
+            doing 'Detect'
+        else
+            doing "Configure"
+            _link_depot "${depot}" "${name}"
+            _update_modulespath "${name}"
+        fi
+        say_done $?
 
-	title "Setting up depot structure for '${cw_DIST}' in '${name}'"
-	if [ -d "${depot}/${cw_DIST}/pkg" ]; then
-	    doing 'Detect'
-	else
-	    doing "Configure"
-	    _initialize_depot "${depot}" "${name}"
-	fi
-	say_done $?
+        title "Setting up depot structure for '${cw_DIST}' in '${name}'"
+        if [ -d "${depot}/${cw_DIST}/pkg" ]; then
+            doing 'Detect'
+        else
+            doing "Configure"
+            _initialize_depot "${depot}" "${name}"
+        fi
+        say_done $?
     done
 
     title "Setting up local package repository"
     if [ -d "${cw_GRIDWARE_root}/etc/repos" ]; then
-	doing 'Detect'
+        doing 'Detect'
     else
-	doing 'Configure'
-	mkdir -p "${cw_GRIDWARE_root}/etc/repos"
-	cp -R "${cw_ROOT}/etc/gridware/reposkel" "${cw_GRIDWARE_root}/etc/repos/local"
-	chmod -R g+rw "${cw_GRIDWARE_root}"/etc
-	find "${cw_GRIDWARE_root}"/etc -type d -exec chmod 2775 {} \;
-	chgrp -R gridware "${cw_GRIDWARE_root}"/etc
-	chgrp gridware "${cw_GRIDWARE_root}" "${cw_GRIDWARE_root}"/depots
-	chmod g+rws "${cw_GRIDWARE_root}" "${cw_GRIDWARE_root}"/depots
+        doing 'Configure'
+        mkdir -p "${cw_GRIDWARE_root}/etc/repos"
+        cp -R "${cw_ROOT}/etc/gridware/reposkel" "${cw_GRIDWARE_root}/etc/repos/local"
+        chmod -R g+rw "${cw_GRIDWARE_root}"/etc
+        find "${cw_GRIDWARE_root}"/etc -type d -exec chmod 2775 {} \;
+        chgrp -R gridware "${cw_GRIDWARE_root}"/etc
+        chgrp gridware "${cw_GRIDWARE_root}" "${cw_GRIDWARE_root}"/depots
+        chmod g+rws "${cw_GRIDWARE_root}" "${cw_GRIDWARE_root}"/depots
     fi
     say_done $?
 
     title "Setting up local depot repository"
     if [ -d "${cw_GRIDWARE_root}/etc/depots" ]; then
-	doing 'Detect'
+        doing 'Detect'
     else
-	doing 'Configure'
-	mkdir -p "${cw_GRIDWARE_root}/etc/depots"
-	cp -R "${cw_ROOT}/etc/gridware/reposkel.depots" "${cw_GRIDWARE_root}/etc/depots/local"
-	chmod -R g+rw "${cw_GRIDWARE_root}"/etc/depots
-	find "${cw_GRIDWARE_root}"/etc/depots -type d -exec chmod 2775 {} \;
-	chgrp -R gridware "${cw_GRIDWARE_root}"/etc/depots
+        doing 'Configure'
+        mkdir -p "${cw_GRIDWARE_root}/etc/depots"
+        cp -R "${cw_ROOT}/etc/gridware/reposkel.depots" "${cw_GRIDWARE_root}/etc/depots/local"
+        chmod -R g+rw "${cw_GRIDWARE_root}"/etc/depots
+        find "${cw_GRIDWARE_root}"/etc/depots -type d -exec chmod 2775 {} \;
+        chgrp -R gridware "${cw_GRIDWARE_root}"/etc/depots
     fi
     say_done $?
 }

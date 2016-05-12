@@ -64,6 +64,7 @@ module Alces
             variant = (rest.first =~ /^[A-Za-z]/ ? rest.shift : 'default')
             path = [path, *rest].join(' ')
             req = package_or_definition(path, variant)
+            raise NotFoundError, "Couldn't resolve a package for #{path} (#{variant})" if req.nil?
             reqs.delete_if {|e| e[1] == req}
             reqs.unshift(
               [
@@ -148,7 +149,7 @@ module Alces
           when Metadata
             req.version.bold
           when Package
-            req.version.color(IoHandler::PRIM) + '/' + req.tag.color(IoHandler::SEC1)
+            req.version.color(IoHandler.color(:prim)) + '/' + req.tag.color(IoHandler.color(:sec1))
           end
         puts '' << prefix << ' ' << colored_path(node.name) << " -#{installed?(path, variant) ? "-" : "\u2717"}->".color(installed?(path, variant) ? :green : :red).bold << " " << p
 

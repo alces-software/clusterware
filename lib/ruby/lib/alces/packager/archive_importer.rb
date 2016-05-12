@@ -196,9 +196,7 @@ module Alces
               FileUtils.mkdir_p(dest_pkg_dir)
               FileUtils.mv(pkg_dir, dest_pkg_dir)
               if File.exists?(depends_file)
-                s = File.read(depends_file)
-                # XXX - bit of a hack!
-                File.write(depends_file,s.gsub('if ! yum install', 'if ! sudo /usr/bin/yum install'))
+                fixup_depends_file(depends_file)
                 FileUtils.mkdir_p(dest_depends_dir)
                 FileUtils.mv(depends_file, dest_depends_dir)
               end
@@ -231,7 +229,7 @@ module Alces
             FileUtils.chown(nil, 'gridware', tgt_depends_file) if File.exists?(tgt_depends_file)
             FileUtils.chown(nil, 'gridware', tgt_module_file)
             FileUtils.chown_R(nil, 'gridware', tgt_pkg_dir)
-            FileUtils.chmod_R("g+w", tgt_pkg_dir)
+            FileUtils.chmod_R("g+w", tgt_pkg_dir, force: true)
             FileUtils.chmod("g+xs", directories_within(tgt_pkg_dir))
           end
           say 'OK'.color(:green)
@@ -282,9 +280,7 @@ module Alces
             FileUtils.mkdir_p(dest_pkg_dir)
             FileUtils.mv(pkg_dir, dest_pkg_dir)
             if File.exists?(depends_file)
-              s = File.read(depends_file)
-              # XXX - bit of a hack!
-              File.write(depends_file,s.gsub('if ! yum install', 'if ! sudo /usr/bin/yum install'))
+              fixup_depends_file(depends_file)
               FileUtils.mkdir_p(dest_depends_dir)
               FileUtils.mv(depends_file, dest_depends_dir)
             end
@@ -312,7 +308,7 @@ module Alces
           FileUtils.chown(nil, 'gridware', tgt_compiler_module_file)
           FileUtils.chown(nil, 'gridware', tgt_lib_module_file)
           FileUtils.chown_R(nil, 'gridware', tgt_pkg_dir)
-          FileUtils.chmod_R("g+w", tgt_pkg_dir)
+          FileUtils.chmod_R("g+w", tgt_pkg_dir, force: true)
           FileUtils.chmod("g+xs", directories_within(tgt_pkg_dir))
         end
         say 'OK'.color(:green)
@@ -341,6 +337,16 @@ module Alces
             a << f if File.directory?(f) && !(dots.include?(File.basename(f)))
           end
         end
+      end
+
+      # XXX - bit of a hack!
+      def fixup_depends_file(depends_file)
+        s = File.read(depends_file)
+        s.gsub!('if yum info', 'if env -i yum info')
+        s.gsub!('if ! yum install', 'if ! sudo /usr/bin/yum install')
+        s.gsub!('if ! sudo /usr/bin/yum install -y --quiet "${a}"',
+                %(if ! sudo /usr/bin/yum install -y "${a}" >>#{Config.log_root}/depends.log 2>&1))
+        File.write(depends_file,s)
       end
     end
   end

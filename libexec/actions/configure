@@ -32,7 +32,25 @@ case $action in
     h|he|hel|help)
         exec /bin/bash "${cw_ROOT}"/libexec/configure/actions/help "$@"
         ;;
+    n|no|nod|node)
+        exec /bin/bash "${cw_ROOT}"/libexec/configure/actions/node "$@"
+        ;;
+    a|au|aut|auto|autos|autosc|autosca|autoscal|autoscali|autoscalin|autoscaling)
+        exec /bin/bash "${cw_ROOT}"/libexec/configure/actions/autoscaling "$@"
+        ;;
     *)
-        exec /bin/bash "${cw_ROOT}"/libexec/configure/actions/configure "$@"
-	;;
+        cat <<EOF
+Usage: $cw_BINNAME COMMAND [[OPTION]... [ARGS]]
+Perform configuration tasks.
+
+Commands:
+EOF
+printf "    %-28s  %s\n" "$cw_BINNAME help" "More help about this command."
+printf "    %-28s  %s\n" "$cw_BINNAME node" "Perform initial node setup."
+printf "    %-28s  %s\n" "$cw_BINNAME autoscaling" "Control autoscaling behaviour."
+cat <<EOF
+
+Please report bugs to support@alces-software.com
+Alces Software home page: <http://alces-software.com>
+EOF
 esac

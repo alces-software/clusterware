@@ -1,9 +1,9 @@
 [38;5;68m       `.:/+/                                               
    ./oooo+`
- `/oooooo.        [1;37m%CLUSTER%[38;5;68m
+ `/oooooo.       [1;37;40m %CLUSTER% [38;5;68;49m
  /oooooo/       
- ooooooo-  ./o/   [1;37m%RELEASE%[38;5;68m
- +oooooo/`+ooo    [1;37m%DISTRO%[38;5;68m
+ ooooooo-  ./o/  [1;37;40m %RELEASE% [38;5;68;49m
+ +oooooo/`+ooo   [1;37;40m %DISTRO% [38;5;68;49m
  -oooooooooooo
   :ooooooooooo. `:+:`
    -+ooooooooo+:ooo`
@@ -16,4 +16,4 @@
                     .+oooooooooo++oooooooooooooooo+:.
                       .:/+ooooooo-`..--::::::::-.`
                             `-:/oo+
-                               `-.  -[ [1;37malces [0mflight[38;5;68m ]-[0m
+                               `-. [40m -[ [1;37malces [22;37mflight[38;5;68m ]- [0m

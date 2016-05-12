@@ -25,7 +25,7 @@ network_get_public_address() {
     if [ "${tmout}" -gt 0 ]; then
         # Attempt to determine our public IP address using the standard EC2
         # API.
-        public_ipv4=$(curl -f --connect-timeout ${tmout} http://169.254.169.254/latest/meta-data/public-ipv4 2>/dev/null)
+        public_ipv4=$(network_fetch_ec2_metadata public-ipv4 ${tmout})
     fi
 
     if [ -z "$public_ipv4" ]; then
@@ -44,7 +44,7 @@ network_get_public_hostname() {
     if [ "${tmout}" -gt 0 ]; then
         # Attempt to determine our public DNS name using the standard EC2
         # API.
-        public_hostname=$(curl -f --connect-timeout ${tmout} http://169.254.169.254/latest/meta-data/public-hostname 2>/dev/null)
+        public_hostname=$(network_fetch_ec2_metadata public-hostname ${tmout})
         dig_tmout=${tmout}
     else
         dig_tmout=1
@@ -124,7 +124,8 @@ network_get_free_port() {
 network_has_metadata_service() {
     local tmout
     tmout="${1:-5}"
-    curl -f --connect-timeout $tmout http://169.254.169.254/ &>/dev/null
+    [ "$cw_TEST_metadata_service" == "true" ] ||
+        curl -f --connect-timeout $tmout http://169.254.169.254/ &>/dev/null
 }
 
 network_get_iface_network() {
@@ -141,4 +142,47 @@ network_cidr_to_mask() {
    set -- $(( 5 - ($1 / 8) )) 255 255 255 255 $(( (255 << (8 - ($1 % 8))) & 255 )) 0 0 0
    [ $1 -gt 1 ] && shift $1 || shift
    echo ${1-0}.${2-0}.${3-0}.${4-0}
+}
+
+network_is_ec2() {
+    [ "${cw_TEST_ec2}" == "true" ] ||
+        [ -f /sys/hypervisor/uuid -a "$(head -c3 /sys/hypervisor/uuid)" == "ec2" ]
+}
+
+network_fetch_ec2_document() {
+    if [ "$cw_TEST_mock_ec2_document" ]; then
+        cat <<EOF
+{
+  "region": "eu-west-1",
+  "pendingTime": "$(date -u +%Y-%m-%dT%H:%M:%SZ)",
+  "instanceId": "i-$(hostname | md5sum | cut -c1-8)",
+  "accountId": "1234567890"
+}
+EOF
+    else
+        curl -s http://169.254.169.254/latest/dynamic/instance-identity/document
+    fi
+}
+
+network_fetch_ec2_metadata() {
+    local item tmout
+    item="$1"
+    tmout="${2:-5}"
+    if [ "$cw_TEST_metadata_service" == "true" ]; then
+        itemvar=cw_TEST_mock_ec2_$(echo "${item}" | tr '-' '_')
+        if [ "${!itemvar}" ]; then
+            echo "${!itemvar}"
+        else
+            return 1
+        fi
+    else
+        curl -f --connect-timeout ${tmout} http://169.254.169.254/latest/meta-data/${item} 2>/dev/null       
+    fi
+}
+
+network_ec2_hashed_account() {
+    local account
+    account=$(network_fetch_ec2_document | \
+                     "${cw_ROOT}"/opt/jq/bin/jq -r .accountId)
+    echo -n "${account}" | md5sum | cut -f1 -d' ' | base64 | cut -c1-16 | tr 'A-Z' 'a-z'
 }

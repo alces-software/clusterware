@@ -5,8 +5,51 @@ This project adheres to [Semantic Versioning](http://semver.org/).
 
 ## [Unreleased] - 1.6.0
 
+## [1.5.0] - 2016-04-25
+
 ### Added
-- Nothing, yet!
+- Enhanced tab-completion under `bash` to allow local files to be suggested where appropriate (#82)
+- Added [`jo`](https://github.com/jpmens/jo) utility (#72)
+- Distribution package repositories (e.g. EPEL) are now handled via a configurable interface (#70)
+- Clusters now support auto-scaling by reporting job scheduler metrics and scaling-in idle nodes (clusterware-handlers#24)
+- Gridware package requirements can now be automatically installed (#47)
+- Updated heuristics for determining bad paths on package export, specifically only reject absolute library paths in ELF binaries (#91)
+- Allow files matching specified patterns to be ignored when exporting packages (#95)
+- Introduced depot repositories (#87)
+- Significantly enhanced depot feature set (export, compile from source) (#42)
+- Importing packages automatically imports or compiles package requirements (#100)
+- Provide option to import existing binaries at install time (#100)
+- The AWS CLI utility now has a serviceware modulefile and is loaded for users by default (clusterware-services#16)
+- The Gridware repository has been split into "main" and "volatile" repositories; the "volatile" repository (which is disabled by default) contains all existing Gridware and the "main" repository contains Gridware that has undergone verification for use on Clusterware systems (#89)
+- Enhanced the login banner to incorporate an Alces Flight logo in the medium of ASCII art (#102)
+- Added `alces configure autoscaling` action (#128)
+- If autoscaling is active, show a message at login (#129)
+- Depot and package repositories are updated at boot (#132)
+- Distro dependency installation for Gridware packages is now available in `/var/log/gridware/depends.log` (#133)
+- Allow users to configure how noisy their login banners are (#108)
+- User-selectible theme for dark/light terminals (#103)
+- Show shorter banner/login messages for non-master instances (#137)
+- Created `cluster-customizer` handler to allow additional scripts to be executed during node lifecycle (clusterware-handlers#25, #113)
+
+### Changed
+- The algorithm for determining the memory limit (`vmem`) for SGE execution hosts has been updated so as not to exceed total RAM + swap (clusterware-handlers#22)
+- The AWS CLI tool has been updated to the latest version (v1.10.19) in order to make use of autoscaling features (clusterware-services#15)
+- Depot `fetch` command has been removed and replaced by depot repository and `install` functionality (#42)
+- Version comparisons have been enhanced to deal more intelligently with package versions that don't conform to sematic versioning (#98)
+- When updating package a repository, better feedback is now provided regarding what revision has been selected, or if the local tree has become out of sync with the upstream repository somehow (#109)
+- Gridware operations that could cause errors when being executed under non-superuser accounts have been made available to all users within the `gridware` group (#88)
+- `alces configure` is now `alces configure node` (#83)
+- The default memory limit for SGE jobs has been increased from 1GiB to 1.5GiB (clusterware-services#23)
+
+### Fixed
+- Correctly parse output from packager scripts when output is less than 10 lines long (#96)
+- Gridware packages are now listed in semantic version order (#97)
+- Correct a problem that could cause exported packages to have incorrect dependency data (#93)
+- Prevent dependency data from being installed in the wrong place if a package is imported before any others hae been built (#94)
+- Set permissions correctly to provide access to `gridware` group members when packages are imported (#105)
+- Remove hard-coded path in the Clusterware configuration files for `logrotate` (#104)
+- Allow Gridware distro dependencies to be installed while an `apps/python` module is loaded (#131)
+- Tolerate broken links when updating file modes during import (#135)
 
 ## [1.5.0] - 2016-04-25
 
