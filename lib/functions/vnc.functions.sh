@@ -51,25 +51,28 @@ vnc_create_password_file() {
 }
 
 vnc_session_start() {
-    local password sessiondir
+    local password geometry sessiondir
     password="$1"
-    sessiondir="$2"
-    shift 2
+    geometry="$2"
+    sessiondir="$3"
+    shift 3
 
     vnc_create_password_file "${password}" "${sessiondir}"
-    vnc_start_server "${sessiondir}" "$@"
+    vnc_start_server "${geometry}" "${sessiondir}" "$@"
 }
 
 vnc_start_server() {
-    local sessiondir
-    sessiondir="$1"
-    shift
+    local geometry sessiondir
+    geometry="$1"
+    sessiondir="$2"
+    shift 2
 
     $cw_VNC_VNCSERVER -autokill \
         -sessiondir "${sessiondir}" \
         -sessionscript "${sessiondir}/session.sh" \
         -vncpasswd "${sessiondir}/password.dat" \
         -exedir "${cw_VNC_BINDIR}" \
+        -geometry "${geometry}" \
         "$@" 2>"${sessiondir}/vncserver.err" > "${sessiondir}/vncserver.out"
 
     files_mark_tempfile "${sessiondir}/vncserver.out"

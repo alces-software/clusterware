@@ -79,7 +79,7 @@ main() {
     if ! session_check_quota; then
         action_die "sorry, your session quota has been reached on this host (${cw_SESSION_quota})."
     fi
-    local sessionscript password vnc_vars host_address terse params sessionvars sessiontype runtime
+    local sessionscript password vnc_vars host_address terse params sessionvars sessiontype runtime geometry
     local -A vnc
 
     #
@@ -103,6 +103,14 @@ main() {
         # enforce specified maximum
         runtime="${cw_SESSION_timeout}"
     fi
+
+    if [ "$1" == "--geometry" ]; then
+        # If no geometry is set we will end up passing "" through to the VNC
+        # server, and so the default value will be used.
+        geometry=$2
+        shift 2
+    fi
+    # TODO check format
 
     #
     # Determine session script to use.
@@ -158,7 +166,7 @@ EOF
     # Start session, logging/writing details.
     #
     password=$(vnc_create_password)
-    vnc_session_start "${password}" "${_SESSIONDIR}"
+    vnc_session_start "${password}" "${geometry}" "${_SESSIONDIR}"
 
     if ! vnc_vars="$(vnc_read_vars "${_SESSIONDIR}")"; then
         action_die "VNC server could not be started, unable to locate configuration file."
