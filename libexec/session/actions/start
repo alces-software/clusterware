@@ -105,11 +105,12 @@ main() {
     fi
 
     if [ "$1" == "--geometry" ]; then
-        # If no geometry is set we will end up passing "" through to the VNC
-        # server, and so the default value will be used.
         geometry=$2
         shift 2
     fi
+    # If no geometry is given as a parameter or in config, pass "" through to
+    # the VNC server so it uses its default value.
+    geometry="${geometry:-${cw_SESSION_geometry:-''}}"
     # TODO check format
 
     #

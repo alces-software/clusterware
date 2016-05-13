@@ -41,3 +41,7 @@
 # Time in seconds between showing session timeout message and
 # performing the termination (default: 30).
 #cw_SESSION_termination_grace=30
+
+# Default geometry to use for sessions if user does not specify a geometry
+# (default: VNC server's default).
+#cw_SESSION_geometry="1024x768"
