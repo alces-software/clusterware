@@ -81,10 +81,15 @@ main() {
     fi
     local sessionscript password vnc_vars host_address terse params sessionvars sessiontype runtime
     local -A vnc
+
+    #
+    # Optional argument parsing.
+    #
     if [ "$1" == "--terse" ]; then
         terse=true
         shift
     fi
+
     if [ "$1" == "--runtime" ]; then
         runtime=$2
         shift 2
@@ -99,6 +104,9 @@ main() {
         runtime="${cw_SESSION_timeout}"
     fi
 
+    #
+    # Determine session script to use.
+    #
     sessionscript="$1"
     shift
     if [ "$1" ]; then
@@ -128,6 +136,9 @@ main() {
     fi
     files_mark_tempfile "${_SESSIONDIR}/session.sh"
 
+    #
+    # Create wrapper script if needed to pass in extra parameters.
+    #
     if [ "$1" ]; then
         # we have parameters, so need to pass them into the session script
         mv "${_SESSIONDIR}/session.sh" "${_SESSIONDIR}/session-runner.sh"
@@ -143,6 +154,9 @@ exec ${_SESSIONDIR}/session-runner.sh ${params}
 EOF
     fi
 
+    #
+    # Start session, logging/writing details.
+    #
     password=$(vnc_create_password)
     vnc_session_start "${password}" "${_SESSIONDIR}"
 
@@ -183,6 +197,9 @@ EOF
         _start_timer "${vnc[DISPLAY]}" "${runtime}"
     fi
 
+    #
+    # Clean up.
+    #
     rm -f "${_SESSIONDIR}/starting.txt"
     {
         process_wait_for_pid $(cat "${vnc[PIDFILE]}")
