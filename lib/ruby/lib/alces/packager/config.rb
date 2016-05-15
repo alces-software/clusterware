@@ -64,10 +64,9 @@ module Alces
 
         private
         def depot_path(depot)
-          File.join(Depot.hash_path_for(depot),ENV['cw_DIST'])
+          File.join(Depot.hash_path_for(depot),ENV['cw_DIST'] || 'unknown')
         end
       end
     end
   end
 end
-

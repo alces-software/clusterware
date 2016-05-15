@@ -52,6 +52,9 @@ main() {
     if network_has_metadata_service 1; then
         _show "Platform host name" "$(network_get_public_hostname)"
         _show "Public IP address" "$(network_get_public_address)"
+        if network_is_ec2; then
+            _show "Account hash" "$(network_ec2_hashed_account)"
+        fi
     else
         hn="$(network_get_public_hostname 0)"
         if [ "${hn}" ]; then

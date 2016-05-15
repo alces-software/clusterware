@@ -17,7 +17,7 @@ if [ -d "$(_cw_root)"/opt/Modules ]; then
     else
         export -f module
     fi
-    MODULEPATH=`sed -n 's/[      #].*$//; /./H; $ { x; s/^\n//; s/\n/:/g; p; }' "$(_cw_root)"/etc/modulespath`
+    MODULEPATH=`sed -n 's/[      #].*$//; /./H; $ { x; s/^\n//; s/\n/:/g; p; }' "$(_cw_root)"/etc/gridware/global/modulespath`
     if [ -f "$HOME/.modulespath" ]; then
         MODULEPATH=`sed -n 's/[     #].*$//; /./H; $ { x; s/^\n//; s/\n/:/g; p; }' "$HOME/.modulespath"`:$MODULEPATH
     fi
@@ -145,7 +145,7 @@ fi;;
     _alces_gridware_list() {
         "$(_cw_root)"/bin/alces gridware list 2>&1 | sed '
                 s#^\(.*\)/\(.\+\)(default)#\1\n\1\/\2#;
-                s#/*$##g;'
+                s#/*$##g; s#^base/##g;'
     }
 
     _alces_package_list_expired() {
@@ -158,19 +158,26 @@ fi;;
 
     _alces_gridware() {
         local cur="$1" prev="$2" cmds opts
-        cmds="clean default help info install list purge update"
+        cmds="clean default help info install list purge update import export depot search requires"
         if ((COMP_CWORD > 2)); then
             case "$prev" in
-                i*)
+                in*|r*)
                     if [ -z "$cw_PACKAGE_LIST" ] || _alces_package_list_expired; then
                         cw_PACKAGE_LIST=$(_alces_gridware_list)
                         cw_PACKAGE_LIST_MTIME=$(date +%s)
                     fi
                     COMPREPLY=( $(compgen -W "$cw_PACKAGE_LIST" -- "$cur") )
                     ;;
-                p*|c*|d*)
+                p*|c*|def*|e*|l*)
                     # for purge, clean and default, we provide a module list
                     COMPREPLY=( $(compgen -W "$(_module_avail_specific)" -- "$cur") )
+                    ;;
+                dep*)
+                    COMPREPLY=( $(compgen -W "list enable disable update info install purge init" -- "$cur") )
+                    ;;
+                *)
+                    # for purge, clean and default, we provide a module list
+                    COMPREPLY=( $(compgen -f -- "$cur") )
                     ;;
             esac
         else

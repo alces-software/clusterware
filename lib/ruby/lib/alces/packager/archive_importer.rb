@@ -22,6 +22,7 @@
 require 'alces/tools/execution'
 require 'alces/packager/package'
 require 'alces/packager/errors'
+require 'find'
 
 module Alces
   module Packager
@@ -34,17 +35,16 @@ module Alces
 
       include Alces::Tools::Execution
 
-      attr_accessor :archive_path, :depot, :io
-      delegate :say, :with_spinner, :doing, :title, :colored_path, :to => :io
-      
-      def initialize(archive_path, depot, io)
+      attr_accessor :archive_path, :options
+      delegate :say, :with_spinner, :doing, :title, :colored_path, :to => IoHandler
+
+      def initialize(archive_path, options)
         self.archive_path = archive_path
-        self.depot = depot
-        self.io = io
+        self.options = options
       end
 
       def import
-        say "Importing #{archive_path.color(:cyan)}"
+        say "Importing #{File.basename(archive_path).color(:cyan)}"
 
         if archive_path[0..4] == 'http:' || 
            archive_path[0..5] == 'https:'
@@ -99,16 +99,16 @@ module Alces
           doing 'Update'
           with_spinner do
             ModuleTree.safely do
-              Version.write_defaults!(depot)
-              Package.write_defaults!(depot)
-              Package.write_aliases!(depot)
+              Version.write_defaults!(options.depot)
+              Package.write_defaults!(options.depot)
+              Package.write_aliases!(options.depot)
             end
           end
           say 'OK'.color(:green)
-          
+
           doing 'Dependencies'
           with_spinner do
-            Dir.glob(File.join(Config.dependencies_dir(depot),"#{type}-#{name}-#{version}*.sh")).each do |f|
+            Dir.glob(File.join(Config.dependencies_dir(options.depot),"#{type}-#{name}-#{version}*.sh")).each do |f|
               run('/bin/bash',f) do |r|
                 raise DepotError, "Unable to resolve dependencies for: #{File.basename(f,'.sh')}" unless r.success?
               end
@@ -129,29 +129,50 @@ module Alces
       private
       def import_package(dir)
         # modify depot in modulefiles
-        dest_module_dir = File.join(Config.modules_dir(depot), package_path)
-        dest_pkg_dir = File.join(Config.packages_dir(depot), package_path)
-        dest_depends_dir = Config.dependencies_dir(depot)
+        dest_module_dir = File.join(Config.modules_dir(options.depot), package_path)
+        dest_pkg_dir = File.join(Config.packages_dir(options.depot), package_path)
+        dest_depends_dir = Config.dependencies_dir(options.depot)
 
         taggings.each do |tagging|
           condition = catch(:done) do
             title "Processing #{package_path}/#{tagging[:tag]}"
+            doing 'Preparing'
+            # verify not already installed!
+            p = Package.first(name: name, type: type, version: version, tag: tagging[:tag])
+            if !p.nil?
+              throw :done, [:exists, p]
+            end
+
+            # verify dependencies are available
+            unresolved = (tagging[:requirements] || []).map do |req|
+              req if Package.resolve(req, tagging[:compiler_tag]).nil?
+            end.compact
+            if unresolved.any?
+              say "#{'NOTICE'.color(:yellow)}: #{options.compile ? 'building' : 'importing'} requirements"
+              say "-" * 80
+              unresolved.each do |req|
+                if req =~ /(\S*)_(\S*)( .*)?/
+                  req = "#{$1}#{$3}"
+                  variant = $2
+                else
+                  variant = 'default'
+                end
+                defn = DependencyHandler.find_definition(req)
+                install_opts = OptionSet.new(options)
+                if defn.metadata[:variants] || variant != 'default'
+                  install_opts.variant = variant
+                end
+                install_opts.binary = true unless options.compile
+                DefinitionHandler.install(defn, install_opts)
+              end
+              say "-" * 80
+              say "#{'NOTICE'.color(:yellow)}: requirements for #{package_path} satisfied; proceeding to import"
+            else
+              say 'OK'.color(:green)
+            end
+
             doing "Importing"
             with_spinner do
-              # verify not already installed!
-              p = Package.first(name: name, type: type, version: version, tag: tagging[:tag])
-              if !p.nil?
-                throw :done, [:exists, p]
-              end
-
-              # verify dependencies are available
-              unresolved = (tagging[:requirements] || []).map do |req|
-                req if Package.resolve(req, tagging[:compiler_tag]).nil?
-              end.compact
-              if unresolved.any?
-                throw :done, [:unresolved, unresolved]
-              end
-
               module_file = File.join(dir, ENV['cw_DIST'], 'etc', 'modules', package_path, tagging[:tag])
               depends_file = File.join(dir, ENV['cw_DIST'], 'etc', 'depends', "#{[type, name, version, tagging[:tag]].join('-')}.sh")
               pkg_dir = File.join(dir, ENV['cw_DIST'], 'pkg', package_path, tagging[:tag])
@@ -175,26 +196,53 @@ module Alces
               FileUtils.mkdir_p(dest_pkg_dir)
               FileUtils.mv(pkg_dir, dest_pkg_dir)
               if File.exists?(depends_file)
+                fixup_depends_file(depends_file)
+                FileUtils.mkdir_p(dest_depends_dir)
                 FileUtils.mv(depends_file, dest_depends_dir)
               end
             end
             nil
           end
-          if condition && condition.first == :exists
-            say 'EXISTS'.color(:yellow)
-          elsif condition && condition.first == :unresolved
-            say "#{'MISSING'.color(:red)}\n\n#{'ERROR'.color(:red).underline}: Unable to satisfy runtime requirements: #{condition[1].join(', ')}"
+          if condition
+            if condition.first == :exists
+              say 'EXISTS'.color(:yellow)
+            elsif condition.first == :unresolved
+              say "#{'MISSING'.color(:red)}\n\n#{'ERROR'.color(:red).underline}: Unable to satisfy runtime requirements: #{condition[1].join(', ')}"
+            else
+              say "#{'BAD'.color(:red)}\n\n#{'ERROR'.color(:red).underline}: Unable to import due to failure condition: #{condition}"
+            end
+            return
           else
             say 'OK'.color(:green)
           end
+
+          doing 'Permissions'
+          with_spinner do
+            # fix permissions on:
+            #   - modulefile
+            #   - depends file
+            #   - package tree
+            tgt_module_file = File.join(dest_module_dir, tagging[:tag])
+            tgt_depends_file = File.join(dest_depends_dir, "#{[type, name, version, tagging[:tag]].join('-')}.sh")
+            tgt_pkg_dir = File.join(dest_pkg_dir, tagging[:tag])
+
+            FileUtils.chown(nil, 'gridware', tgt_depends_file) if File.exists?(tgt_depends_file)
+            FileUtils.chown(nil, 'gridware', tgt_module_file)
+            FileUtils.chown_R(nil, 'gridware', tgt_pkg_dir)
+            FileUtils.chmod_R("g+w", tgt_pkg_dir, force: true)
+            FileUtils.chmod("g+xs", directories_within(tgt_pkg_dir))
+          end
+          say 'OK'.color(:green)
         end
       end
 
       def import_compiler(dir)
         # modify depot in modulefiles
-        dest_compiler_module_dir = File.join(Config.modules_dir(depot), 'compilers', name)
-        dest_lib_module_dir = File.join(Config.modules_dir(depot), 'libs', name)
-        dest_pkg_dir = File.join(Config.packages_dir(depot), 'compilers', name)
+        dest_compiler_module_dir = File.join(Config.modules_dir(options.depot), 'compilers', name)
+        dest_lib_module_dir = File.join(Config.modules_dir(options.depot), 'libs', name)
+        dest_pkg_dir = File.join(Config.packages_dir(options.depot), 'compilers', name)
+        dest_depends_dir = Config.dependencies_dir(options.depot)
+
         title "Processing #{package_path}"
         doing "Importing"
         exists = false
@@ -214,7 +262,7 @@ module Alces
             File.write(compiler_module_file,s)
             s = File.read(lib_module_file).gsub('_DEPOT_',depot_path)
             File.write(lib_module_file,s)
-            (rewritten || []).each do |f|
+            (@metadata[:rewritten] || []).each do |f|
               fname = File.join(dir, ENV['cw_DIST'], 'pkg', 'compilers', name, version, f)
               s = File.read(fname).gsub('_DEPOT_',depot_path)
               File.write(fname,s)
@@ -232,15 +280,38 @@ module Alces
             FileUtils.mkdir_p(dest_pkg_dir)
             FileUtils.mv(pkg_dir, dest_pkg_dir)
             if File.exists?(depends_file)
+              fixup_depends_file(depends_file)
+              FileUtils.mkdir_p(dest_depends_dir)
               FileUtils.mv(depends_file, dest_depends_dir)
             end
           end
         end
         if exists
           say 'EXISTS'.color(:yellow)
+          return
         else
           say 'OK'.color(:green)
         end
+
+        doing 'Permissions'
+        with_spinner do
+          # fix permissions on:
+          #   - modulefiles
+          #   - depends file
+          #   - package tree
+          tgt_compiler_module_file = File.join(dest_compiler_module_dir, version)
+          tgt_lib_module_file = File.join(dest_lib_module_dir, version)
+          tgt_depends_file = File.join(dest_depends_dir, "#{['compilers', name, version].join('-')}.sh")
+          tgt_pkg_dir = File.join(dest_pkg_dir, version)
+
+          FileUtils.chown(nil, 'gridware', tgt_depends_file) if File.exists?(tgt_depends_file)
+          FileUtils.chown(nil, 'gridware', tgt_compiler_module_file)
+          FileUtils.chown(nil, 'gridware', tgt_lib_module_file)
+          FileUtils.chown_R(nil, 'gridware', tgt_pkg_dir)
+          FileUtils.chmod_R("g+w", tgt_pkg_dir, force: true)
+          FileUtils.chmod("g+xs", directories_within(tgt_pkg_dir))
+        end
+        say 'OK'.color(:green)
       end
 
       def load_metadata(dir)
@@ -256,7 +327,26 @@ module Alces
       end
       
       def depot_path
-        @depot_path ||= Depot.hash_path_for(depot)
+        @depot_path ||= Depot.hash_path_for(options.depot)
+      end
+
+      def directories_within(base)
+        dots = ['.','..']
+        [].tap do |a|
+          Find.find(base) do |f|
+            a << f if File.directory?(f) && !(dots.include?(File.basename(f)))
+          end
+        end
+      end
+
+      # XXX - bit of a hack!
+      def fixup_depends_file(depends_file)
+        s = File.read(depends_file)
+        s.gsub!('if yum info', 'if env -i yum info')
+        s.gsub!('if ! yum install', 'if ! sudo /usr/bin/yum install')
+        s.gsub!('if ! sudo /usr/bin/yum install -y --quiet "${a}"',
+                %(if ! sudo /usr/bin/yum install -y "${a}" >>#{Config.log_root}/depends.log 2>&1))
+        File.write(depends_file,s)
       end
     end
   end

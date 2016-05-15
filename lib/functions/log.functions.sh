@@ -30,7 +30,7 @@ fi
 log() {
     local message logfile
     message="$1"
-    logfile="$2"
+    logfile="${2:-${cw_LOG_default_log}}"
     if [ "$logfile" == '-' ]; then
         echo "$(date +"%b %e %H:%M:%S") ${message}"
     else
@@ -47,7 +47,7 @@ log() {
 
 log_blob() {
     local logfile prefix message date
-    logfile="$1"
+    logfile="${1:-${cw_LOG_default_log}}"
     prefix="$2"
     date="$(date +"%b %e %H:%M:%S")"
     if [ "$prefix" ]; then
@@ -67,4 +67,8 @@ log_blob() {
             sed "s/^/${prefix} /g" > /dev/stderr
         fi
     fi
+}
+
+log_set_default() {
+    cw_LOG_default_log="$1"
 }

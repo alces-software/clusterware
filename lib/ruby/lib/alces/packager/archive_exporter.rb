@@ -34,19 +34,23 @@ module Alces
 
       include Alces::Tools::Execution
 
-      attr_accessor :package_path, :depot, :io, :ignore_bad_package
-      delegate :say, :with_spinner, :doing, :title, :colored_path, :to => :io
-      
-      def initialize(package_path, depot, io, ignore_bad_package)
+      attr_accessor :package_path, :depot, :options
+      delegate :say, :with_spinner, :doing, :title, :colored_path, :to => IoHandler
+
+      def initialize(package_path, options)
         self.package_path = package_path.gsub(/([\[\]\{\}\*\?\\])/, '\\\\\1')
-        self.depot = depot
-        self.io = io
-        self.ignore_bad_package = ignore_bad_package
+        self.depot = options.depot
+        self.options = options
         setup
       end
 
       def export
         say "Exporting #{colored_path(normalized_package_path)}"
+
+        if !File.exists?(output_dir) || !File.directory?(output_dir)
+          raise InvalidSelectionError, "Output directory does not exist: #{output_dir}"
+        end
+
         # copy package and module file from depot root into temporary directory
         Dir.mktmpdir do |dir|
           h = {
@@ -85,7 +89,7 @@ module Alces
         depends_file = File.join(Config.dependencies_dir(depot), "compilers-#{@name}-#{version}.sh")
         dest_compiler_module_file = File.join(dest_compiler_module_dir, version)
         dest_lib_module_file = File.join(dest_lib_module_dir, version)
-        
+
         doing "Prepare"
         with_spinner do
           FileUtils.cp_r(pkg_dir, dest_pkg_dir)
@@ -107,14 +111,16 @@ module Alces
 
         rewritten_files, bad_files = detect_bad_paths(dest_pkg_dir, depot_path)
         h[:rewritten] = rewritten_files
-        
+
         File.write(File.join(dir,'metadata.yml'), h.to_yaml)
         if bad_files.any?
-          if ignore_bad_package
+          if options.ignore_bad
             say "#{'WARNING!'.color(:yellow)} Package contains hard-coded directory (#{bad_files.join(', ')})"
           else
             raise PackageError, "Package contains hard-coded directory (#{bad_files.join(', ')})"
           end
+        else
+          say 'OK'.color(:green)
         end
 
         archive(dir)
@@ -132,7 +138,7 @@ module Alces
         basename, variant = @name.split('_')
         md = Repository.map do |r|
           r.packages.select do |p|
-            p.type == @type && p.name == basename
+            p.type == @type && p.name == basename && p.version == version
           end
         end.flatten.first
 
@@ -176,11 +182,20 @@ module Alces
             }
           end
           if bad_files.any?
-            if ignore_bad_package
+            if options.ignore_bad
               say "#{'WARNING!'.color(:yellow)} Package contains hard-coded directory (#{bad_files.join(', ')})"
+            elsif options.accept_bad
+              real_bad_files = bad_files.reject(&ignore_pattern)
+              if real_bad_files.any?
+                raise PackageError, "Package contains hard-coded directory (#{real_bad_files.join(', ')})"
+              else
+                say "#{'WARNING!'.color(:yellow)} Ignoring hard-coded directory (#{bad_files.join(', ')}"
+              end
             else
               raise PackageError, "Package contains hard-coded directory (#{bad_files.join(', ')})"
             end
+          else
+            say 'OK'.color(:green)
           end
         end
         File.write(File.join(dir,'metadata.yml'), h.to_yaml)
@@ -191,6 +206,12 @@ module Alces
       def text_file?(file)
         run(['file',file]) do |r|
           r.success? && r.stdout.include?("text")
+        end
+      end
+
+      def elf_file?(file)
+        run(['file',file]) do |r|
+          r.success? && r.stdout.include?("ELF")
         end
       end
 
@@ -206,13 +227,21 @@ module Alces
                 s = File.read(f).gsub(depot_path,'_DEPOT_')
                 File.write(f,s)
                 rewritten_files << f.gsub(File.join(dir,''),'')
+              elsif options.accept_elf && elf_file?(f)
+                # accept ELF binaries which don't have hardcoded lib paths
+                run(['ldd',f]) do |r|
+                  r.stdout.each_line do |l|
+                    if l =~ /^\S*#{depot_path}.*=>/
+                      bad_files << f.gsub(File.join(dir,''),'')
+                    end
+                  end
+                end
               else
                 bad_files << f.gsub(File.join(dir,''),'')
               end
             end
             [rewritten_files,bad_files]
           else
-            say 'OK'.color(:green)
             [[],[]]
           end
         end
@@ -223,7 +252,7 @@ module Alces
         # tar up temporary tree
         doing 'Archive'
         package_name = normalized_package_path.tr('/','-')
-        tar_name = '/tmp/' + package_name + '-' + ENV['cw_DIST'] + '.tar.gz'
+        tar_name = File.join(output_dir, package_name + '-' + ENV['cw_DIST'] + '.tar.gz')
         with_spinner do
           run(['tar', '-czf', tar_name, '-C', dir, ENV['cw_DIST'], 'metadata.yml']) do |r|
             raise PackageError, "Unable to create tarball." unless r.success?
@@ -232,7 +261,7 @@ module Alces
         say "#{'OK'.color(:green)}"
         say "\nExported #{colored_path(normalized_package_path)} to #{tar_name}\n\n"
       end
-      
+
       def setup
         @type, @name, @version, tag = package_path.split('/')
         @tags =
@@ -248,7 +277,7 @@ module Alces
           raise NotFoundError, "No package found: #{package_path}"
         end
       end
-      
+
       def package_dir
         @package_dir ||= Config.packages_dir(depot)
       end
@@ -286,6 +315,17 @@ module Alces
 
       def depot_path
         @depot_path ||= Depot.hash_path_for(depot)
+      end
+
+      def output_dir
+        options.output || '/tmp'
+      end
+
+      def ignore_pattern
+        return nil unless options.accept_bad
+        lambda do |f|
+          options.accept_bad.split(',').any? {|glob| File.fnmatch?(glob, f)}
+        end
       end
     end
   end

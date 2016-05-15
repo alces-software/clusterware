@@ -10,13 +10,14 @@ _cw_root() {
 }
 
 alces() {
-    local errlvl
+    local errlvl _cw_ROOT
     if [[ -t 1 && "$TERM" != linux ]]; then
         export cw_COLOUR=1
     else
         export cw_COLOUR=0
     fi
-    [[ -s "$(_cw_root)"/bin/alces ]] && case $1 in
+    _cw_ROOT="$(_cw_root)"
+    [[ -s "${_cw_ROOT}"/bin/alces ]] && case $1 in
         mo*)
             if [[ ! $(ps -o 'command=' -p "$$" 2>/dev/null) =~ ^- ]]; then
                 # Not an interactive shell
@@ -27,21 +28,21 @@ alces() {
             case $2 in
                 al*|h*|-h|--help)
                     if [[ ":$cw_FLAGS:" =~ :nopager: ]]; then
-                        "$(_cw_root)"/bin/alces "$@" 0>&1 2>&1
+                        "${_cw_ROOT}"/bin/alces "$@" 0>&1 2>&1
                     else
-                        "$(_cw_root)"/bin/alces "$@" 0>&1 2>&1 | less -FRX
+                        "${_cw_ROOT}"/bin/alces "$@" 0>&1 2>&1 | less -FRX
                     fi
                     ;;
                 *)
                     if [[ ":$cw_FLAGS:" =~ :nopager: ]]; then
-                        eval $("$(_cw_root)"/bin/alces "$@") 2>&1
+                        eval $("${_cw_ROOT}"/bin/alces "$@") 2>&1
                     elif [ -n "$POSIXLY_CORRECT" ]; then
-                        eval $("$(_cw_root)"/bin/alces "$@") 2>&1
+                        eval $("${_cw_ROOT}"/bin/alces "$@") 2>&1
                     elif [ "$2" == "load" -o "$2" == "add" ]; then
-                        eval $("$(_cw_root)"/bin/alces "$@") 2>&1
+                        eval $("${_cw_ROOT}"/bin/alces "$@") 2>&1
                     else
                         local p
-                        p="$(_cw_root)"
+                        p="${_cw_ROOT}"
                         eval $(${p}/bin/alces "$@" 2> >(less -FRX >&2)) 2>&1
                     fi
                     ;;
@@ -51,21 +52,21 @@ alces() {
             case $2 in
                 dep*)
                     case $3 in
-                        e*|di*)
-                            eval $("$(_cw_root)"/bin/alces "$@") 2>&1
+                        en*|d*|p*|ini*|ins*)
+                            eval $("${_cw_ROOT}"/bin/alces "$@") 2>&1
                             ;;
                         *)
-                            "$(_cw_root)"/bin/alces "$@"
+                            "${_cw_ROOT}"/bin/alces "$@"
                             ;;
                     esac
                     ;;
                 *)
-                    "$(_cw_root)"/bin/alces "$@"
+                    "${_cw_ROOT}"/bin/alces "$@"
                     ;;
             esac
             ;;
         *)
-            "$(_cw_root)"/bin/alces "$@"
+            "${_cw_ROOT}"/bin/alces "$@"
             ;;
     esac
     errlvl=$?
@@ -85,24 +86,24 @@ if [ "$BASH_VERSION" ]; then
     _alces_action() {
         local cmds action
         action="$3"
-        cmds=$(ls "$(_cw_root)"/libexec/${action}/actions)
+        cmds=$(ls "${_cw_ROOT}"/libexec/${action}/actions)
         _alces_complete "$@" "$cmds"
     }
 
     _alces_repo_list_enabled() {
         local state="$1"
-        ls -1 "$(_cw_root)"/etc/${state}
+        ls -1 "${_cw_ROOT}"/etc/${state}
     }
 
     _alces_repo_list_avail() {
         local repo="$1"
-        ls -1 "$(_cw_root)"/var/lib/${repo}/repos/*
+        ls -1 "${_cw_ROOT}"/var/lib/${repo}/repos/*
     }
 
     _alces_repo_list_disabled() {
         local repo="$1" state="$2"
         state="${state:-${repo}}"
-        echo -e "$(ls -1 "$(_cw_root)"/var/lib/${repo}/repos/*)\n$(ls -1 "$(_cw_root)"/etc/${state})" \
+        echo -e "$(ls -1 "${_cw_ROOT}"/var/lib/${repo}/repos/*)\n$(ls -1 "${_cw_ROOT}"/etc/${state})" \
             | sort | uniq -u
     }
 
@@ -177,6 +178,9 @@ if [ "$BASH_VERSION" ]; then
             f|fo|'for'|forg|forge|forget)
                 values="$(alces storage avail | sed -r "s:\x1B\[[0-9;]*[mK]::g" | cut -c5- | awk '{print $1;}')"
                 ;;
+            *)
+                values="$(compgen -f -- "$cur")"
+                ;;
             # TODO: get/put etc.
         esac
         echo "$values"
@@ -188,7 +192,10 @@ if [ "$BASH_VERSION" ]; then
             k|ki|kil|kill|w|wa|wai|wait|i|in|inf|info|c|cl|cle|clea|clean)
                 values="$(alces session list --identities 2>/dev/null)"
                 ;;
-            s|st|sta|star|start|d|di|dis|disa|disab|disabl|disable)
+            s|st|sta|star|start)
+                values="$(_alces_repo_list_enabled "sessions")"
+                ;;
+            d|di|dis|disa|disab|disabl|disable)
                 values=$(_alces_repo_list_enabled "sessions")
                 ;;
             e|en|ena|enab|enabl|enable)
@@ -245,11 +252,12 @@ if [ "$BASH_VERSION" ]; then
     }
 
     _alces() {
-        local cur="$2" prev="$3" cmds opts
+        local cur="$2" prev="$3" cmds opts _cw_ROOT
 
         COMPREPLY=()
+        _cw_ROOT="$(_cw_root)"
 
-        cmds=$(ls "$(_cw_root)"/libexec/actions)
+        cmds=$(ls "${_cw_ROOT}"/libexec/actions)
 
         if ((COMP_CWORD == 1)); then
             COMPREPLY=( $(compgen -W "$cmds" -- "$cur") )

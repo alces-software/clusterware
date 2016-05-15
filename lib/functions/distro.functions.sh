@@ -58,3 +58,46 @@ distro_is() {
     dist="$1"
     [ "${cw_DIST}" == "${dist}" ]
 }
+
+distro_is_repository_permitted() {
+    local name repo
+    name="$1"
+    for repo in "${cw_DIST_permit_repos[@]}"; do
+	if [ "$repo" == "*" -o "$repo" == "$name" ]; then
+	    return 0
+	fi
+    done
+    return 1
+}
+
+distro_enable_repository() {
+    distro_manage_repository enable "$@"
+}
+
+distro_disable_repository() {
+    distro_manage_repository disable "$@"
+}
+
+distro_manage_repository() {
+    local op name
+    op="$1"
+    name="$2"
+    shift 2
+    if distro_repository_exists "$name"; then
+	if distro_is_repository_permitted "$name"; then
+            "${cw_ROOT}"/etc/distro/repos/${name}.sh "${op}" "$@"
+	else
+	    echo "Prohibited repository: ${name}"
+	    return 1
+	fi
+    else
+	echo "Unknown repository: ${name}"
+	return 1
+    fi
+}
+
+distro_repository_exists() {
+    local name
+    name="$1"
+    [ -x "${cw_ROOT}"/etc/distro/repos/${name}.sh ]
+}

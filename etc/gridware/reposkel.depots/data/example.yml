@@ -1,0 +1,8 @@
+---
+:title: Example depot
+:summary: A depot that serves as an example
+:description: |
+  A depot that serves as an example.
+:root: https://s3-eu-west-1.amazonaws.com/packages.alces-software.com/gridware/%24dist
+:content:
+  - apps/example/1.0

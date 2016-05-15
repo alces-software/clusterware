@@ -1,0 +1,9 @@
+################################################################################
+##
+## Alces Clusterware - sudoers configuration file
+## Copyright (c) 2016 Alces Software Ltd
+##
+################################################################################
+#Defaults!_ROOT_/libexec/share/trigger-depot-event !requiretty
+%gridware ALL=(root) NOPASSWD:/usr/bin/yum install *
+%gridware ALL=(root) NOPASSWD:_ROOT_/libexec/share/trigger-depot-event *

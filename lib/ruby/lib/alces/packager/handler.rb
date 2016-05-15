@@ -29,8 +29,13 @@ require 'alces/packager/archive_exporter'
 require 'alces/packager/archive_importer'
 require 'alces/packager/errors'
 require 'alces/packager/io_handler'
+require 'alces/packager/dependency_handler'
+require 'alces/packager/depot_handler'
+require 'alces/packager/option_set'
 require 'terminal-table'
 require 'memoist'
+require 'alces/packager/display_handler'
+require 'alces/packager/definition_handler'
 
 Alces::Tools::Logging.default = Alces::Tools::Logger.new(File::expand_path(File.join(Alces::Packager::Config.log_root,'packager.log')),
                                                          :progname => 'packager',
@@ -56,195 +61,101 @@ module Alces
       end
     end
 
-    class Handler < Struct.new(:args, :options)
+    class Handler
       extend Memoist
 
       include Alces::Tools::Logging
       include Alces::Tools::Execution
 
-      def initialize(*)
-        super
-        options.default(compiler: :first)
-        options.default(groups: false)
-        options.default(descriptions: false)
-        options.default(names: false)
-        options.default(depot: (Config.default_depot rescue 'local'))
+      attr_accessor :options
+
+      delegate :doing, :colored_path, :to => IoHandler
+
+      def initialize(args, options)
+        self.options = OptionSet.new(options)
+        self.options.args = args
         if ":#{ENV['cw_FLAGS']}:" =~ /nocolou?r/ || ENV['cw_COLOUR'] == '0'
           HighLine.use_color = false
         end
       end
 
       def list
-        if options.full
-          details(definitions)
-        else
-          glob = args.first || '*'
-          d 'package list requested'
-          pkgs = definitions.sort.map { |p| colored_path(p) }
-          mode = options.oneline == true || !STDOUT.tty? ? ':rows' : ':columns_across'
-          Alces::Packager::CLI.send(:enable_paging)
-          say <<-ERB.chomp
-<%= list(#{pkgs.inspect},#{mode}) %>
-            ERB
-        end
+        DisplayHandler.list(options)
       end
 
       def search
-        if args.first.nil?
-          raise MissingArgumentError, 'Please supply a search string'
-        end
-        args.map! {|s| Regexp.escape(s)}
-        if !options.descriptions && !options.names && !options.groups
-          opts = {
-            group: true,
-            name: true,
-            description: true
-          }
-          options.groups = true
-          options.names = true
-          options.descriptions = true
-        else
-          opts = {
-            group: options.groups,
-            name: options.names,
-            description: options.descriptions
-          }
-        end
-        pkgs = search_metadata(args, opts)
-        if options.full
-          details(pkgs, args)
-        else
-          mode = options.oneline == true || !STDOUT.tty? ? ':rows' : ':columns_across'
-          Alces::Packager::CLI.send(:enable_paging)
-          say <<-ERB.chomp
-<%= list(#{pkgs.sort.map { |p| colored_path(p) }.inspect},#{mode}) %>
-          ERB
-        end
-      end
-      
-      def details(packages, highlights = [])
-        highlighter = lambda do |s,t|
-          if t
-            s.gsub(/(.*)(#{highlights.join('.*')})(.*)/i) do
-              $1 + $2.reverse + $3
-            end
-          else
-            s
-          end
-        end
-        cols = $terminal.output_cols
-        wrap_col = ((cols - 56) * 0.5).floor
-        rows = [].tap do |a|
-          packages.sort.each do |p|
-            a << [
-                  highlighter.call(colored_path(p), options.names),
-                  highlighter.call((p.metadata[:group] || '<Unknown>'), options.groups).color(:green)
-                 ]
-            a.last << $terminal.wrap(highlighter.call(p.metadata[:summary] || '<Unknown>', options.descriptions),wrap_col) if cols > 80
-            a << :separator
-          end
-        end
-        rows.pop
-        headings = ['Path','Category']
-        if cols > 80
-          headings << 'Summary' 
-        end
-        Alces::Packager::CLI.send(:enable_paging)
-        say Terminal::Table.new(title: 'Matching Gridware Packages', 
-                                headings: headings,
-                                rows: rows, 
-                                style: {width: cols < 80 ? 80 : cols - 5}).to_s
+        DisplayHandler.search(options)
       end
 
       def info
-        if args.first.nil?
-          raise MissingArgumentError, 'Please supply a package name'
-        end
-        if definitions.empty?
-          raise NotFoundError, "Could not find package matching: #{args.first}"
-        end
+        DisplayHandler.info(options)
+      end
 
-        Alces::Packager::CLI.send(:enable_paging)
-        definitions.sort.each do |m|
-          say "#{colored_path(m)}:"
-          # XXX more info in here
-          say "  #{'Name'.underline}\n    #{m.title}"
-          say "\n  #{'Summary'.underline}\n    #{m.summary}"
-          say "\n  #{'Version'.underline}\n    #{m.version}"
-          say "\n  #{'Compatible compilers'.underline} (--compiler)\n    "
-          say m.compilers.keys.join("\n    ")
-          
-          unless m.metadata[:variants].nil?
-            say "\n  #{'Available variants'.underline} (--variant)\n    "
-            say m.variants.keys.join("\n    ")
-          end
-          print_params_help(m)
-          if m.metadata[:description]
-            say "\n  #{'Description'.underline}\n    "
-            say "#{m.metadata[:description].split("\n").join("\n    ")}"
-          end
-          say "\n  #{'Repository'.underline}\n    #{m.repo.name}"
-          say "\n" 
+      def export
+        with_depot do
+          raise MissingArgumentError, 'Please supply a package path' if package_path.nil? || !package_path.include?('/')
+          ArchiveExporter.export(package_path, options)
         end
       end
 
-      def install
+      def import
         with_depot do
-          return unless validate_metadata!
-
-          #Validate the package before going any further
-          say "Installing #{colored_path(metadata)}"
-          metadata.validate!
-          if metadata.metadata[:variants] && variant == 'all'
-            metadata.metadata[:variants].keys.each do |v|
-              Actions.install(metadata, action_opts(:install).merge(variant: v), IoHandler)
-            end
-          else
-            Actions.install(metadata, action_opts(:install), IoHandler)
-          end
-          puts "\nInstallation complete."
+          raise MissingArgumentError, 'Please supply path to archive' if package_path.nil?
+          ArchiveImporter.import(package_path, options)
         end
+      end
+
+      def depot
+        raise MissingArgumentError, 'Please supply the depot operation' if options.args.empty?
+        DepotHandler.handle(options)
       end
 
       def purge
         with_depot do
-          return unless validate_package!
-          say "Purging #{colored_path(package)}"
-          Actions.purge(package, action_opts(:purge), IoHandler)
+          with_live_package do |package|
+            say "Purging #{colored_path(package)}"
+            Actions.purge(package, action_opts, IoHandler)
+          end
         end
       end
 
       def clean
         with_depot do
           begin
-            if validate_package!
+            with_live_package do |package|
               say "Cleaning up #{colored_path(package)}"
-              Actions.clean(package, action_opts(:clean), IoHandler)
+              Actions.clean(package, action_opts, IoHandler)
             end
           rescue
-            args.unshift(package_name)
-            validate_metadata!
-            say "Cleaning up #{colored_path(metadata)}"
-            Actions.clean(metadata, action_opts(:clean), IoHandler)
+            with_definition do |defn|
+              say "Cleaning up #{colored_path(defn)}"
+              opts = action_opts.tap do |o|
+                o[:compiler] = (options.compiler == :first ? defn.compilers.keys.first : options.compiler)
+              end
+              Actions.clean(defn, opts, IoHandler)
+            end
           end
         end
       end
 
       def update
-        # update the specified repo, or 'base' if none specified
-        repo_name = args.first || 'base'
+        # update the specified repo, or 'main' if none specified
+        repo_name = options.args.first || 'main'
         repo = Repository.find { |r| r.name == repo_name }
         raise NotFoundError, "Repository #{repo_name} not found" if repo.nil?
         say "Updating repository: #{repo_name}"
-        IoHandler.doing 'Update'
+        doing 'Update'
         begin
-          case repo.update!
+          status, rev = repo.update!
+          case status
           when :ok
-            say 'OK'.color(:green)
+            say "#{'OK'.color(:green)} (At: #{rev})"
           when :uptodate
-            say "#{'OK'.color(:green)} (Already up-to-date)"
+            say "#{'OK'.color(:green)} (Up-to-date: #{rev})"
           when :not_updateable
             say "#{'SKIP'.color(:yellow)} (Not updateable, no remote configured)"
+          when :outofsync
+            say "#{'SKIP'.color(:yellow)} (Out of sync: #{rev})"
           end
         rescue
           say "#{'FAIL'.color(:red)} (#{$!.message})"
@@ -254,7 +165,7 @@ module Alces
       def default
         with_depot do
           # set the specified package as default
-          if (package_path = args.first).nil?
+          if (package_path = package_path).nil?
             raise MissingArgumentError, 'Please supply a package path'
           end
           package_parts = package_path.split('/')
@@ -262,245 +173,47 @@ module Alces
           version = package_parts.last
           package = Package.first(path: package_path) || Version.first(path: package_prefix, version: version)
           raise NotFoundError, "Package '#{colored_path(package_path)}' not found" if package.nil?
-          Actions.set_default(package, action_opts(:default), IoHandler)
+          Actions.set_default(package, action_opts, IoHandler)
         end
       end
 
-      def export
+      def install
         with_depot do
-          package_path = args[0]
-          raise MissingArgumentError, 'Please supply a package path' if package_path.nil? || !package_path.include?('/')
-          ArchiveExporter.export(package_path, options.depot, IoHandler, options.ignore_bad)
+          with_definition do |defn|
+            DefinitionHandler.install(defn, options)
+          end
         end
       end
 
-      def import
+      def requires
         with_depot do
-          archive_path = args[0]
-          raise MissingArgumentError, 'Please supply path to archive' if archive_path.nil?
-
-          ArchiveImporter.import(archive_path, options.depot, IoHandler)
-        end
-      end
-
-      def depot
-        $terminal.instance_variable_set :@output, STDERR
-        operation = args[0]
-        raise MissingArgumentError, 'Please supply the depot operation' if operation.nil?
-        case operation
-        when 'f', 'fe', 'fet', 'fetc', 'fetch'
-          source_url = args[1]
-          name = args[2]
-          raise MissingArgumentError, 'Please supply a depot source URL' if source_url.nil?
-          depot = Depot.new(source_url: source_url, name: name)
-          if depot.fetch
-            say "\nDepot '#{depot.name}' fetched successfully."
-          else
-            raise InvalidSelectionError, "Depot could not be fetched from: #{source_url}"
+          with_definition do |defn|
+            DefinitionHandler.requires(defn, options)
           end
-        when 'e', 'en', 'ena', 'enab', 'enabl', 'enable'
-          target = args[1]
-          raise MissingArgumentError, 'Please supply a depot name' if target.nil?
-          if depot = Depot.find(target)
-            depot.enable
-          else
-            raise InvalidSelectionError, "No such depot: #{target}"
-          end
-        when 'di', 'dis', 'disa', 'disab', 'disabl', 'disable'
-          target = args[1]
-          raise MissingArgumentError, 'Please supply a depot name' if target.nil?
-          if depot = Depot.find(target)
-            depot.disable
-          else
-            raise InvalidSelectionError, "No such depot: #{target}"
-          end
-        when 'l', 'li', 'lis', 'list', 'ls'
-          Depot.list
-        when 'de', 'dep', 'depe', 'depen', 'depend', 'depends'
-          target = args[1] || options.depot
-          raise MissingArgumentError, 'Please supply a depot name' if target.nil?
-          if depot = Depot.find(target)
-            depot.resolve_depends
-            say "\nDependencies resolved."
-          else
-            raise InvalidSelectionError, "No such depot: #{target}"
-          end
-        else
-          raise InvalidSelectionError, "No such depot operation: #{operation}"
         end
       end
 
       private
-      def colored_path(p)
-        IoHandler.colored_path(p)
+      def with_definition(&block)
+        with_resource(definitions, &block)
       end
 
-      def validate_metadata!
-        if args.first.nil?
+      def with_live_package(&block)
+        with_resource(packages, &block)
+      end
+
+      def with_resource(collection, &block)
+        if package_path.nil?
           raise MissingArgumentError, 'Please supply a package name'
         end
-        if definitions.length == 0
-          raise NotFoundError, "No matching package found for: #{package_name}"
-        elsif definitions.length > 1
-          l = definitions.map {|p| colored_path(p) }
+        if collection.length == 0
+          raise NotFoundError, "No matching package found for: #{package_path}"
+        elsif collection.length > 1
+          l = collection.map {|p| colored_path(p) }
           say "More than one matching package found, please choose one of:"
           say $terminal.list(l,:columns_across)
-          false
         else
-          # set compiler to first available if we're using the default
-          options.compiler = metadata.compilers.keys.first if options.compiler == :first
-          validate_variant
-          validate_compiler
-          true
-        end
-      end
-
-      def validate_package!
-        if args.first.nil?
-          raise MissingArgumentError, 'Please supply a package path'
-        end
-        if packages.length == 0
-          raise NotFoundError, "No matching package found for: #{package_name}"
-        elsif packages.length > 1
-          l = packages.map {|p| colored_path(p) }
-          say "More than one matching package found, please choose one of:"
-          say $terminal.list(l,:columns_across)
-          false
-        else
-          true
-        end
-      end
-
-      def params
-        {}.tap do |params|
-          a = args.dup
-          while param = a.shift do
-            k,v = param.split('=')
-            raise InvalidParameterError, "No value found for parameter '#{k}' -- did you forget the '='?" if v.nil?
-            params[k.to_sym] = v
-          end
-          metadata.validate_params!(params)
-        end
-      rescue InvalidParameterError
-        print_params_help(metadata)
-        say "\n"
-        raise
-      end
-
-      def action_opts(action)
-        {
-          compiler: compiler,
-          variant: variant,
-          verbose: verbose,
-          noninteractive: (yes ? :force : non_interactive),
-          tag: tag,
-          depot: options.depot,
-          global: options.global
-        }.tap do |h|
-          # only need params or modules when installing
-          if [:install].include?(action)
-            h[:params] = params
-            h[:modules] = modules
-            if metadata.mode == :unpacker
-              h[:skip_validation] = true
-              h.delete(:compiler)
-            end
-          end
-        end
-      end
-      memoize :action_opts
-
-      def validate_compiler
-        raise InvalidSelectionError, "Invalid compiler '#{compiler}' for package '#{metadata.name}' - please choose from: #{metadata.compilers.keys.join(', ')}" unless metadata.compilers.include?(compiler.split('/').first)
-      end
-
-      def validate_variant
-        if metadata.metadata[:variants].nil? || metadata.metadata[:variants].empty?
-          raise InvalidSelectionError, "Invalid variant '#{variant}' for package '#{metadata.name}' - this package has no variants." if variant
-        elsif !variant.nil?
-          raise InvalidSelectionError, "Invalid variant '#{variant}' for package '#{metadata.name}' - please choose from: #{metadata.variants.keys.join(', ')}" unless variant == 'all' || metadata.variants.include?(variant)
-        elsif variant.nil?
-          raise InvalidSelectionError, "Select a variant to build for package '#{metadata.name}' - please choose from: #{metadata.variants.keys.join(', ')} (or pass 'all' to build all variants)"
-        end
-      end
-
-      [:tag, :variant, :compiler, :modules, :verbose, :yes, :non_interactive].each do |k|
-        define_method(k) do
-          # XXX - kinda API private hack here
-          options.__hash__[k]
-        end
-      end
-
-      def package_name
-        @package_name ||= args.shift
-      end
-
-      def metadata
-        definitions.first
-      end
-
-      def definitions
-        @definitions ||= find_metadata(package_name || '*')
-      end
-
-      def package
-        packages.first
-      end
-
-      def packages
-        @packages ||= begin
-                        ps = Package.all(:path.like => "#{package_name}")
-                        ps.empty? ? Package.all(:path.like => "#{package_name}%") : ps
-                      end
-      end
-
-      def search_metadata(a, opts)
-        re = Regexp.new(a.join('.*'),true)
-        Repository.map do |r|
-          r.packages.select do |p|
-            (opts[:description] &&
-              ((p.metadata[:description] || '') =~ re ||
-               (p.metadata[:summary] || '') =~ re ||
-               (p.metadata[:title] || '') =~ re)) ||
-              (opts[:group] &&
-               (p.metadata[:group] || '') =~ re) ||
-              (opts[:name] &&
-               p.name =~ re)
-          end
-        end.flatten
-      end
-      
-      def find_metadata(a)
-        Repository.map do |r|
-          r.packages.select do |p|
-            if (parts = a.split('/')).length == 1
-              File.fnmatch?(a, p.name, File::FNM_CASEFOLD)
-            elsif parts.length == 2
-              # one of repo/type, type/name or name/version
-              File.fnmatch?(a, "#{p.repo.name}/#{p.type}", File::FNM_CASEFOLD) || File.fnmatch?(a, "#{p.type}/#{p.name}", File::FNM_CASEFOLD) || File.fnmatch?(a, "#{p.name}/#{p.version}", File::FNM_CASEFOLD)
-            elsif parts.length == 3
-              # one of repo/type/name or type/name/version
-              File.fnmatch?(a, "#{p.repo.name}/#{p.type}/#{p.name}", File::FNM_CASEFOLD) || File.fnmatch?(a, "#{p.type}/#{p.name}/#{p.version}", File::FNM_CASEFOLD)
-            elsif parts.length == 4
-              if File.fnmatch?(a, p.path, File::FNM_CASEFOLD)
-                true
-              else
-                if File.fnmatch?(parts[0..2].join('/'), "#{p.type}/#{p.name}/#{p.version}", File::FNM_CASEFOLD)
-                  options.tag = parts[3]
-                  true
-                end
-              end
-            end
-          end
-        end.flatten
-      end
-      
-      def print_params_help(m)
-        if m.metadata[:params] && m.metadata[:params].any?
-          say "\n  #{'Required parameters'.underline} (param=value)\n\n"
-          m.params.each do |k,v|
-            say sprintf("%15s: %s\n", k, v)
-          end
+          block.call(collection.first)
         end
       end
 
@@ -514,6 +227,33 @@ module Alces
         else
           raise NotFoundError, "Could not find depot: #{options.depot}"
         end
+      end
+
+      def action_opts
+        {
+          compiler: options.compiler,
+          variant: options.variant,
+          verbose: options.verbose,
+          noninteractive: (options.yes ? :force : options.non_interactive),
+          tag: options.tag,
+          depot: options.depot,
+          global: options.global
+        }
+      end
+
+      def package_path
+        @package_path ||= options.args.first
+      end
+
+      def definitions
+        @definitions ||= Metadata.sort(Repository.find_definitions(package_path || '*'))
+      end
+
+      def packages
+        @packages ||= begin
+                        ps = Package.all(:path.like => "#{package_path}")
+                        ps.empty? ? Package.all(:path.like => "#{package_path}%") : ps
+                      end
       end
     end
   end

@@ -68,6 +68,26 @@ module Alces
         def all
           @all ||= repo_paths.map { |path| new(path) }
         end
+
+        def find_definitions(a)
+          map do |r|
+            r.packages.select do |p|
+              if (parts = a.split('/')).length == 1
+                File.fnmatch?(a, p.name, File::FNM_CASEFOLD)
+              elsif parts.length == 2
+                # one of repo/type, type/name or name/version
+                File.fnmatch?(a, "#{p.repo.name}/#{p.type}", File::FNM_CASEFOLD) || File.fnmatch?(a, "#{p.type}/#{p.name}", File::FNM_CASEFOLD) || File.fnmatch?(a, "#{p.name}/#{p.version}", File::FNM_CASEFOLD)
+              elsif parts.length == 3
+                # one of repo/type/name or type/name/version
+                File.fnmatch?(a, "#{p.repo.name}/#{p.type}/#{p.name}", File::FNM_CASEFOLD) || File.fnmatch?(a, "#{p.type}/#{p.name}/#{p.version}", File::FNM_CASEFOLD)
+              elsif parts.length == 4
+                if File.fnmatch?(a, p.path, File::FNM_CASEFOLD)
+                  true
+                end
+              end
+            end
+          end.flatten
+        end
       end
       
       include Alces::Tools::Logging
@@ -105,27 +125,41 @@ module Alces
 
       def update!
         if metadata.key?(:source)
-          r = Alces.git.sync(package_path, metadata[:source])
-          case r
-          when /^Branch master set up/, /^Updating/
+          case Alces.git.sync(repo_path, metadata[:source])
+          when /^Branch master set up/
             # force reload of packages if needed
             @packages = nil
-            :ok
+            [:ok, head_revision]
+          when /^Updating (\S*)\.\.(\S*)/
+            cur = $1
+            tgt = $2
+            head_rev = head_revision
+            if head_rev != tgt
+              [:outofsync, head_rev]
+            else
+              # force reload of packages if needed
+              @packages = nil
+              [:ok, tgt]
+            end
           when /^Already up-to-date./
-            :uptodate
+            [:uptodate, head_revision]
           else
             raise "Unrecognized response from synchronization: #{r.chomp}"
           end
         else
-          :not_updateable
+          [:not_updateable, nil]
         end
       rescue
         raise "Unable to sync repo: '#{name}' (#{$!.message})"
       end
 
       private
+      def repo_path
+        @repo_path ||= metadata[:schema] == 1 ? package_path : path
+      end
+
       def head_revision
-        Alces.git.head_revision(package_path)[0..6] rescue 'unknown'
+        Alces.git.head_revision(repo_path)[0..6] rescue 'unknown'
       end
 
       def load_packages

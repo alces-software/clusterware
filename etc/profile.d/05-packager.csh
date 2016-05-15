@@ -1,16 +1,16 @@
 ################################################################################
 ##
 ## Alces Clusterware - Shell configuration
-## Copyright (c) 2008-2015 Alces Software Ltd
+## Copyright (c) 2008-2016 Alces Software Ltd
 ##
 ################################################################################
 foreach a ( modules modulerc )
     if ( ! -f "$HOME/.$a" ) then
-        cp /opt/clusterware/etc/skel/$a "$HOME/.$a"
+        cp _ROOT_/etc/skel/$a "$HOME/.$a"
     endif
 end
 
-set exec_prefix='/opt/clusterware/opt/Modules/bin'
+set exec_prefix='_ROOT_/opt/Modules/bin'
 
 set prefix=""
 set postfix=""
@@ -39,7 +39,7 @@ set postfix = "set _exit="'$status'"; $postfix; test 0 = "'$_exit;'
 alias module $prefix'eval `'$exec_prefix'/modulecmd '$cw_SHELL' '$histchar'*`; '$postfix
 
 if (! $?MODULEPATH ) then
-    setenv MODULEPATH `sed -n 's/[      #].*$//; /./H; $ { x; s/^\n//; s/\n/:/g; p; }' /opt/clusterware/etc/modulespath`
+    setenv MODULEPATH `sed -n 's/[      #].*$//; /./H; $ { x; s/^\n//; s/\n/:/g; p; }' _ROOT_/etc/gridware/global/modulespath`
     if ( -f "$HOME/.modulespath" ) then
       set usermodulepath = `sed -n 's/[     #].*$//; /./H; $ { x; s/^\n//; s/\n/:/g; p; }' "$HOME/.modulespath"`
       setenv MODULEPATH "$usermodulepath":"$MODULEPATH"

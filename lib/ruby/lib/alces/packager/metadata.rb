@@ -25,7 +25,20 @@ require 'alces/tools/logging'
 module Alces
   module Packager
     class Metadata < Struct.new(:name, :version, :metadata, :checksum, :repo)
-
+      class << self
+        def sort(arr)
+          arr.sort do |a,b|
+            begin
+              Semver.new(a.semver) <=> Semver.new(b.semver)
+            rescue
+              a.semver <=> b.semver
+            end
+          end.sort do |a,b|
+            File.join(a.repo.name, a.type, a.name) <=> File.join(b.repo.name, b.type, b.name)
+          end
+        end
+      end
+      
       include Alces::Tools::Logging
       
       attr_reader :mode
@@ -37,7 +50,9 @@ module Alces
       end
 
       def path
-        @path ||= "#{repo.name}/#{type}/#{name}/#{version}"
+        @path ||= "#{repo.name}/#{type}/#{name}".tap do |s|
+          s << "/#{version}" unless version.empty?
+        end
       end
 
       def method_missing(s,*a,&b)
@@ -77,7 +92,7 @@ module Alces
       end
 
       def variant_requirements(variant, phase)
-        retrieve([]) do 
+        retrieve([]) do
           requirements_from(metadata[:variants][variant][:requirements], phase)
         end
       end
@@ -216,7 +231,24 @@ module Alces
       def bottom_title_bar
         centred("=" * (17 + title.length))
       end
-      
+
+      def semver
+        return metadata[:semver] if metadata[:semver]
+        if version =~ /^[0-9]+\.[0-9]+$/
+          "#{version}.0"
+        elsif version =~ /^([0-9]+\.[0-9]+\.[0-9]+)([a-zA-z]+)$/
+          "#{$1}-#{$2}"
+        elsif version =~ /^([0-9]+\.[0-9]+\.[0-9]+)\.(.*)$/
+          "#{$1}-#{$2}"
+        elsif version =~ /^([0-9]+\.[0-9]+)\.(.*)$/
+          "#{$1}.0-#{$2}"
+        elsif version =~ /^[0-9]{8}$/
+          "0.0.#{version}"
+        else
+          version
+        end
+      end
+
       private
       def centred(text, opts = {})
         opts = {width: 70}.merge(opts)

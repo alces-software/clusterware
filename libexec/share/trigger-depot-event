@@ -1,0 +1,17 @@
+#!/bin/bash
+bindir="$(cd "$(dirname "$0")" && pwd)"
+
+if [ "$UID" != "0" ]; then
+    exec sudo "${bindir}"/$(basename "$0") "$@"
+fi
+
+if [ "$1" == "nfs-export" ]; then
+    depot_path="$2"
+    "${bindir}"/trigger-event --local nfs-export "${depot_path}"
+elif [ "$1" == "gridware-depots" ]; then
+    payload="$2"
+    "${bindir}"/trigger-event gridware-depots "${payload}"
+else
+    echo "Unrecognized event type: ${1}"
+    exit 1
+fi

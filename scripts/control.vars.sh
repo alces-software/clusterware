@@ -19,7 +19,7 @@
 # For more information on the Alces Clusterware, please visit:
 # https://github.com/alces-software/clusterware
 #==============================================================================
-deps="git libyaml ruby bundler modules genders pdsh components tigervnc xwd serf pluginhook websockify jq"
+deps="git libyaml ruby bundler modules genders pdsh components tigervnc xwd serf pluginhook websockify jq jo"
 serviceware="gridscheduler aws s3cmd galaxy simp_le alces-storage-manager-daemon clusterware-dropbox-cli"
 dists="el6 el7"
 dist_url=${cw_BUILD_dist_url:-https://s3-eu-west-1.amazonaws.com/packages.alces-software.com/clusterware/dist}
