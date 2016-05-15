@@ -186,3 +186,35 @@ network_ec2_hashed_account() {
                      "${cw_ROOT}"/opt/jq/bin/jq -r .accountId)
     echo -n "${account}" | md5sum | cut -f1 -d' ' | base64 | cut -c1-16 | tr 'A-Z' 'a-z'
 }
+
+network_fetch_ec2_userdata() {
+    tmout="${1:-5}"
+    if network_has_metadata_service $tmout; then
+        if [ "${cw_TEST_mock_ec2_userdata}" == "true" ]; then
+            cat <<EOF
+#cloud-config
+#=FlightCustomizer ${cw_TEST_flight_customizer}
+system_info:
+  default_user:
+    name: admin
+hostname: login1
+write_files:
+- content: |
+    cluster:
+      uuid: '11111111-2222-3333-444444444444'
+      token: '1A0a1aaAA1aAAA/aaa1aAA=='
+      name: mockcluster
+      role: 'master'
+      tags:
+        scheduler_roles: ':master:'
+        storage_roles: ':master:'
+        access_roles: ':master:'
+  owner: root:root
+  path: /opt/clusterware/etc/config.yml
+  permissions: '0640'
+EOF
+        else
+            curl -f --connect-timeout ${tmout} http://169.254.169.254/latest/user-data
+        fi
+    fi
+}
