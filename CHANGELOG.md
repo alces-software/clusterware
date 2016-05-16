@@ -5,8 +5,13 @@ This project adheres to [Semantic Versioning](http://semver.org/).
 
 ## [1.5.1] - TBC
 
+### Added
+- Clusterware now displays an appropriate cosmetic version number at login (clusterware#119)
+- Provide a framework to allow anonymous usage data to be gathered (clusterware#142)
+
 ### Fixed
 - Updated Trinity session installation to reflect updated version available upstream (clusterware-sessions#8)
+- Corrected a problem that was preventing environment modules from functioning correctly under tcsh
 
 ## [1.5.0] - 2016-05-15
 
