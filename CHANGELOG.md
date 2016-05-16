@@ -3,6 +3,11 @@
 All notable changes to this project will be documented in this file.
 This project adheres to [Semantic Versioning](http://semver.org/).
 
+## [1.5.1] - TBC
+
+### Fixed
+- Updated Trinity session installation to reflect updated version available upstream (clusterware-sessions#8)
+
 ## [1.5.0] - 2016-05-15
 
 ### Added
@@ -134,6 +139,7 @@ This project adheres to [Semantic Versioning](http://semver.org/).
 
 - Initial release
 
+[1.5.1]: https://github.com/alces-software/clusterware/compare/1.5.0...1.5.1
 [1.5.0]: https://github.com/alces-software/clusterware/compare/1.4.1...1.5.0
 [Core 1.5.0]: https://github.com/alces-software/clusterware/issues?q=milestone%3A1.5.0
 [Handlers 1.5.0]: https://github.com/alces-software/clusterware-handlers/issues?q=milestone%3A1.5.0
