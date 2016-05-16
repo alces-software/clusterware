@@ -110,8 +110,8 @@ main() {
     fi
     # If no geometry is given as a parameter or in config, pass "" through to
     # the VNC server so it uses its default value.
-    geometry="${geometry:-${cw_SESSION_geometry:-''}}"
-    if [[ ! "${geometry}" =~ ^[0-9]+x[0-9]+$ ]]; then
+    geometry="${geometry:-${cw_SESSION_geometry}}"
+    if [[ -n "${geometry}" && ! "${geometry}" =~ ^[0-9]+x[0-9]+$ ]]; then
         action_die "bad value for geometry: ${geometry} (must be like \"1024x768\")"
     fi
 
