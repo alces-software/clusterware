@@ -107,6 +107,10 @@ if [ ! -d "${target}/etc" ]; then
         cp "${cw_BUILD_recorder_generator}" "${target}"/libexec/share/flight-recorder-data-generator
         chmod 755 "${target}"/libexec/share/flight-recorder-data-generator
     fi
+    if [ -n "${cw_BUILD_release}" ]; then
+        sed -e "s,^cw_RELEASE=.*,cw_RELEASE=${cw_BUILD_release},g" \
+            -i "${target}"/etc/clusterware.rc
+    fi
     cp -R "${source}/dist/distro/${os}" "${target}"/etc/distro
 fi
 mkdir -p /var/log/clusterware
