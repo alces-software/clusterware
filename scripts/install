@@ -98,6 +98,15 @@ if [ ! -d "${target}/etc" ]; then
     chmod 0750 "${target}"/etc/sudoers.d
     sed -e "s,_SECRET_,${cw_BUILD_naming_auth},g" \
         -i "${target}"/etc/naming.rc
+    if [ -n "${cw_BUILD_recorder_generator}" -a -n "${cw_BUILD_recorder_url}" ]; then
+        sed -e "s,_URL_,${cw_BUILD_recorder_url},g" \
+            -e "s,_GENERATOR_,${target}/libexec/share/flight-recorder-data-generator,g" \
+            -e "s,^cw_FLIGHT_RECORDER_enabled=false,cw_FLIGHT_RECORDER_enabled=true,g" \
+            -e "s,^#cw_FLIGHT_RECORDER_,cw_FLIGHT_RECORDER_,g" \
+            -i "${target}"/etc/flight-recorder.rc
+        cp "${cw_BUILD_recorder_generator}" "${target}"/libexec/share/flight-recorder-data-generator
+        chmod 755 "${target}"/libexec/share/flight-recorder-data-generator
+    fi
     cp -R "${source}/dist/distro/${os}" "${target}"/etc/distro
 fi
 mkdir -p /var/log/clusterware
