@@ -67,7 +67,10 @@ vnc_start_server() {
     sessiondir="$2"
     shift 2
 
-    $cw_VNC_VNCSERVER -autokill \
+    # Set session geometry variable for VNC server process so the session
+    # scripts for session types which do not obey the VNC server's geometry
+    # parameter can be forced to resize to the given geometry.
+    cw_SESSION_geometry="${geometry}" $cw_VNC_VNCSERVER -autokill \
         -sessiondir "${sessiondir}" \
         -sessionscript "${sessiondir}/session.sh" \
         -vncpasswd "${sessiondir}/password.dat" \
