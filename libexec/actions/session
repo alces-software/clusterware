@@ -1,3 +1,4 @@
+# vim: set filetype=sh :
 : '
 : NAME: session
 : SYNOPSIS: Manage interactive VNC sessions
