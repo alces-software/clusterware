@@ -12,6 +12,7 @@ This project adheres to [Semantic Versioning](http://semver.org/).
 ### Fixed
 - Updated Trinity session installation to reflect updated version available upstream (clusterware-sessions#8)
 - Corrected a problem that was preventing environment modules from functioning correctly under tcsh
+- Prevented a spurious error in the logs when `config.yml` does not contain an `instance` section (clusterware#141)
 
 ## [1.5.0] - 2016-05-15
 
