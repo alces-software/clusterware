@@ -1,3 +1,4 @@
+# vim: set filetype=sh :
 : '
 : NAME: service
 : SYNOPSIS: Install and manage serviceware

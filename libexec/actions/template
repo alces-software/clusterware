@@ -1,3 +1,4 @@
+# vim: set filetype=sh :
 : '
 : NAME: template
 : SYNOPSIS: Job script templates tailored to your research environment
