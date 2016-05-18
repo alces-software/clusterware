@@ -76,7 +76,7 @@ module Alces
           headings = ['Requirement','Package','Build arguments']
           Alces::Packager::CLI.send(:enable_paging)
           cols = $terminal.output_cols
-          say Terminal::Table.new(title: "Requirements for #{colored_path(defn)}", 
+          say Terminal::Table.new(title: "Requirements for #{colored_path(defn)}",
                                   headings: headings,
                                   rows: rows
                                  ).to_s
@@ -134,7 +134,7 @@ module Alces
 
         missing_str = missing.map do |_, pkg, _, build_arg_hash|
           colored_path(pkg).tap do |s|
-            if build_arg_hash[:variant] && build_arg_hash[:variant] != 'default' 
+            if build_arg_hash[:variant] && build_arg_hash[:variant] != 'default'
               s << " (#{build_arg_hash[:variant]})"
             end
           end

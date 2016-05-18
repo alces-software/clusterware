@@ -151,7 +151,7 @@ EOF
           end
         end
       end
-      
+
       def prepare
         title 'Preparing package sources'
         mkdir_p(package.archive_dir)
@@ -160,7 +160,7 @@ EOF
         title 'Preparing for installation'
         create_build_area
         if default_unpack?
-          unpack_tarball 
+          unpack_tarball
         else
           unpack_package
         end
@@ -318,7 +318,7 @@ EOF
           say 'OK'.color(:green)
         end
       end
-      
+
       def install_modulefiles
         doing 'Module'
         with_spinner do
@@ -380,7 +380,7 @@ EOF
         msg = nil
         with_spinner do
           unless File.directory?(build_dir)
-            msg = "Matching build directory was not found: #{build_dir}" 
+            msg = "Matching build directory was not found: #{build_dir}"
           else
             rm_r(build_dir)
           end
@@ -401,7 +401,7 @@ EOF
             a << dest_dir if File.directory?(dest_dir)
             a << dependency_file if File.exists?(dependency_file)
             if m = ModuleTree.find(opts[:depot], modulefile_name)
-              a << m 
+              a << m
             end
           end
           if !package.is_a?(Package) && files.empty?
@@ -670,9 +670,9 @@ EOF
 
       def script(key, name, working_dir = src_dir)
         ERB.new(template_for(package.metadata[key], working_dir).tap do |t|
-                  i("#{name} template"){t} 
+                  i("#{name} template"){t}
                 end).result(binding).tap do |t|
-          i("#{name} script"){t}               
+          i("#{name} script"){t}
         end
       end
 
@@ -884,7 +884,7 @@ EOF
         File.join(Config.dependencies_dir(opts[:depot]),"#{package_descriptor.join('-')}.sh")
       end
       memoize :dependency_file
-      
+
       def compiler
         # XXX - try deeper in the hash for version-specific options?
         package.metadata[:compilers][opts[:compiler].split('/').first]

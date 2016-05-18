@@ -49,14 +49,14 @@ module Alces
       property :default, Boolean
 
       before :save do
-        self.default = (comparable_versions.empty? || 
+        self.default = (comparable_versions.empty? ||
                         (comparable_versions.length == 1 && comparable_versions.first.id == self.id))
       end
 
       after :destroy do
         comparable_versions.update(default: true) if comparable_versions.length == 1
       end
-      
+
       private
       def comparable_versions
         @comparable_versions = Version.all(path: path)

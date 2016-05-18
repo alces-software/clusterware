@@ -159,7 +159,7 @@ EOF
         end
         node = node_for(modulepath)
         purger.call(node) unless node.nil?
-      end          
+      end
 
       def persist!
         path = Config.modules_dir(depot)

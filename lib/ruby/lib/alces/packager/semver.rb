@@ -3,8 +3,8 @@
 #
 # This file/package is part of Alces Clusterware.
 #==============================================================================
-# This file has been derived from code contained within the Ruby               
-# Semantic Version class project at https://github.com/jlindsey/semantic       
+# This file has been derived from code contained within the Ruby
+# Semantic Version class project at https://github.com/jlindsey/semantic
 # originally licensed as follows:
 #
 # Copyright (c) 2012 Josh Lindsey
@@ -81,7 +81,7 @@ module Alces
 
       SemVerRegexp = /\A(\d+\.\d+\.\d+)(-([0-9A-Za-z-]+(\.[0-9A-Za-z-]+)*))?(\+([0-9A-Za-z-]+(\.[0-9A-Za-z-]+)*))?\Z/
       attr_accessor :major, :minor, :patch, :pre, :build
-      
+
       def initialize version_str
         raise ArgumentError.new("#{version_str} is not a valid SemVer Version (http://semver.org)") unless version_str =~ SemVerRegexp
 
@@ -101,7 +101,7 @@ module Alces
       def to_a
         [@major, @minor, @patch, @pre, @build]
       end
-      
+
       def to_s
         str = [@major, @minor, @patch].join '.'
         str << '-' << @pre unless @pre.nil?
