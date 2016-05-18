@@ -3,7 +3,7 @@
 All notable changes to this project will be documented in this file.
 This project adheres to [Semantic Versioning](http://semver.org/).
 
-## [1.5.1] - TBC
+## [1.5.1] - 2016-05-08
 
 ### Added
 - Clusterware now displays an appropriate cosmetic version number at login (clusterware#119)
@@ -14,6 +14,7 @@ This project adheres to [Semantic Versioning](http://semver.org/).
 - Corrected a problem that was preventing environment modules from functioning correctly under tcsh
 - Prevented a spurious error in the logs when `config.yml` does not contain an `instance` section (clusterware#141)
 - Display an error rather than raising an exception when `gridware info` is requested for a non-existent package (clusterware#155)
+- Corrected URLs in core howto guides
 
 ## [1.5.0] - 2016-05-15
 
