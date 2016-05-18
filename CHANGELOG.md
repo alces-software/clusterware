@@ -5,6 +5,7 @@ This project adheres to [Semantic Versioning](http://semver.org/).
 
 ## [Unreleased] - 1.6.0
 - Added `--geometry` parameter to `alces session start` command (#85)
+- Added `--latest` parameter to `alces gridware install` command (#101)
 
 ## [1.5.0] - 2016-05-15
 
