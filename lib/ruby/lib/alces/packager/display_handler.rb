@@ -72,7 +72,7 @@ module Alces
           raise MissingArgumentError, 'Please supply a package name'
         end
         if definitions.empty?
-          raise NotFoundError, "Could not find package matching: #{args.first}"
+          raise NotFoundError, "Could not find package matching: #{options.args.first}"
         end
 
         Alces::Packager::CLI.send(:enable_paging)

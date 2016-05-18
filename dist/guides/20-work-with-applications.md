@@ -181,7 +181,7 @@ loaded, use the `module show` command, e.g.:
 For more information regarding environment modules please refer to the
 *environment modules website* (<http://modules.sourceforge.net/>).
 
-For more information on some of the additional application features, please see the [Gridware documentation](http://alces-flight-appliance-docs.readthedocs.org/en/latest/getting-started/environment-usage/environment_usage.html#additional-application-features)
+For more information on some of the additional application features, please see the [Gridware documentation](http://docs.alces-flight.com/en/latest/apps/apps.html#shared-cluster-applications)
 
 ## SEE ALSO
 
