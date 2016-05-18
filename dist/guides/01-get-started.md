@@ -103,7 +103,7 @@ different storage areas available on your machine.
 The `alces storage` utility can also assist you in the management and
 usage of the different storage areas including file and object 
 storage types. For more information on the usage of the `alces storage`
-utility - please [refer to the documentation](http://alces-flight-appliance-docs.readthedocs.org/en/latest/clusterware-storage/alces-storage-overview.html#alces-storage-overview)
+utility - please [refer to the documentation](http://docs.alces-flight.com/en/latest/databasics/data_basics.html#using-alces-storage-commands)
 
 ## SEE ALSO
 
