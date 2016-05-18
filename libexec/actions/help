@@ -1,4 +1,3 @@
-# vim: set filetype=sh :
 : '
 : NAME: help
 : SYNOPSIS: Display help and usage information
@@ -25,6 +24,7 @@
 # For more information on the Alces Clusterware, please visit:
 # https://github.com/alces-software/clusterware
 #==============================================================================
+# vim: set filetype=sh :
 action=$1
 shift
 
