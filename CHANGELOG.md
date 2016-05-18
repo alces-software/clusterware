@@ -5,6 +5,19 @@ This project adheres to [Semantic Versioning](http://semver.org/).
 
 ## [Unreleased] - 1.6.0
 
+## [1.5.1] - 2016-05-08
+
+### Added
+- Clusterware now displays an appropriate cosmetic version number at login (clusterware#119)
+- Provide a framework to allow anonymous usage data to be gathered (clusterware#142)
+
+### Fixed
+- Updated Trinity session installation to reflect updated version available upstream (clusterware-sessions#8)
+- Corrected a problem that was preventing environment modules from functioning correctly under tcsh
+- Prevented a spurious error in the logs when `config.yml` does not contain an `instance` section (clusterware#141)
+- Display an error rather than raising an exception when `gridware info` is requested for a non-existent package (clusterware#155)
+- Corrected URLs in core howto guides
+
 ## [1.5.0] - 2016-05-15
 
 ### Added
@@ -170,7 +183,8 @@ This project adheres to [Semantic Versioning](http://semver.org/).
 
 - Initial release
 
-[Unreleased]: https://github.com/alces-software/clusterware/compare/1.5.0...develop
+[Unreleased]: https://github.com/alces-software/clusterware/compare/1.5.1...develop
+[1.5.1]: https://github.com/alces-software/clusterware/compare/1.5.0...1.5.1
 [1.5.0]: https://github.com/alces-software/clusterware/compare/1.4.1...1.5.0
 [Core 1.5.0]: https://github.com/alces-software/clusterware/issues?q=milestone%3A1.5.0
 [Handlers 1.5.0]: https://github.com/alces-software/clusterware-handlers/issues?q=milestone%3A1.5.0
