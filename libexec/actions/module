@@ -1,4 +1,3 @@
-# vim: set filetype=sh :
 : '
 : NAME: module
 : SYNOPSIS: An enhanced environment modules utility
@@ -25,6 +24,7 @@
 # For more information on the Alces Clusterware, please visit:
 # https://github.com/alces-software/clusterware
 #==============================================================================
+# vim: set filetype=sh :
 action=$1
 shift
 

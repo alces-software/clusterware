@@ -1,4 +1,3 @@
-# vim: set filetype=sh :
 : '
 : NAME: service
 : SYNOPSIS: Install and manage serviceware
@@ -25,6 +24,7 @@
 # For more information on the Alces Clusterware, please visit:
 # https://github.com/alces-software/clusterware
 #==============================================================================
+# vim: set filetype=sh :
 action=$1
 shift
 cw_BINNAME="${cw_BINNAME} $(basename "$0")"
