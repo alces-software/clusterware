@@ -38,11 +38,11 @@ module Alces
           end
         end
       end
-      
+
       include Alces::Tools::Logging
-      
+
       attr_reader :mode
-      
+
       def initialize(*)
         super
         @mode = metadata[:mode] || :installer
@@ -103,7 +103,7 @@ module Alces
 
       def requirements(compiler, variant, phase)
         base_requirements(phase) +
-          compiler_requirements(compiler, phase) + 
+          compiler_requirements(compiler, phase) +
           variant_requirements(variant, phase)
       end
 
@@ -179,7 +179,7 @@ module Alces
       def archive_file_path(f)
         File.join(archive_dir,f)
       end
-      
+
       def validate_params!(params)
         if metadata[:params] && (missing_params = (metadata[:params].keys - params.keys)).any?
           raise InvalidParameterError, "No values specified for required parameters: #{missing_params.join(', ')}"
@@ -254,7 +254,7 @@ module Alces
         opts = {width: 70}.merge(opts)
         cmd = "sed -e :a -e 's/^.\\{1,#{opts[:width]-3}\\}$/ & /;ta'"
         cmd = "fold -s -w#{opts[:fold]} | #{cmd}" unless opts[:fold].nil?
-        IO.popen(cmd,'w+') do |io| 
+        IO.popen(cmd,'w+') do |io|
           io.puts text
           io.close_write
           io.read

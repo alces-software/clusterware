@@ -23,7 +23,7 @@ module Alces
   module Packager
     class DepotMetadata
       attr_accessor :name, :metadata
-      
+
       def initialize(name, metadata)
         self.name = name
         self.metadata = metadata

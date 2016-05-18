@@ -58,7 +58,7 @@ class HighLine
 
   def actual_length( string_with_escapes )
     string_with_escapes.to_s.gsub(/\e\[\d{1,2}(;5;\d{1,3})?m/, "").length
-  end  
+  end
 end
 
 module Alces
@@ -67,7 +67,7 @@ module Alces
       extend Commander::UI
       extend Commander::UI::AskForClass
       extend Commander::Delegates
-      
+
       class << self
         def add_package_options(c)
           c.option '-c', '--compiler STRING', String, 'Specify compiler'

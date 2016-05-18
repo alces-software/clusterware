@@ -29,7 +29,7 @@ module Alces
   module Packager
     class Repository < Struct.new(:path)
       class InvalidRepo < StandardError; end
-        
+
       DEFAULT_CONFIG = {
         repo_paths: ['/opt/clusterware/installer/local/'],
       }
@@ -44,7 +44,7 @@ module Alces
             h.merge!(YAML.load_file(cfgfile)) unless cfgfile.nil?
           end
         end
-        
+
         def method_missing(s,*a,&b)
           if config.has_key?(s)
             config[s]
@@ -56,7 +56,7 @@ module Alces
         def each(&block)
           all.each(&block)
         end
-        
+
         def [](k)
           all[k]
         end
@@ -89,9 +89,9 @@ module Alces
           end.flatten
         end
       end
-      
+
       include Alces::Tools::Logging
-      
+
       attr_accessor :package_path
 
       def initialize(path)
