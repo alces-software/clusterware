@@ -23,7 +23,7 @@ module Alces
   module Packager
     class OptionSet
       attr_accessor :compiler, :variant, :depot, :args, :tag, :modules, :binary, :binary_depends
-      attr_accessor :global, :yes, :non_interactive, :verbose
+      attr_accessor :global, :latest, :yes, :non_interactive, :verbose
       attr_accessor :ignore_bad, :accept_elf, :accept_bad, :output, :packages, :notify
       attr_accessor :tree, :ignore_satisfied
       attr_accessor :full, :oneline, :groups, :descriptions, :names
@@ -41,6 +41,7 @@ module Alces
           self.binary_depends = options.binary_depends
 
           self.global = options.global
+          self.latest = options.latest
           self.yes = options.yes
           self.non_interactive = options.non_interactive
           self.verbose = options.verbose
