@@ -3,7 +3,12 @@
 All notable changes to this project will be documented in this file.
 This project adheres to [Semantic Versioning](http://semver.org/).
 
-## [1.5.1] - 2016-05-08
+## [1.5.2] - 2016-05-19
+
+### Fixed
+- Correct semantic version comparisons when resolving uninstalled package dependencies
+
+## [1.5.1] - 2016-05-18
 
 ### Added
 - Clusterware now displays an appropriate cosmetic version number at login (clusterware#119)
@@ -147,6 +152,7 @@ This project adheres to [Semantic Versioning](http://semver.org/).
 
 - Initial release
 
+[1.5.2]: https://github.com/alces-software/clusterware/compare/1.5.1...1.5.2
 [1.5.1]: https://github.com/alces-software/clusterware/compare/1.5.0...1.5.1
 [1.5.0]: https://github.com/alces-software/clusterware/compare/1.4.1...1.5.0
 [Core 1.5.0]: https://github.com/alces-software/clusterware/issues?q=milestone%3A1.5.0
