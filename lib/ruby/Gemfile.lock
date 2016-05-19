@@ -3,6 +3,8 @@ GEM
   specs:
     addressable (2.3.8)
     alces-tools (0.13.0)
+    bourne (1.6.0)
+      mocha (~> 1.1)
     commander (4.3.5)
       highline (~> 1.7.2)
     data_objects (0.10.16)
@@ -80,6 +82,7 @@ PLATFORMS
 
 DEPENDENCIES
   alces-tools (>= 0.13.0)
+  bourne
   commander
   dm-aggregates (>= 1.2.0)
   dm-migrations (>= 1.2.0)
