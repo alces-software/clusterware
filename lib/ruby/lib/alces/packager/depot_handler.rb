@@ -34,7 +34,7 @@ module Alces
           handler_opts.args = options.args[1..-1]
           handler = new(handler_opts)
           instance_methods(false).each do |m|
-            if m =~ /^#{op}/ || m == :list && op == 'ls'
+            if is_method_shortcut(op, m)
               if [:info, :init, :install].include?(m) && op.length < 3
                 raise DepotError, "Ambiguous depot operation: #{op} (maybe: info, init, install?)"
               elsif [:export, :enable].include?(m) && m =~ op.length < 2
@@ -59,6 +59,10 @@ module Alces
 
         def archive_path_for(root, name)
           "#{root}/#{name.tr('/','-')}-#{ENV['cw_DIST']}.tar.gz"
+        end
+
+        def is_method_shortcut(operation, method_identifier)
+          method_identifier =~ /^#{operation}/ || method_identifier == :list && operation == 'ls'
         end
       end
 
