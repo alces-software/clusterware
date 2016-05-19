@@ -46,7 +46,7 @@ module Alces
       def import
         say "Importing #{File.basename(archive_path).color(:cyan)}"
 
-        if archive_path[0..4] == 'http:' || 
+        if archive_path[0..4] == 'http:' ||
            archive_path[0..5] == 'https:'
           title "Fetching archive"
           doing 'Download'
@@ -125,7 +125,7 @@ module Alces
           super
         end
       end
-      
+
       private
       def import_package(dir)
         # modify depot in modulefiles
@@ -267,7 +267,7 @@ module Alces
               s = File.read(fname).gsub('_DEPOT_',depot_path)
               File.write(fname,s)
             end
-            
+
             Package.first_or_create(type: type,
                                     name: name,
                                     version: version)
@@ -320,12 +320,12 @@ module Alces
         else
           raise PackageError, "Archive does not contain metadata"
         end
-      end 
+      end
 
       def package_path
         @package_path ||= File.join(type, name, version)
       end
-      
+
       def depot_path
         @depot_path ||= Depot.hash_path_for(options.depot)
       end

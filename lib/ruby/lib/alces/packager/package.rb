@@ -36,7 +36,7 @@ module Alces
             first(:path.like => "compilers/#{name}/%", :version => version)
           end
         end
-        
+
         # have affinity for currently selected compiler
         def resolve(descriptor, compiler_tag = nil, all_depots = false)
           if all_depots
@@ -105,7 +105,7 @@ module Alces
             end.find(&matcher)
           end
         end
-        
+
         def write_aliases!(depot)
           File.open(File.expand_path(File.join(Config.modules_dir(depot),'.aliases')), 'w') do |io|
             Package.all.each do |p|
@@ -153,7 +153,7 @@ module Alces
               IoHandler.warning("No directory found for #{path}; please purge #{path}")
             end
           end
-        end          
+        end
       end
 
       include DataMapper::Resource
@@ -169,7 +169,7 @@ module Alces
 
       before :save do
         self.path = [type, name, version, tag].compact.join('/')
-        self.default = (comparable_packages.empty? || 
+        self.default = (comparable_packages.empty? ||
                         (comparable_packages.length == 1 && comparable_packages.first.id == self.id))
       end
 
@@ -220,7 +220,7 @@ module Alces
       def compiler_libs_alias_prefix
         "libs-#{name}"
       end
-      
+
       def alias_suffix
         Digest::SHA1.hexdigest(path)[0..7]
       end
@@ -293,9 +293,9 @@ module Alces
               end
             end
             dependencies = case depends.length
-                           when 0 
+                           when 0
                              nil
-                           when 1 
+                           when 1
                              "     Dependencies: #{depends.first}"
                            else
                              "     Dependencies: #{depends.shift}".tap do |s|
@@ -387,7 +387,7 @@ EOF
         def modulefile_name
           [type, name, version, tag].compact.join('/')
         end
-        
+
         def render_modulefile(path)
           ERB.new(template).result(binding)
         end
@@ -421,7 +421,7 @@ EOF
         def library_modulefile_name
           ['libs', name, version, tag].compact.join('/')
         end
-        
+
         def render_library_modulefile(path, package_specifics)
           ERB.new(library_template).result(binding)
         end

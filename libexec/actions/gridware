@@ -26,6 +26,7 @@ DOC
 # For more information on the Alces Clusterware, please visit:
 # https://github.com/alces-software/clusterware
 #==============================================================================
+# vim: set filetype=ruby :
 # Execute as ruby script if we're evaluating under bash
 if [ "" ]; then 0; else eval 'cw_RUBY_EXEC "$@" || exit 1'; fi; end
 
