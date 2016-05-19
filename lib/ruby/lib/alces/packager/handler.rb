@@ -19,6 +19,8 @@
 # For more information on the Alces Clusterware, please visit:
 # https://github.com/alces-software/clusterware
 #==============================================================================
+require 'time'
+
 require 'alces/tools/logging'
 require 'alces/tools/execution'
 require 'alces/packager/config'
@@ -58,6 +60,12 @@ module Alces
       rescue Interrupt
         say "\n#{'WARNING'.underline.color(:yellow)}: Cancelled by user"
         exit(130)
+      end
+
+      private
+
+      def last_update_time
+        Time.parse(Config.last_update_file.readlines.first)
       end
     end
 
