@@ -79,12 +79,17 @@ main() {
     if ! session_check_quota; then
         action_die "sorry, your session quota has been reached on this host (${cw_SESSION_quota})."
     fi
-    local sessionscript password vnc_vars host_address terse params sessionvars sessiontype runtime
+    local sessionscript password vnc_vars host_address terse params sessionvars sessiontype runtime geometry
     local -A vnc
+
+    #
+    # Optional argument parsing.
+    #
     if [ "$1" == "--terse" ]; then
         terse=true
         shift
     fi
+
     if [ "$1" == "--runtime" ]; then
         runtime=$2
         shift 2
@@ -99,6 +104,20 @@ main() {
         runtime="${cw_SESSION_timeout}"
     fi
 
+    if [ "$1" == "--geometry" ]; then
+        geometry=$2
+        shift 2
+    fi
+    # If no geometry is given as a parameter or in config, pass "" through to
+    # the VNC server so it uses its default value.
+    geometry="${geometry:-${cw_SESSION_geometry}}"
+    if [[ -n "${geometry}" && ! "${geometry}" =~ ^[0-9]+x[0-9]+$ ]]; then
+        action_die "bad value for geometry: ${geometry} (must be like \"1024x768\")"
+    fi
+
+    #
+    # Determine session script to use.
+    #
     sessionscript="$1"
     shift
     if [ "$1" ]; then
@@ -128,6 +147,9 @@ main() {
     fi
     files_mark_tempfile "${_SESSIONDIR}/session.sh"
 
+    #
+    # Create wrapper script if needed to pass in extra parameters.
+    #
     if [ "$1" ]; then
         # we have parameters, so need to pass them into the session script
         mv "${_SESSIONDIR}/session.sh" "${_SESSIONDIR}/session-runner.sh"
@@ -143,8 +165,11 @@ exec ${_SESSIONDIR}/session-runner.sh ${params}
 EOF
     fi
 
+    #
+    # Start session, logging/writing details.
+    #
     password=$(vnc_create_password)
-    vnc_session_start "${password}" "${_SESSIONDIR}"
+    vnc_session_start "${password}" "${geometry}" "${_SESSIONDIR}"
 
     if ! vnc_vars="$(vnc_read_vars "${_SESSIONDIR}")"; then
         action_die "VNC server could not be started, unable to locate configuration file."
@@ -183,6 +208,9 @@ EOF
         _start_timer "${vnc[DISPLAY]}" "${runtime}"
     fi
 
+    #
+    # Clean up.
+    #
     rm -f "${_SESSIONDIR}/starting.txt"
     {
         process_wait_for_pid $(cat "${vnc[PIDFILE]}")
