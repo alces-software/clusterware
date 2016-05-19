@@ -62,7 +62,7 @@ module Alces
         end
 
         def is_method_shortcut(operation, method_identifier)
-          method_identifier =~ /^#{operation}/ || method_identifier == :list && operation == 'ls'
+          method_identifier =~ /^#{Regexp.escape(operation)}/ || method_identifier == :list && operation == 'ls'
         end
       end
 

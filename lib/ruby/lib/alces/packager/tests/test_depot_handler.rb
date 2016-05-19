@@ -40,5 +40,11 @@ class TestDepotHandler < MiniTest::Test
     def test_ls_is_list_shortcut
       assert @depot_handler_class.is_method_shortcut('ls', :list)
     end
+
+    def test_does_not_error_when_operation_contains_regex_chars
+      # Everything fine if these don't error.
+      @depot_handler_class.is_method_shortcut('list[', :anything)
+      @depot_handler_class.is_method_shortcut('enable]', :does_not_matter)
+    end
   end
 end
