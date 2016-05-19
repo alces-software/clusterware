@@ -233,20 +233,7 @@ module Alces
       end
 
       def semver
-        return metadata[:semver] if metadata[:semver]
-        if version =~ /^[0-9]+\.[0-9]+$/
-          "#{version}.0"
-        elsif version =~ /^([0-9]+\.[0-9]+\.[0-9]+)([a-zA-z]+)$/
-          "#{$1}-#{$2}"
-        elsif version =~ /^([0-9]+\.[0-9]+\.[0-9]+)\.(.*)$/
-          "#{$1}-#{$2}"
-        elsif version =~ /^([0-9]+\.[0-9]+)\.(.*)$/
-          "#{$1}.0-#{$2}"
-        elsif version =~ /^[0-9]{8}$/
-          "0.0.#{version}"
-        else
-          version
-        end
+        @semver ||= (metadata[:semver] || Semver.mutate(version))
       end
 
       private
