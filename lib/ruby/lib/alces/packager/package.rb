@@ -74,9 +74,9 @@ module Alces
           else
             matcher = case op
                       when '<>', '!='
-                        lambda { |p| try_semver(p.semver, '!=', version) }
+                        lambda { |p| try_semver(p.version, '!=', version) }
                       when '=', '=='
-                        lambda { |p| try_semver(p.semver, '==', version) }
+                        lambda { |p| try_semver(p.version, '==', version) }
                       when '>=', '>', '<', '<='
                         lambda { |p| try_semver(p.semver, op, version) }
                       when '~>'
