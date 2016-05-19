@@ -1,5 +1,5 @@
 #==============================================================================
-# Copyright (C) 2004-2015 Stephen F. Norledge and Alces Software Ltd.
+# Copyright (C) 2007-2016 Stephen F. Norledge and Alces Software Ltd.
 #
 # This file/package is part of Alces Clusterware.
 #==============================================================================
@@ -31,7 +31,7 @@
 # All modifications performed by Alces Software Ltd are licensed under
 # an MIT-style license.
 #
-# Copyright (C) 2014 Stephen F Norledge & Alces Software Ltd.
+# Copyright (C) 2014-2016 Stephen F Norledge & Alces Software Ltd.
 #
 # Permission is hereby granted, free of charge, to any person obtaining
 # a copy of this software and associated documentation files (the
@@ -57,6 +57,26 @@
 module Alces
   module Packager
     class Semver
+      class << self
+        def mutate(version)
+          if version =~ /^[0-9]+\.[0-9]+$/
+            "#{version}.0"
+          elsif version =~ /^([0-9]+\.[0-9]+\.[0-9]+)([a-zA-z0-9]+)$/
+            "#{$1}-#{$2}"
+          elsif version =~ /^([0-9]+\.[0-9]+\.[0-9]+)\.(.*)$/
+            "#{$1}-#{$2}"
+          elsif version =~ /^([0-9]+\.[0-9]+)\.(^[0-9].*)$/
+            "#{$1}.0-#{$2}"
+          elsif version =~ /^([0-9]+\.[0-9]+)([a-zA-z0-9]+)$/
+            "#{$1}.0-#{$2}"
+          elsif version =~ /^[0-9]{8}$/
+            "0.0.#{version}"
+          else
+            version
+          end
+        end
+      end
+
       SemVerRegexp = /\A(\d+\.\d+\.\d+)(-([0-9A-Za-z-]+(\.[0-9A-Za-z-]+)*))?(\+([0-9A-Za-z-]+(\.[0-9A-Za-z-]+)*))?\Z/
       attr_accessor :major, :minor, :patch, :pre, :build
       
