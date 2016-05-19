@@ -36,3 +36,4 @@ gem 'ronn'
 
 # Test gems - TODO not always install?
 gem 'minitest'
+gem 'mocha'

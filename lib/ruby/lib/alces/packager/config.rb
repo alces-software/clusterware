@@ -62,6 +62,10 @@ module Alces
           end
         end
 
+        def update_period_in_seconds
+          update_period * 24 * 60 * 60
+        end
+
         private
         def depot_path(depot)
           File.join(Depot.hash_path_for(depot),ENV['cw_DIST'] || 'unknown')
