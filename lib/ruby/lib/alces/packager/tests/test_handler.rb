@@ -14,29 +14,39 @@ class TestHandlerProxy < MiniTest::Test
       Alces::Packager::Handler.stubs(:new).returns(@spied_handler)
 
       Alces::Packager::Config.stubs(:update_period).returns(10)
+
+      @handler_proxy = Alces::Packager::HandlerProxy.new
     end
 
     # TODO: want to test both when no update and that called after update
-    def test_calls_handler_method
-      handler_proxy = Alces::Packager::HandlerProxy.new
-      handler_proxy.stubs(:last_update_datetime).returns(DateTime.now())
-      handler_proxy.install(*@handler_args)
+    def test_does_not_update_when_not_time_for_an_update
+      update_is_not_due(@handler_proxy)
+
+      @handler_proxy.install(*@handler_args)
 
       assert_received(Alces::Packager::Handler, :new)
+      assert_received(@spied_handler, :update_all) {|expect| expect.never}
       assert_received(@spied_handler, :install)
     end
 
     # TODO: Check update happens before method call
     def test_updates_all_repos_when_time_for_update
-      handler_proxy = Alces::Packager::HandlerProxy.new
-      handler_proxy.stubs(:last_update_datetime).returns(DateTime.new(2016, 5, 1))
-      DateTime.stubs(:now).returns(DateTime.new(2016, 5, 19))
+      update_is_due(@handler_proxy)
       @spied_handler.stubs(:update_all)
 
-      handler_proxy.install(*@handler_args)
+      @handler_proxy.install(*@handler_args)
 
-      assert_received @spied_handler, :update_all
-      assert_received @spied_handler, :install
+      assert_received(@spied_handler, :update_all)
+      assert_received(@spied_handler, :install)
+    end
+
+    def update_is_due(handler_proxy)
+      handler_proxy.stubs(:last_update_datetime).returns(DateTime.new(2016, 5, 1))
+      DateTime.stubs(:now).returns(DateTime.new(2016, 5, 19))
+    end
+
+    def update_is_not_due(handler_proxy)
+      handler_proxy.stubs(:last_update_datetime).returns(DateTime.now())
     end
   end
 
