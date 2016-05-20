@@ -48,11 +48,12 @@ module Alces
     class HandlerProxy
       def method_missing(s,*a,&b)
         if Handler.instance_methods.include?(s)
-          if update_due?
-            raise
-          end
           Bundler.with_clean_env do
-            Handler.new(*a).send(s)
+            handler = Handler.new(*a)
+            if update_due?
+              handler.update_all
+            end
+            handler.send(s)
           end
         else
           super
@@ -158,22 +159,12 @@ module Alces
         repo_name = options.args.first || 'main'
         repo = Repository.find { |r| r.name == repo_name }
         raise NotFoundError, "Repository #{repo_name} not found" if repo.nil?
-        say "Updating repository: #{repo_name}"
-        doing 'Update'
-        begin
-          status, rev = repo.update!
-          case status
-          when :ok
-            say "#{'OK'.color(:green)} (At: #{rev})"
-          when :uptodate
-            say "#{'OK'.color(:green)} (Up-to-date: #{rev})"
-          when :not_updateable
-            say "#{'SKIP'.color(:yellow)} (Not updateable, no remote configured)"
-          when :outofsync
-            say "#{'SKIP'.color(:yellow)} (Out of sync: #{rev})"
-          end
-        rescue
-          say "#{'FAIL'.color(:red)} (#{$!.message})"
+        update_repository(repo)
+      end
+
+      def update_all
+        Repository.all.each do |repo|
+          update_repository(repo)
         end
       end
 
@@ -271,6 +262,26 @@ module Alces
                         ps = Package.all(:path.like => "#{package_path}")
                         ps.empty? ? Package.all(:path.like => "#{package_path}%") : ps
                       end
+      end
+
+      def update_repository(repo)
+        say "Updating repository: #{repo.name}"
+        doing 'Update'
+        begin
+          status, rev = repo.update!
+          case status
+          when :ok
+            say "#{'OK'.color(:green)} (At: #{rev})"
+          when :uptodate
+            say "#{'OK'.color(:green)} (Up-to-date: #{rev})"
+          when :not_updateable
+            say "#{'SKIP'.color(:yellow)} (Not updateable, no remote configured)"
+          when :outofsync
+            say "#{'SKIP'.color(:yellow)} (Out of sync: #{rev})"
+          end
+        rescue
+          say "#{'FAIL'.color(:red)} (#{$!.message})"
+        end
       end
     end
   end

@@ -26,15 +26,17 @@ class TestHandlerProxy < MiniTest::Test
       assert_received(@spied_handler, :install)
     end
 
-    # TODO actually update stuff
-    def test_raises_exception_when_time_for_update
+    # TODO: Check update happens before method call
+    def test_updates_all_repos_when_time_for_update
       handler_proxy = Alces::Packager::HandlerProxy.new
       handler_proxy.stubs(:last_update_datetime).returns(DateTime.new(2016, 5, 1))
       DateTime.stubs(:now).returns(DateTime.new(2016, 5, 19))
+      @spied_handler.stubs(:update_all)
 
-      assert_raises do
-        handler_proxy.install(*@handler_args)
-      end
+      handler_proxy.install(*@handler_args)
+
+      assert_received @spied_handler, :update_all
+      assert_received @spied_handler, :install
     end
   end
 
