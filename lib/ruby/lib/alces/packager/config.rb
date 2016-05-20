@@ -54,6 +54,10 @@ module Alces
           File.expand_path(File.join(depot_path(depot),'etc'))
         end
 
+        def last_update_file
+          File.new(method_missing(:last_update_file))
+        end
+
         def method_missing(s,*a,&b)
           if config.has_key?(s)
             config[s]
