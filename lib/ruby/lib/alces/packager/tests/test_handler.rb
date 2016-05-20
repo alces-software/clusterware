@@ -7,10 +7,21 @@ require 'alces/packager/cli'
 
 class TestHandlerProxy < MiniTest::Test
   describe 'method_missing' do
+    ACTIONS_NOT_REQUIRING_UPDATE = [
+      :clean,
+      :default,
+      :depot,
+      :export,
+      :purge,
+      :update
+    ]
+
     def setup
       @handler_args = [[], Commander::Command::Options.new]
       @spied_handler = Alces::Packager::Handler.new(*@handler_args)
-      @spied_handler.stubs(:install)
+      all_actions.map do |action|
+        @spied_handler.stubs(action)
+      end
       Alces::Packager::Handler.stubs(:new).returns(@spied_handler)
 
       Alces::Packager::Config.stubs(:update_period).returns(10)
@@ -19,25 +30,22 @@ class TestHandlerProxy < MiniTest::Test
     end
 
     # TODO: want to test both when no update and that called after update
-    def test_does_not_update_when_not_time_for_an_update
+    def test_does_not_update_for_any_actions_when_not_time
       update_is_not_due(@handler_proxy)
 
-      @handler_proxy.install(*@handler_args)
+      send_all_actions_to_handler
 
-      assert_received(Alces::Packager::Handler, :new)
       assert_received(@spied_handler, :update_all) {|expect| expect.never}
-      assert_received(@spied_handler, :install)
     end
 
     # TODO: Check update happens before method call
-    def test_updates_all_repos_when_time_for_update
+    def test_updates_for_required_actions_when_time
       update_is_due(@handler_proxy)
       @spied_handler.stubs(:update_all)
 
-      @handler_proxy.install(*@handler_args)
+      send_all_actions_to_handler
 
-      assert_received(@spied_handler, :update_all)
-      assert_received(@spied_handler, :install)
+      assert_received(@spied_handler, :update_all) {|expect| expect.times(actions_requiring_update.length)}
     end
 
     def update_is_due(handler_proxy)
@@ -47,6 +55,30 @@ class TestHandlerProxy < MiniTest::Test
 
     def update_is_not_due(handler_proxy)
       handler_proxy.stubs(:last_update_datetime).returns(DateTime.now())
+    end
+
+    def send_all_actions_to_handler
+      all_actions.map do |action|
+        @handler_proxy.send(action, *@handler_args)
+        assert_received(@spied_handler, action)
+      end
+    end
+
+    def all_actions
+      intersection = actions_requiring_update & actions_not_requiring_update
+      if intersection != []
+        raise "Actions both require and don't require an update: #{intersection}"
+      end
+
+      actions_requiring_update + actions_not_requiring_update
+    end
+
+    def actions_requiring_update
+      Alces::Packager::HandlerProxy::ACTIONS_REQUIRING_UPDATE
+    end
+
+    def actions_not_requiring_update
+      ACTIONS_NOT_REQUIRING_UPDATE
     end
   end
 

@@ -46,14 +46,24 @@ Alces::Tools::Logging.default = Alces::Tools::Logger.new(File::expand_path(File.
 module Alces
   module Packager
     class HandlerProxy
+      ACTIONS_REQUIRING_UPDATE = [
+        :import,
+        :info,
+        :install,
+        :list,
+        :requires,
+        :search
+      ]
+
       def method_missing(s,*a,&b)
         if Handler.instance_methods.include?(s)
+          action = s
           Bundler.with_clean_env do
             handler = Handler.new(*a)
-            if update_due?
+            if action_requires_update?(action) && update_due?
               handler.update_all
             end
-            handler.send(s)
+            handler.send(action)
           end
         else
           super
@@ -67,6 +77,10 @@ module Alces
       end
 
       private
+
+      def action_requires_update?(action)
+        ACTIONS_REQUIRING_UPDATE.include? action
+      end
 
       def update_due?
         last_update_datetime + Config.update_period < DateTime.now
