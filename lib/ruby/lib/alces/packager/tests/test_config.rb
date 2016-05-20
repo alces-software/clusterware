@@ -6,6 +6,7 @@ require 'alces/packager/cli'
 require 'alces/packager/config'
 
 class TestConfig < MiniTest::Test
+  # TODO do we actually need this
   describe 'update_period_in_seconds' do
     def setup
       Alces::Packager::Config.stubs(:update_period).returns(10)

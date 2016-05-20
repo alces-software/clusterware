@@ -19,7 +19,7 @@
 # For more information on the Alces Clusterware, please visit:
 # https://github.com/alces-software/clusterware
 #==============================================================================
-require 'time'
+require 'date'
 
 require 'alces/tools/logging'
 require 'alces/tools/execution'
@@ -48,6 +48,9 @@ module Alces
     class HandlerProxy
       def method_missing(s,*a,&b)
         if Handler.instance_methods.include?(s)
+          if update_due?
+            raise
+          end
           Bundler.with_clean_env do
             Handler.new(*a).send(s)
           end
@@ -64,8 +67,12 @@ module Alces
 
       private
 
-      def last_update_time
-        Time.parse(Config.last_update_file.readlines.first)
+      def update_due?
+        last_update_datetime + Config.update_period < DateTime.now
+      end
+
+      def last_update_datetime
+        DateTime.parse(Config.last_update_file.readlines.first)
       end
     end
 
