@@ -57,14 +57,7 @@ module Alces
 
       def method_missing(s,*a,&b)
         if Handler.instance_methods.include?(s)
-          action = s
-          Bundler.with_clean_env do
-            handler = Handler.new(*a)
-            if action_requires_update?(action) && update_due?
-              handler.update_all
-            end
-            handler.send(action)
-          end
+          handle_action(s, a)
         else
           super
         end
@@ -77,6 +70,16 @@ module Alces
       end
 
       private
+
+      def handle_action(action, args)
+        Bundler.with_clean_env do
+          handler = Handler.new(*args)
+          if action_requires_update?(action) && update_due?
+            handler.update_all
+          end
+          handler.send(action)
+        end
+      end
 
       def action_requires_update?(action)
         ACTIONS_REQUIRING_UPDATE.include? action
