@@ -31,7 +31,7 @@ class TestHandlerProxy < MiniTest::Test
 
     # TODO: want to test both when no update and that called after update
     def test_does_not_update_for_any_actions_when_not_time
-      update_is_not_due(@handler_proxy)
+      update_is_not_due
 
       send_all_actions_to_handler
 
@@ -40,7 +40,7 @@ class TestHandlerProxy < MiniTest::Test
 
     # TODO: Check update happens before method call
     def test_updates_for_required_actions_when_time
-      update_is_due(@handler_proxy)
+      update_is_due
       @spied_handler.stubs(:update_all)
 
       send_all_actions_to_handler
@@ -48,13 +48,13 @@ class TestHandlerProxy < MiniTest::Test
       assert_received(@spied_handler, :update_all) {|expect| expect.times(actions_requiring_update.length)}
     end
 
-    def update_is_due(handler_proxy)
-      handler_proxy.stubs(:last_update_datetime).returns(DateTime.new(2016, 5, 1))
+    def update_is_due
+      @handler_proxy.stubs(:last_update_datetime).returns(DateTime.new(2016, 5, 1))
       DateTime.stubs(:now).returns(DateTime.new(2016, 5, 19))
     end
 
-    def update_is_not_due(handler_proxy)
-      handler_proxy.stubs(:last_update_datetime).returns(DateTime.now())
+    def update_is_not_due
+      @handler_proxy.stubs(:last_update_datetime).returns(DateTime.now())
     end
 
     def send_all_actions_to_handler
