@@ -80,17 +80,18 @@ module Alces
                       when '>=', '>', '<', '<='
                         lambda { |p| try_semver(p.semver, op, version) }
                       when '~>'
-                        # clever operator; ~> 1.0 = 1.* ; 1.0.0 = 1.0.*
-                        split = version.split('.')[0..-2]
-                        lower_bound = split.join('.')
-                        upper_bound = split.tap { |a| a[-1] = a[-1].to_i + 1 }.join('.')
+                        upper_bound = version.split('.').tap do |a|
+                          a.pop
+                          a[-1] = a[-1].to_i + 1
+                          a << 0
+                        end.join('.')
                         lambda do |p|
                           begin
                             p_semver = Semver.new(p.semver)
-                            p_semver.satisfies("~ #{lower_bound}.*") &&
-                              p_semver.satisfies("<= #{upper_bound}")
+                            p_semver.satisfies(">= #{version}") &&
+                              p_semver.satisfies("< #{upper_bound}")
                           rescue ArgumentError
-                            p.semver >= lower_bound && p.semver <= upper_bound
+                            p.semver >= version && p.semver <= upper_bound
                           end
                         end
                       else
