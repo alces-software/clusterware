@@ -35,7 +35,7 @@ class TestHandlerProxy < MiniTest::Test
 
     # TODO: want to test both when no update and that called after update
     def test_does_not_update_for_any_actions_when_not_time
-      Alces::Packager::Config.stubs(:update_period).returns(50)
+      no_repos_need_updating
 
       send_all_actions_to_handler
 
@@ -44,22 +44,26 @@ class TestHandlerProxy < MiniTest::Test
 
     # TODO: Check update happens before method call
     def test_updates_needed_repositories_when_time
+      some_repos_need_updating
+
       send_all_actions_to_handler
 
       # Updates repos which have not been updated recently.
-      repos_requiring_update.map do |repo|
+      not_recently_updated_repos.map do |repo|
         assert_received(@spied_handler, :update_repository) do |expect|
           expect.with(repo).times(actions_requiring_update.length)
         end
       end
 
       # Does not update repos which have been updated recently.
-      repos_not_requiring_update.map do |repo|
+      recently_updated_repos.map do |repo|
         assert_received(@spied_handler, :update_repository) do |expect|
           expect.with(repo).never
         end
       end
     end
+
+    private
 
     def send_all_actions_to_handler
       all_actions.map do |action|

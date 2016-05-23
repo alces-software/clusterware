@@ -52,10 +52,11 @@ class TestRepository < MiniTest::Test
 
     def setup
       use_mock_repositories
+      some_repos_need_updating
     end
 
     def test_returns_repos_requiring_update
-      assert_equal repos_requiring_update, repository_class.requiring_update
+      assert_equal not_recently_updated_repos, repository_class.requiring_update
     end
   end
 end
