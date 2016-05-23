@@ -160,8 +160,14 @@ module Alces
       end
 
       def last_update
-        datetime_str = File.readlines(last_update_file).first
-        DateTime.parse(datetime_str)
+        if File.exists?(last_update_file)
+          datetime_str = File.readlines(last_update_file).first
+          DateTime.parse(datetime_str)
+        else
+          # Return earliest possible datetime so update will (probably) run
+          # when next needed.
+          DateTime.new
+        end
       end
 
       def last_update=(datetime)
