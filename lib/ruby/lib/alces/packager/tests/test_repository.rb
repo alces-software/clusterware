@@ -46,4 +46,39 @@ class TestRepository < MiniTest::Test
       @repo.stubs(:last_update_file).returns(@last_update_file.path)
     end
   end
+
+  describe 'requiring_update' do
+    def test_returns_repos_requiring_update
+      Alces::Packager::Config.stubs(:update_period).returns(10)
+      DateTime.stubs(:now).returns(DateTime.new(2016, 5, 19))
+
+      repository_class = Alces::Packager::Repository
+
+      repos_requiring_update_paths = [
+        '/needs/an/update',
+        '/also/needs/an/update'
+      ]
+      repos_requiring_update = repos_requiring_update_paths.map do |path|
+        repo = repository_class.new(path)
+        repo.stubs(:last_update).returns(DateTime.new(2016, 4, 20))
+        repo
+      end
+
+      repos_not_requiring_update_paths = [
+        '/no/update/needed',
+        '/also/no/update/needed'
+      ]
+      repos_not_requiring_update = repos_not_requiring_update_paths.map do |path|
+        repo = repository_class.new(path)
+        repo.stubs(:last_update).returns(DateTime.new(2016, 5, 15))
+        repo
+      end
+
+      repository_class.stubs(:all).returns(
+        repos_requiring_update + repos_not_requiring_update
+      )
+
+      assert_equal repos_requiring_update, repository_class.requiring_update
+    end
+  end
 end

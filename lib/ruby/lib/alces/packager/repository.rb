@@ -69,6 +69,12 @@ module Alces
           @all ||= repo_paths.map { |path| new(path) }
         end
 
+        def requiring_update
+          select do |repo|
+            repo.last_update + Config.update_period < DateTime.now
+          end
+        end
+
         def find_definitions(a)
           map do |r|
             r.packages.select do |p|
