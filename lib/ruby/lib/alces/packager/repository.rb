@@ -153,6 +153,17 @@ module Alces
         raise "Unable to sync repo: '#{name}' (#{$!.message})"
       end
 
+      def last_update
+        datetime_str = File.readlines(last_update_file).first
+        DateTime.parse(datetime_str)
+      end
+
+      def last_update=(datetime)
+        File.open(last_update_file, 'w') do |file|
+          file.write(datetime)
+        end
+      end
+
       private
       def repo_path
         @repo_path ||= metadata[:schema] == 1 ? package_path : path
@@ -194,6 +205,10 @@ module Alces
         else
           {}
         end
+      end
+
+      def last_update_file
+        File.join(path, Config.last_update_filename)
       end
     end
   end
