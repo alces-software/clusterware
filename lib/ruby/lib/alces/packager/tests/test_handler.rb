@@ -22,6 +22,7 @@ class TestHandlerProxy < MiniTest::Test
       all_actions.map do |action|
         @spied_handler.stubs(action)
       end
+      @spied_handler.stubs(:update_all)
       Alces::Packager::Handler.stubs(:new).returns(@spied_handler)
 
       Alces::Packager::Config.stubs(:update_period).returns(10)
@@ -41,7 +42,6 @@ class TestHandlerProxy < MiniTest::Test
     # TODO: Check update happens before method call
     def test_updates_for_required_actions_when_time
       update_is_due
-      @spied_handler.stubs(:update_all)
 
       send_all_actions_to_handler
 
