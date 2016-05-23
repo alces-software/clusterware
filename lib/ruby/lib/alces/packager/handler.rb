@@ -74,8 +74,10 @@ module Alces
       def handle_action(action, args)
         Bundler.with_clean_env do
           handler = Handler.new(*args)
-          if action_requires_update?(action) && update_due?
-            handler.update_all
+          if action_requires_update?(action)
+            Repository.requiring_update.map do |repo|
+              handler.update_repository(repo)
+            end
           end
           handler.send(action)
         end
@@ -179,9 +181,23 @@ module Alces
         update_repository(repo)
       end
 
-      def update_all
-        Repository.all.each do |repo|
-          update_repository(repo)
+      def update_repository(repo)
+        say "Updating repository: #{repo.name}"
+        doing 'Update'
+        begin
+          status, rev = repo.update!
+          case status
+          when :ok
+            say "#{'OK'.color(:green)} (At: #{rev})"
+          when :uptodate
+            say "#{'OK'.color(:green)} (Up-to-date: #{rev})"
+          when :not_updateable
+            say "#{'SKIP'.color(:yellow)} (Not updateable, no remote configured)"
+          when :outofsync
+            say "#{'SKIP'.color(:yellow)} (Out of sync: #{rev})"
+          end
+        rescue
+          say "#{'FAIL'.color(:red)} (#{$!.message})"
         end
       end
 
@@ -279,26 +295,6 @@ module Alces
                         ps = Package.all(:path.like => "#{package_path}")
                         ps.empty? ? Package.all(:path.like => "#{package_path}%") : ps
                       end
-      end
-
-      def update_repository(repo)
-        say "Updating repository: #{repo.name}"
-        doing 'Update'
-        begin
-          status, rev = repo.update!
-          case status
-          when :ok
-            say "#{'OK'.color(:green)} (At: #{rev})"
-          when :uptodate
-            say "#{'OK'.color(:green)} (Up-to-date: #{rev})"
-          when :not_updateable
-            say "#{'SKIP'.color(:yellow)} (Not updateable, no remote configured)"
-          when :outofsync
-            say "#{'SKIP'.color(:yellow)} (Out of sync: #{rev})"
-          end
-        rescue
-          say "#{'FAIL'.color(:red)} (#{$!.message})"
-        end
       end
     end
   end

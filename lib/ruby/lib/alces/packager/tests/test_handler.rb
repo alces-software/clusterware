@@ -4,6 +4,7 @@ require 'bourne'
 require 'mocha/mini_test'
 
 require 'alces/packager/cli'
+require 'alces/packager/tests/mock_repositories'
 
 class TestHandlerProxy < MiniTest::Test
   describe 'method_missing' do
@@ -16,45 +17,48 @@ class TestHandlerProxy < MiniTest::Test
       :update
     ]
 
+    include MockRepositories
+
     def setup
       @handler_args = [[], Commander::Command::Options.new]
       @spied_handler = Alces::Packager::Handler.new(*@handler_args)
       all_actions.map do |action|
         @spied_handler.stubs(action)
       end
-      @spied_handler.stubs(:update_all)
+      @spied_handler.stubs(:update_repository)
       Alces::Packager::Handler.stubs(:new).returns(@spied_handler)
 
-      Alces::Packager::Config.stubs(:update_period).returns(10)
-
       @handler_proxy = Alces::Packager::HandlerProxy.new
+
+      use_mock_repositories
     end
 
     # TODO: want to test both when no update and that called after update
     def test_does_not_update_for_any_actions_when_not_time
-      update_is_not_due
+      Alces::Packager::Config.stubs(:update_period).returns(50)
 
       send_all_actions_to_handler
 
-      assert_received(@spied_handler, :update_all) {|expect| expect.never}
+      assert_received(@spied_handler, :update_repository) {|expect| expect.never}
     end
 
     # TODO: Check update happens before method call
-    def test_updates_for_required_actions_when_time
-      update_is_due
-
+    def test_updates_needed_repositories_when_time
       send_all_actions_to_handler
 
-      assert_received(@spied_handler, :update_all) {|expect| expect.times(actions_requiring_update.length)}
-    end
+      # Updates repos which have not been updated recently.
+      repos_requiring_update.map do |repo|
+        assert_received(@spied_handler, :update_repository) do |expect|
+          expect.with(repo).times(actions_requiring_update.length)
+        end
+      end
 
-    def update_is_due
-      @handler_proxy.stubs(:last_update_datetime).returns(DateTime.new(2016, 5, 1))
-      DateTime.stubs(:now).returns(DateTime.new(2016, 5, 19))
-    end
-
-    def update_is_not_due
-      @handler_proxy.stubs(:last_update_datetime).returns(DateTime.now())
+      # Does not update repos which have been updated recently.
+      repos_not_requiring_update.map do |repo|
+        assert_received(@spied_handler, :update_repository) do |expect|
+          expect.with(repo).never
+        end
+      end
     end
 
     def send_all_actions_to_handler
@@ -79,17 +83,6 @@ class TestHandlerProxy < MiniTest::Test
 
     def actions_not_requiring_update
       ACTIONS_NOT_REQUIRING_UPDATE
-    end
-  end
-
-  describe 'last_update_datetime' do
-    def setup
-      stub_last_update_file = StringIO.new(DateTime.new(2016, 5, 19).to_s)
-      Alces::Packager::Config.stubs(:last_update_file).returns(stub_last_update_file)
-    end
-
-    def test_returns_correct_value
-      assert_equal DateTime.new(2016, 5, 19), Alces::Packager::HandlerProxy.new.send(:last_update_datetime)
     end
   end
 end
