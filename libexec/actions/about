@@ -35,6 +35,9 @@ case $action in
     n|no|nod|node)
         exec /bin/bash $cw_ROOT/libexec/about/actions/node "$@"
         ;;
+    i|id|ide|iden|ident|identi|identit|identity)
+        exec /bin/bash $cw_ROOT/libexec/about/actions/identity "$@"
+        ;;
     *)
         cat <<EOF
 Usage: $cw_BINNAME COMMAND [[OPTION]... [ARGS]]
@@ -44,6 +47,7 @@ Commands:
 EOF
 printf "  %-22s  %s\n" "$cw_BINNAME help" "More help about this command."
 printf "  %-22s  %s\n" "$cw_BINNAME node" "Display information about this node/instance."
+printf "  %-22s  %s\n" "$cw_BINNAME identity" "Display identity information for this cluster."
 cat <<EOF
 
 Please report bugs to support@alces-software.com
