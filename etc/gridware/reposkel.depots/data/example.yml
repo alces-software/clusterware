@@ -1,8 +1,10 @@
 ---
-:title: Example depot
-:summary: A depot that serves as an example
+:title: Example local depot
+:summary: An example depot from your local Gridware tree
 :description: |
-  A depot that serves as an example.
+  This depot is provided as an example of how to construct a depot
+  metadata file.  Please refer to the Alces Flight Compute
+  documentation for more information.
 :root: https://s3-eu-west-1.amazonaws.com/packages.alces-software.com/gridware/%24dist
 :content:
   - apps/example/1.0
