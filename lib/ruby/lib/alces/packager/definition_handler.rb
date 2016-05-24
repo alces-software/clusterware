@@ -115,7 +115,8 @@ module Alces
         say("Installing #{colored_path(defn)}".tap do |s|
           s << " (#{variant})" unless variant.nil?
             end)
-        if options.binary && archive_path = binary_path(defn, variant)
+        if ((Config.prefer_binary && options.binary.nil?) || options.binary) &&
+           archive_path = binary_path(defn, variant)
           ArchiveImporter.new(archive_path, options).import
           return
         end

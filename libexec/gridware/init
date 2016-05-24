@@ -90,6 +90,7 @@ _create_gridware_configuration() {
 :fallback_package_url: https://s3-eu-west-1.amazonaws.com/packages.alces-software.com/gridware
 :default_binary_url: https://s3-eu-west-1.amazonaws.com/packages.alces-software.com/gridware/%24dist
 :fetch_timeout: 10
+:prefer_binary: ${cw_GRIDWARE_prefer_binary:-false}
 EOF
 }
 

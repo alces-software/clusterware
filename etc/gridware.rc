@@ -8,4 +8,5 @@ cw_GRIDWARE_root=/opt/gridware
 cw_GRIDWARE_default_depot=local
 cw_GRIDWARE_boot_update_package_repos=main
 cw_GRIDWARE_boot_update_depot_repos=official
+cw_GRIDWARE_prefer_binary=false
 #cw_GRIDWARE_depots=site
