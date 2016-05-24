@@ -149,7 +149,8 @@ EOF
         if options.yes || (!options.non_interactive && confirm(msg))
           missing_params = {}
           missing.each do |_, pkg, _, build_arg_hash|
-            unless (options.binary || options.binary_depends) && binary_available?(pkg, build_arg_hash[:variant])
+            unless ((Config.prefer_binary && options.binary.nil?) || options.binary || options.binary_depends) &&
+                   binary_available?(pkg, build_arg_hash[:variant])
               (build_arg_hash[:params] || '').split(',').each do |p|
                 if !params(defn)[p.to_sym]
                   (missing_params[pkg] ||= []) << p
