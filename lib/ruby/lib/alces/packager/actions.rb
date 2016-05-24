@@ -29,6 +29,7 @@ require 'alces/packager/package'
 require 'alces/packager/errors'
 require 'alces/packager/config'
 require 'memoist'
+require 'find'
 
 module Alces
   module Packager
@@ -299,6 +300,7 @@ EOF
             run('/bin/bash',f)
           end
           handle_failure!(res,'installation') if res.fail?
+          correct_permissions
         end
         say 'OK'.color(:green)
       end
@@ -687,6 +689,21 @@ EOF
       end
 
       private
+      def correct_permissions
+        FileUtils.chown_R(nil, 'gridware', dest_dir)
+        FileUtils.chmod_R("ug+w,a+r", dest_dir, force: true)
+        FileUtils.chmod("g+xs,a+x", directories_within(dest_dir))
+      end
+
+      def directories_within(base)
+        dots = ['.','..']
+        [].tap do |a|
+          Find.find(base) do |f|
+            a << f if File.directory?(f) && !(dots.include?(File.basename(f)))
+          end
+        end
+      end
+
       def generate_dependency_script(phase, stem, check_cmd, install_cmd, available_cmd)
         deps_hashes = [].tap do |a|
           if package.metadata[:dependencies][phase]

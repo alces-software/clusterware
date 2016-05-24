@@ -1,3 +1,4 @@
+#!/bin/bash
 #==============================================================================
 # Copyright (C) 2016 Stephen F. Norledge and Alces Software Ltd.
 #
@@ -19,10 +20,29 @@
 # For more information on the Alces Clusterware, please visit:
 # https://github.com/alces-software/clusterware
 #==============================================================================
-cw_HANDLER_rev="c14ca464e42f7d1080252e327839980eb0e28964"
-cw_SESSION_rev="a20a72bd25565fe160823ea27b1fc6b860000b3a"
-cw_SERVICE_rev="4a018bd7676a9010d8a40b7d37163a5b25420bee"
-cw_STORAGE_rev="a4aebf75106c597f13ed87ecdd64177d5725d622"
-cw_SERVICE_registry_galaxy="galaxy-20160301-cw1_3"
-cw_SERVICE_registry_s3cmd="s3cmd-20160307-cw1_4"
-cw_SERVICE_registry_aws="aws-20160411-cw1_5"
+require action
+require files
+require process
+
+_show() {
+    local name val
+    name="$1"
+    val="$2"
+    printf "%25s: %s\n" "${name}" "${val}"
+}
+
+main() {
+    local a
+    files_load_config config config/cluster
+    _show "Cluster UUID" "${cw_CLUSTER_uuid}"
+    if [ -r "${cw_ROOT}"/etc/config/cluster/auth.rc ]; then
+        files_load_config auth config/cluster
+        _show "Cluster security token" "${cw_CLUSTER_auth_token}"
+    fi
+}
+
+if sudo -l | grep -q ' ALL$'; then
+    process_reexec_sudo
+fi
+
+main "$@"

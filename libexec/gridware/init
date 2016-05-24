@@ -79,10 +79,10 @@ _create_gridware_configuration() {
 :repo_paths:
  - ${cw_ROOT}/var/lib/gridware/repos/main
 # - ${cw_ROOT}/var/lib/gridware/repos/volatile
- - ${cw_GRIDWARE_root}/etc/repos/local
+# - ${cw_GRIDWARE_root}/etc/repos/local
 :depot_repo_paths:
  - ${cw_ROOT}/var/lib/gridware/depots/official
- - ${cw_GRIDWARE_root}/etc/depots/local
+# - ${cw_GRIDWARE_root}/etc/depots/local
 :depotroot: ${cw_GRIDWARE_root}
 :default_depot: ${cw_GRIDWARE_default_depot:-local}
 :archives_dir: /var/cache/gridware/archives
@@ -90,6 +90,7 @@ _create_gridware_configuration() {
 :fallback_package_url: https://s3-eu-west-1.amazonaws.com/packages.alces-software.com/gridware
 :default_binary_url: https://s3-eu-west-1.amazonaws.com/packages.alces-software.com/gridware/%24dist
 :fetch_timeout: 10
+:prefer_binary: ${cw_GRIDWARE_prefer_binary:-false}
 EOF
 }
 

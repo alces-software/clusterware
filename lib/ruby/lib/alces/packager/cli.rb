@@ -156,7 +156,7 @@ module Alces
         add_depot_options(c)
         c.option '-g', '--global', 'Allow use of packages across all depots'
         c.option '-m', '--modules STRING', String, 'Specify modules to load before build'
-        c.option '-b', '--binary', 'Prefer binary packages when available'
+        c.option '-b', '--[no-]binary', 'Toggle use of binary packages when available'
         c.option '--binary-depends', 'Prefer binary packages for dependencies when available'
       end
       set_aliases(:install, min: 3)

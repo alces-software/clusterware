@@ -27,7 +27,7 @@ main() {
     shift
 
     case $action in
-        help|node)
+        help|node|identity)
             help_for_${action}
             ;;
         ?*)
@@ -51,6 +51,19 @@ help_for_node() {
 
     Display information about the networking and software
     configuration of this node/instance.
+
+EOF
+}
+
+help_for_cluster() {
+    cat <<EOF
+  SYNOPSIS:
+
+    alces about identity
+
+  DESCRIPTION:
+
+    Display information about the identity of this cluster.
 
 EOF
 }
