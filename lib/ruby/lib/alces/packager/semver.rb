@@ -59,7 +59,9 @@ module Alces
     class Semver
       class << self
         def mutate(version)
-          if version =~ /^[0-9]+\.[0-9]+$/
+          if version =~ /^[0-9]+\.[0-9]+\.[0-9]+$/
+            version
+          elsif version =~ /^[0-9]+\.[0-9]+$/
             "#{version}.0"
           elsif version =~ /^([0-9]+\.[0-9]+\.[0-9]+)([a-zA-z0-9]+)$/
             "#{$1}-#{$2}"

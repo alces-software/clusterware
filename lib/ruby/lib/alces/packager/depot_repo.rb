@@ -51,7 +51,7 @@ module Alces
         end
 
         def get_depot(name)
-          map {|r| r.depots.find {|d| d.name == name }}.first
+          map {|r| r.depots.find {|d| d.name == name }}.compact.first
         end
       end
 

@@ -7,22 +7,34 @@ This project adheres to [Semantic Versioning](http://semver.org/).
 - Added `--geometry` parameter to `alces session start` command (#85)
 - Added `--latest` parameter to `alces gridware install` command (#101)
 
-## [1.5.2] - 2016-05-19
+## [1.5.2] - 2016-05-24
+
+### Added
+- Create cluster identification parameters from `identity` parameter when present in `config.yml` (#160)
+- Provide new `alces about identity` action to facilitate access to cluster identification parameters (#163)
+- Allow binary installation or compilation behaviour to be configured for Gridware package installation (#167)
+- Defaults for `config.yml` parameters can be configured within the Clusterware tree (#165)
+
+### Changed
+- Interactive GNOME sessions have a new background (clusterware-sessions#7)
 
 ### Fixed
 - Correct semantic version comparisons when resolving uninstalled package dependencies
+- Allow installation of a depot from a depot repository other than the first configured repository (#166)
+- Update file permissions on files within the installation directory after performing a Gridware package installation (#106)
+- Correct dependency resolution when exporting Gridware packages that have "default" variants
 
 ## [1.5.1] - 2016-05-18
 
 ### Added
-- Clusterware now displays an appropriate cosmetic version number at login (clusterware#119)
-- Provide a framework to allow anonymous usage data to be gathered (clusterware#142)
+- Clusterware now displays an appropriate cosmetic version number at login (#119)
+- Provide a framework to allow anonymous usage data to be gathered (#142)
 
 ### Fixed
 - Updated Trinity session installation to reflect updated version available upstream (clusterware-sessions#8)
 - Corrected a problem that was preventing environment modules from functioning correctly under tcsh
-- Prevented a spurious error in the logs when `config.yml` does not contain an `instance` section (clusterware#141)
-- Display an error rather than raising an exception when `gridware info` is requested for a non-existent package (clusterware#155)
+- Prevented a spurious error in the logs when `config.yml` does not contain an `instance` section (#141)
+- Display an error rather than raising an exception when `gridware info` is requested for a non-existent package (#155)
 - Corrected URLs in core howto guides
 
 ## [1.5.0] - 2016-05-15

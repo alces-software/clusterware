@@ -115,7 +115,8 @@ module Alces
         say("Installing #{colored_path(defn)}".tap do |s|
           s << " (#{variant})" unless variant.nil?
             end)
-        if options.binary && archive_path = binary_path(defn, variant)
+        if ((Config.prefer_binary && options.binary.nil?) || options.binary) &&
+           archive_path = binary_path(defn, variant)
           ArchiveImporter.new(archive_path, options).import
           return
         end
@@ -148,7 +149,8 @@ EOF
         if options.yes || (!options.non_interactive && confirm(msg))
           missing_params = {}
           missing.each do |_, pkg, _, build_arg_hash|
-            unless (options.binary || options.binary_depends) && binary_available?(pkg, build_arg_hash[:variant])
+            unless ((Config.prefer_binary && options.binary.nil?) || options.binary || options.binary_depends) &&
+                   binary_available?(pkg, build_arg_hash[:variant])
               (build_arg_hash[:params] || '').split(',').each do |p|
                 if !params(defn)[p.to_sym]
                   (missing_params[pkg] ||= []) << p
