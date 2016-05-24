@@ -131,7 +131,7 @@ module Alces
 
       def update!
         if metadata.key?(:source)
-          case Alces.git.sync(repo_path, metadata[:source])
+          case r = Alces.git.sync(repo_path, metadata[:source])
           when /^Branch master set up/
             # force reload of packages if needed
             @packages = nil
