@@ -29,6 +29,7 @@ class TestHandlerProxy < MiniTest::Test
       Alces::Packager::Handler.stubs(:new).returns(@spied_handler)
 
       @handler_proxy = Alces::Packager::HandlerProxy.new
+      @handler_proxy.stubs(:say_repos_requiring_update_message)
 
       use_mock_repositories
     end

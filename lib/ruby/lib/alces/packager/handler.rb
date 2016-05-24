@@ -73,13 +73,11 @@ module Alces
 
       def handle_action(action, args)
         Bundler.with_clean_env do
-          handler = Handler.new(*args)
+          @handler = Handler.new(*args)
           if action_requires_update?(action)
-            Repository.requiring_update.map do |repo|
-              handler.update_repository(repo)
-            end
+            update_repositories
           end
-          handler.send(action)
+          @handler.send(action)
         end
       end
 
@@ -93,6 +91,22 @@ module Alces
 
       def last_update_datetime
         DateTime.parse(Config.last_update_file.readlines.first)
+      end
+
+      def update_repositories
+        repos_requiring_update = Repository.requiring_update
+        say_repos_requiring_update_message(repos_requiring_update)
+        repos_requiring_update.map do |repo|
+          @handler.update_repository(repo)
+        end
+      end
+
+      def say_repos_requiring_update_message(repos_requiring_update)
+        if repos_requiring_update.any?
+          num_repos = repos_requiring_update.length
+          repo_needs_str = num_repos  > 1 ? 'repositories need' : 'repository needs'
+          say "#{repos_requiring_update.length} #{repo_needs_str} to update ..."
+        end
       end
     end
 
