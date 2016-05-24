@@ -85,14 +85,6 @@ module Alces
         ACTIONS_REQUIRING_UPDATE.include? action
       end
 
-      def update_due?
-        last_update_datetime + Config.update_period < DateTime.now
-      end
-
-      def last_update_datetime
-        DateTime.parse(Config.last_update_file.readlines.first)
-      end
-
       def update_repositories
         repos_requiring_update = Repository.requiring_update
         say_repos_requiring_update_message(repos_requiring_update)
