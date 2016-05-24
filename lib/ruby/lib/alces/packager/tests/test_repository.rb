@@ -8,6 +8,66 @@ require 'alces/packager/cli'
 require 'alces/packager/tests/mock_repositories'
 
 class TestRepository < MiniTest::Test
+  describe 'update!' do
+    def setup
+      @repo = Alces::Packager::Repository.new('/path/to/repo')
+      @repo.stubs(:metadata).returns({source: 'repo/source'})
+      @repo.stubs(:last_update=)
+
+      DateTime.stubs(:now).returns(DateTime.new(2016, 5, 20))
+    end
+
+    def test_sets_last_update_when_newly_tracking_master
+      stub_sync_response_as('Branch master set up')
+      assert_sets_last_update
+    end
+
+    # TODO always want to set when updating, even if out-of-sync?
+    def test_sets_last_update_when_updating
+      stub_sync_response_as('Updating ..')
+      assert_sets_last_update
+    end
+
+    def test_sets_last_update_when_up_to_date
+      stub_sync_response_as('Already up-to-date.')
+      assert_sets_last_update
+    end
+
+    def test_doesnt_sets_last_update_when_unrecognized_response
+      stub_sync_response_as('Something unhandled')
+      assert_does_not_set_last_update
+    end
+
+    # This case occurs for repos with no source set up, such as the local repo,
+    # so we set the last update time to avoid trying to update these with every
+    # command.
+    def test_sets_last_update_no_source_defined
+      # Metadata doesn't have `source` key so cannot sync.
+      @repo.stubs(:metadata).returns({})
+
+      assert_sets_last_update
+    end
+
+    private
+
+    def stub_sync_response_as(response)
+      Alces::Git.stubs(:sync).returns(response)
+    end
+
+    def assert_sets_last_update
+      @repo.update!
+      assert_received(@repo, :last_update=) {|expect| expect.with(DateTime.now).once}
+    end
+
+    def assert_does_not_set_last_update
+      assert_raises do
+        @repo.update!
+      end
+
+      assert_received(@repo, :last_update=) {|expect| expect.never}
+    end
+  end
+
   describe 'last_update' do
     def setup
       @repo = Alces::Packager::Repository.new('/path/to/repo')

@@ -133,10 +133,12 @@ module Alces
         if metadata.key?(:source)
           case r = Alces.git.sync(repo_path, metadata[:source])
           when /^Branch master set up/
+            set_last_update
             # force reload of packages if needed
             @packages = nil
             [:ok, head_revision]
           when /^Updating (\S*)\.\.(\S*)/
+            set_last_update
             cur = $1
             tgt = $2
             head_rev = head_revision
@@ -148,11 +150,13 @@ module Alces
               [:ok, tgt]
             end
           when /^Already up-to-date./
+            set_last_update
             [:uptodate, head_revision]
           else
             raise "Unrecognized response from synchronization: #{r.chomp}"
           end
         else
+          set_last_update
           [:not_updateable, nil]
         end
       rescue
@@ -221,6 +225,10 @@ module Alces
 
       def last_update_file
         File.join(path, Config.last_update_filename)
+      end
+
+      def set_last_update
+        self.last_update = DateTime.now
       end
     end
   end
