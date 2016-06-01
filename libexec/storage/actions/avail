@@ -45,6 +45,12 @@ main() {
             else
                 reponame=$(basename "$a")
                 for b in "${a}"/*; do
+                    if [[ ! -d "$b" ]]; then
+                        # We consider any directory within the repo to be for a
+                        # storage backend, and skip any other files.
+                        continue
+                    fi
+
                     storage="$(basename "$b")"
                     if storage_is_enabled "${storage}"; then
                         enabled='*'
