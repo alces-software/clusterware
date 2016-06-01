@@ -32,6 +32,12 @@ main() {
     for a in "${cw_HANDLER_REPODIR}"/*; do
         reponame=$(basename "$a")
         for b in "${a}"/*; do
+            if [[ ! -d "$b" ]]; then
+                # We consider any directory within the repo to be for a
+                # handler, and skip any other files.
+                continue
+            fi
+
             handlername="$(basename "$b")"
             if handler_is_enabled "${handlername}"; then
                 enabled='*'
