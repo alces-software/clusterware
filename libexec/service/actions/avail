@@ -24,29 +24,29 @@ require action
 require serviceware
 
 main() {
-    local a b c service reponame enabled installed
+    local repopath reponame servicepath service component enabled installed
     if [ "$1" == "--components" ]; then
         with_components=true
         shift
     fi
-    for a in "${cw_SERVICEWARE_REPODIR}"/*; do
-        reponame=$(basename "$a")
-        for b in "${a}"/*; do
-            if [[ ! -d "$b" ]]; then
+    for repopath in "${cw_SERVICEWARE_REPODIR}"/*; do
+        reponame=$(basename "$repopath")
+        for servicepath in "${repopath}"/*; do
+            if [[ ! -d "$servicepath" ]]; then
                 # We consider any directory within the repo to be for a
                 # service, and skip any other files.
                 continue
             fi
 
-            service="$(basename "$b")"
+            service="$(basename "$servicepath")"
             if [ "${with_components}" ]; then
                 if serviceware_is_installed "${service}"; then
                     installed='*'
-                    for c in $(serviceware_list_components "${reponame}/${service}"); do
-                        if ! serviceware_is_enabled "${service}-${c}"; then
+                    for component in $(serviceware_list_components "${reponame}/${service}"); do
+                        if ! serviceware_is_enabled "${service}-${component}"; then
                             installed=' '
                         fi
-                        echo -e "[${installed}] \e[38;5;68m${reponame}\e[0m/\e[38;5;221m$(basename "$b")\e[0m/\e[35m${c}\e[0m"
+                        echo -e "[${installed}] \e[38;5;68m${reponame}\e[0m/\e[38;5;221m${service}\e[0m/\e[35m${component}\e[0m"
                     done
                 fi
             else
@@ -55,7 +55,7 @@ main() {
                 else
                     installed=' '
                 fi
-                echo -e "[${installed}] \e[38;5;68m${reponame}\e[0m/\e[38;5;221m$(basename "$b")\e[0m"
+                echo -e "[${installed}] \e[38;5;68m${reponame}\e[0m/\e[38;5;221m${service}\e[0m"
             fi
         done
     done

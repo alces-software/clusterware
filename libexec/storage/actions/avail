@@ -37,27 +37,27 @@ _show_config() {
 }
 
 main() {
-    local a b storage reponame enabled
+    local repopath reponame storagepath storage enabled
     if [ "$1" == "--backends" ]; then
-        for a in "${cw_STORAGE_REPODIR}"/*; do
-            if [ "$a" == "${cw_STORAGE_REPODIR}/*" ]; then
+        for repopath in "${cw_STORAGE_REPODIR}"/*; do
+            if [ "$repopath" == "${cw_STORAGE_REPODIR}/*" ]; then
                 action_die "no storage backends found"
             else
-                reponame=$(basename "$a")
-                for b in "${a}"/*; do
-                    if [[ ! -d "$b" ]]; then
+                reponame=$(basename "$repopath")
+                for storagepath in "${repopath}"/*; do
+                    if [[ ! -d "$storagepath" ]]; then
                         # We consider any directory within the repo to be for a
                         # storage backend, and skip any other files.
                         continue
                     fi
 
-                    storage="$(basename "$b")"
+                    storage="$(basename "$storagepath")"
                     if storage_is_enabled "${storage}"; then
                         enabled='*'
                     else
                         enabled=' '
                     fi
-                    echo -e "[${enabled}] \e[38;5;68m${reponame}\e[0m/\e[38;5;221m$(basename "$b")\e[0m"
+                    echo -e "[${enabled}] \e[38;5;68m${reponame}\e[0m/\e[38;5;221m${storage}\e[0m"
                 done
             fi
         done

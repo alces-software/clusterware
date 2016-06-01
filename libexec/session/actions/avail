@@ -24,23 +24,23 @@ require action
 require vnc
 
 main() {
-    local a b c sessionname reponame enabled
-    for a in "${cw_SESSION_REPODIR}"/*; do
-        reponame=$(basename "$a")
-        for b in "${a}"/*; do
-            if [[ ! -d "$b" ]]; then
+    local repopath reponame sessionpath sessionname enabled
+    for repopath in "${cw_SESSION_REPODIR}"/*; do
+        reponame=$(basename "$repopath")
+        for sessionpath in "${repopath}"/*; do
+            if [[ ! -d "$sessionpath" ]]; then
                 # We consider any directory within the repo to be for a
                 # session, and skip any other files.
                 continue
             fi
 
-            sessionname="$(basename "$b")"
+            sessionname="$(basename "$sessionpath")"
             if session_is_enabled "${sessionname}"; then
                 enabled='*'
             else
                 enabled=' '
             fi
-            echo -e "[${enabled}] \e[38;5;68m${reponame}\e[0m/\e[38;5;221m$(basename "$b")\e[0m"
+            echo -e "[${enabled}] \e[38;5;68m${reponame}\e[0m/\e[38;5;221m${sessionname}\e[0m"
         done
     done
     action_cleanup
