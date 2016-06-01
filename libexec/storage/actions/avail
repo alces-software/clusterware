@@ -22,6 +22,7 @@
 #==============================================================================
 require action
 require storage
+require ui
 
 _show_config() {
     local path name type default
@@ -57,7 +58,7 @@ main() {
                     else
                         enabled=' '
                     fi
-                    echo -e "[${enabled}] \e[38;5;68m${reponame}\e[0m/\e[38;5;221m${storage}\e[0m"
+                    ui_print_enabled_status_line "${enabled}" "${reponame}" "${storage}"
                 done
             fi
         done

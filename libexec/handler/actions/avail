@@ -22,6 +22,7 @@
 #==============================================================================
 require action
 require handler
+require ui
 
 main() {
     local repopath reponame handlerpath handlername hookpath hookname with_hooks enabled
@@ -50,11 +51,11 @@ main() {
                     # Any executable file within the handler dir is a hook.
                     if [ -f "$hookpath" -a -x "$hookpath" ]; then
                         hookname="$(basename "$hookpath")"
-                        echo -e "[${enabled}] \e[38;5;68m${reponame}\e[0m/\e[38;5;221m${handlername}\e[0m/\e[35m${hookname}\e[0m"
+                        ui_print_enabled_status_line "${enabled}" "${reponame}" "${handlername}" "${hookname}"
                     fi
                 done
             else
-                echo -e "[${enabled}] \e[38;5;68m${reponame}\e[0m/\e[38;5;221m${handlername}\e[0m"
+                ui_print_enabled_status_line "${enabled}" "${reponame}" "${handlername}"
             fi
         done
     done
