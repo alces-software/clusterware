@@ -22,6 +22,7 @@
 #==============================================================================
 require action
 require serviceware
+require ui
 
 main() {
     local repopath reponame servicepath service component enabled installed
@@ -46,7 +47,7 @@ main() {
                         if ! serviceware_is_enabled "${service}-${component}"; then
                             installed=' '
                         fi
-                        echo -e "[${installed}] \e[38;5;68m${reponame}\e[0m/\e[38;5;221m${service}\e[0m/\e[35m${component}\e[0m"
+                        ui_print_enabled_status_line "${installed}" "${reponame}" "${service}" "${component}"
                     done
                 fi
             else
@@ -55,7 +56,7 @@ main() {
                 else
                     installed=' '
                 fi
-                echo -e "[${installed}] \e[38;5;68m${reponame}\e[0m/\e[38;5;221m${service}\e[0m"
+                ui_print_enabled_status_line "${installed}" "${reponame}" "${service}"
             fi
         done
     done
