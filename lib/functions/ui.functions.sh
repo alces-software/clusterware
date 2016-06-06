@@ -73,3 +73,16 @@ say_done () {
         echo '[32mOK[0m '
     fi
 }
+
+ui_print_enabled_status_line() {
+    local enabled repo item sub_item sub_item_section
+    enabled="${1}"
+    repo="${2}"
+    item="${3}"
+    sub_item="${4}"
+
+    if [[ -n "${sub_item}" ]]; then
+        sub_item_section="/\e[35m${sub_item}\e[0m"
+    fi
+    echo -e "[${enabled}] \e[38;5;68m${repo}\e[0m/\e[38;5;221m${item}\e[0m${sub_item_section}"
+}
