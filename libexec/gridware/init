@@ -144,12 +144,12 @@ main() {
     local depot name
     cw_GRIDWARE_root="${1:-${cw_GRIDWARE_root}}"
     shift
-    
+
     while [ "$1" ]; do
         cw_GRIDWARE_depots="${cw_GRIDWARE_depots} $1"
         shift
     done
-    
+
     mkdir -p "${cw_GRIDWARE_root}"
     _create_default_depot
 
