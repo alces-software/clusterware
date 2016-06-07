@@ -91,6 +91,8 @@ _create_gridware_configuration() {
 :default_binary_url: https://s3-eu-west-1.amazonaws.com/packages.alces-software.com/gridware/%24dist
 :fetch_timeout: 10
 :prefer_binary: ${cw_GRIDWARE_prefer_binary:-false}
+:update_period: 3
+:last_update_filename: .last_update
 EOF
 }
 
