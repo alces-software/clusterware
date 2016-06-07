@@ -18,6 +18,6 @@ Rake::TestTask.new do |t|
   Bundler.setup(:default)
   ####
 
-  t.pattern = "**/tests/test_*.rb"
+  t.pattern = "lib/**/tests/test_*.rb"
 end
 
