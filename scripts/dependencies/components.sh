@@ -39,7 +39,11 @@ install_components() {
 	# for easier dev separation...? .bundle file probably still
 	# awkward tho... perhaps dev operation copies .bundle and
 	# vendor/ruby into dev tree...
-        "${cw_RUBYHOME}/bin/bundle" install --local --path=vendor &> "${dep_logs}/components-install.log"
+        "${cw_RUBYHOME}/bin/bundle" install \
+            --local \
+            --without test \
+            --path=vendor \
+            &> "${dep_logs}/components-install.log"
         say_done $?
     else
         install_dist 'components'
