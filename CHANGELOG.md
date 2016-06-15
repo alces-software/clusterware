@@ -4,8 +4,23 @@ All notable changes to this project will be documented in this file.
 This project adheres to [Semantic Versioning](http://semver.org/).
 
 ## [1.5.3] - Unreleased
+
+### Added
 - Added `--geometry` parameter to `alces session start` command (#85)
 - Added `--latest` parameter to `alces gridware install` command (#101)
+- S3cmd is now added to the PATH by default when the serviceware is installed (clusterware-services#21)
+- Git may be added to the PATH via a services modulefile if desired (clusterware#180)
+- Interactive desktop session sizes may be specified when a session is launched (#85)
+- The latest version of a Gridware package can automatically be selected for installation via a command-line argument (#101)
+
+### Changed
+- The `cluster-customizer` handler has been enhanced to allow machine type and feature specific profiles to be installed from S3 (clusterware-handlers#33)
+- Distro dependency installation is retried if it times out (#178)
+
+### Fixed
+- Non-directory files in repository-driven content such as handlers, serviceware etc. are no longer incorrectly displayed (#173)
+- Binary installation of packages with parameters no longer fail if requirements cannot be met (#171)
+- Packages that require two or more variants of another package now resolve their dependencies correctly (#172)
 
 ## [1.5.2] - 2016-05-24
 
@@ -168,6 +183,7 @@ This project adheres to [Semantic Versioning](http://semver.org/).
 
 - Initial release
 
+[1.5.3]: https://github.com/alces-software/clusterware/compare/1.5.2...1.5.3
 [1.5.2]: https://github.com/alces-software/clusterware/compare/1.5.1...1.5.2
 [1.5.1]: https://github.com/alces-software/clusterware/compare/1.5.0...1.5.1
 [1.5.0]: https://github.com/alces-software/clusterware/compare/1.4.1...1.5.0
