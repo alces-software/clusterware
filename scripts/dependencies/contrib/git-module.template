@@ -1,0 +1,107 @@
+#%Module1.0#####################################################################
+##
+## Alces HPC Software Stack - Service module file
+## Copyright (c) 2016 Alces Software Ltd
+##
+## path: services/git
+################################################################################
+if { [info exists ::env(ALCES_TRACE)] } {
+    puts stderr " -> $::ModulesCurrentModulefile"
+}
+
+if { [namespace exists alces] == 0 } {
+    if { [info exists ::env(MODULES_ALCES_TCL)] } {
+        source $::env(MODULES_ALCES_TCL)
+    } else {
+        # compatibility mode for module use without availability of Alces tools
+        proc ::process {body} { eval $body }
+        proc ::depend {module {version ""} {_ ""}} {
+            set req [regsub {\-} $module {/}]/$version
+            if { [catch { prereq $req }] } {
+                puts stderr "Could not satisfy prereq: $req"
+                break
+            }
+        }
+        proc ::alces {_ module} { return $module }
+        proc ::search {_ _ _} { }
+    }
+}
+
+proc ModulesHelp { } {
+    puts stderr "
+                =============== Git ===============
+                Git Source Control Management System
+               ======================================
+
+This module sets up your environment for the use of the 'git'
+service. This module sets up version '2.5.2' of the service.
+
+
+>> SYNOPSIS <<
+
+Git is a free and open source distributed version control system
+designed to handle everything from small to very large projects with
+speed and efficiency.
+
+Git is easy to learn and has a tiny footprint with lightning fast
+performance. It outclasses SCM tools like Subversion, CVS, Perforce,
+and ClearCase with features like cheap local branching, convenient
+staging areas, and multiple workflows.
+
+>> LICENSING <<
+
+This package is made available subject to the following license(s):
+
+\tGPLv2
+
+Please visit the website for further details regarding licensing.
+
+
+>> FURTHER INFORMATION <<
+
+More information about this software can be found at the website:
+
+\thttps://git-scm.com/
+
+For further details regarding this module, including the environment
+modifications it will apply, execute:
+
+\tmodule show services/git
+
+
+>> GET STARTED <<
+
+Please refer to the website for further details on usage of this
+package.
+"
+}
+
+set     app     git
+set     version 2.5.2
+set     appcaps GIT
+set     appdir  _cw_ROOT_/opt/git
+
+module-whatis   "
+
+            Title: Git
+          Summary: Git Source Control Management System
+          License: GPLv2
+            Group: Alces/Services
+              URL: https://git-scm.com/
+
+             Name: git
+          Version: 2.5.2
+           Module: [alces pretty services/git]
+      Module path: _cw_ROOT_/etc/modules/services/git
+     Package path: _cw_ROOT_/opt/git
+
+For further information, execute:
+
+\tmodule help services/git
+"
+
+setenv ${appcaps}DIR ${appdir}
+setenv ${appcaps}BIN ${appdir}/bin
+
+prepend-path PATH ${appdir}/bin
+prepend-path MANPATH ${appdir}/share/man
