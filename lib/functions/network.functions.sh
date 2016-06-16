@@ -153,7 +153,7 @@ network_fetch_ec2_document() {
     if [ "$cw_TEST_mock_ec2_document" ]; then
         cat <<EOF
 {
-  "region": "eu-west-1",
+  "region": "${cw_TEST_mock_ec2_region:-eu-west-1}",
   "pendingTime": "$(date -u +%Y-%m-%dT%H:%M:%SZ)",
   "instanceId": "i-$(hostname | md5sum | cut -c1-8)",
   "accountId": "1234567890"
@@ -193,7 +193,8 @@ network_fetch_ec2_userdata() {
         if [ "${cw_TEST_mock_ec2_userdata}" == "true" ]; then
             cat <<EOF
 #cloud-config
-#=FlightCustomizer ${cw_TEST_flight_customizer}
+#=FlightProfiles ${cw_TEST_flight_profiles}
+#=FlightFeatures ${cw_TEST_flight_features}
 system_info:
   default_user:
     name: admin

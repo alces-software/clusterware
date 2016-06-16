@@ -22,31 +22,40 @@
 #==============================================================================
 require action
 require handler
+require ui
 
 main() {
-    local a b c handlername reponame with_hooks enabled
+    local repopath reponame handlerpath handlername hookpath hookname with_hooks enabled
     if [ "$1" == "--with-hooks" ]; then
         with_hooks=true
         shift
     fi
-    for a in "${cw_HANDLER_REPODIR}"/*; do
-        reponame=$(basename "$a")
-        for b in "${a}"/*; do
-            handlername="$(basename "$b")"
+    for repopath in "${cw_HANDLER_REPODIR}"/*; do
+        reponame=$(basename "$repopath")
+        for handlerpath in "${repopath}"/*; do
+            if [[ ! -d "$handlerpath" ]]; then
+                # We consider any directory within the repo to be for a
+                # handler, and skip any other files.
+                continue
+            fi
+
+            handlername="$(basename "$handlerpath")"
             if handler_is_enabled "${handlername}"; then
                 enabled='*'
             else
                 enabled=' '
             fi
             if [ "$with_hooks" ]; then
-                handlername="$(basename "$b")"
-                for c in "${b}"/*; do
-                    if [ -f "$c" -a -x "$c" ]; then
-                        echo -e "[${enabled}] \e[38;5;68m${reponame}\e[0m/\e[38;5;221m${handlername}\e[0m/\e[35m$(basename "$c")\e[0m"
+                handlername="$(basename "$handlerpath")"
+                for hookpath in "${handlerpath}"/*; do
+                    # Any executable file within the handler dir is a hook.
+                    if [ -f "$hookpath" -a -x "$hookpath" ]; then
+                        hookname="$(basename "$hookpath")"
+                        ui_print_enabled_status_line "${enabled}" "${reponame}" "${handlername}" "${hookname}"
                     fi
                 done
             else
-                echo -e "[${enabled}] \e[38;5;68m${reponame}\e[0m/\e[38;5;221m$(basename "$b")\e[0m"
+                ui_print_enabled_status_line "${enabled}" "${reponame}" "${handlername}"
             fi
         done
     done

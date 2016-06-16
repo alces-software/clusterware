@@ -58,7 +58,7 @@ class HighLine
 
   def actual_length( string_with_escapes )
     string_with_escapes.to_s.gsub(/\e\[\d{1,2}(;5;\d{1,3})?m/, "").length
-  end  
+  end
 end
 
 module Alces
@@ -67,7 +67,7 @@ module Alces
       extend Commander::UI
       extend Commander::UI::AskForClass
       extend Commander::Delegates
-      
+
       class << self
         def add_package_options(c)
           c.option '-c', '--compiler STRING', String, 'Specify compiler'
@@ -156,6 +156,7 @@ module Alces
         add_depot_options(c)
         c.option '-g', '--global', 'Allow use of packages across all depots'
         c.option '-m', '--modules STRING', String, 'Specify modules to load before build'
+        c.option '-l', '--latest', 'Install latest if multiple versions of package available'
         c.option '-b', '--[no-]binary', 'Toggle use of binary packages when available'
         c.option '--binary-depends', 'Prefer binary packages for dependencies when available'
       end

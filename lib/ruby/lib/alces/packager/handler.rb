@@ -208,6 +208,8 @@ module Alces
         end
         if collection.length == 0
           raise NotFoundError, "No matching package found for: #{package_path}"
+        elsif options.latest
+          block.call(collection.last)
         elsif collection.length > 1
           l = collection.map {|p| colored_path(p) }
           say "More than one matching package found, please choose one of:"

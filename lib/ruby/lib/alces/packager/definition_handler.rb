@@ -76,7 +76,7 @@ module Alces
           headings = ['Requirement','Package','Build arguments']
           Alces::Packager::CLI.send(:enable_paging)
           cols = $terminal.output_cols
-          say Terminal::Table.new(title: "Requirements for #{colored_path(defn)}", 
+          say Terminal::Table.new(title: "Requirements for #{colored_path(defn)}",
                                   headings: headings,
                                   rows: rows
                                  ).to_s
@@ -134,7 +134,7 @@ module Alces
 
         missing_str = missing.map do |_, pkg, _, build_arg_hash|
           colored_path(pkg).tap do |s|
-            if build_arg_hash[:variant] && build_arg_hash[:variant] != 'default' 
+            if build_arg_hash[:variant] && build_arg_hash[:variant] != 'default'
               s << " (#{build_arg_hash[:variant]})"
             end
           end
@@ -152,7 +152,7 @@ EOF
             unless ((Config.prefer_binary && options.binary.nil?) || options.binary || options.binary_depends) &&
                    binary_available?(pkg, build_arg_hash[:variant])
               (build_arg_hash[:params] || '').split(',').each do |p|
-                if !params(defn)[p.to_sym]
+                if !params(false)[p.to_sym]
                   (missing_params[pkg] ||= []) << p
                 end
               end
@@ -174,7 +174,7 @@ EOF
             opts.binary = options.binary || options.binary_depends
             opts.args = [dep.path].tap do |a|
               (build_arg_hash[:params] || '').split(',').each do |p|
-                a << "#{p}=#{params(defn)[p.to_sym]}"
+                a << "#{p}=#{params(false)[p.to_sym]}"
               end
             end
             DefinitionHandler.install(dep, opts)
@@ -188,7 +188,7 @@ EOF
         options.compiler == :first ? defn.compilers.keys.first : options.compiler
       end
 
-      def params
+      def params(validate = true)
         {}.tap do |params|
           a = options.args[1..-1]
           while param = a.shift do
@@ -196,7 +196,7 @@ EOF
             raise InvalidParameterError, "No value found for parameter '#{k}' -- did you forget the '='?" if v.nil?
             params[k.to_sym] = v
           end
-          defn.validate_params!(params)
+          defn.validate_params!(params) if validate
         end
       rescue InvalidParameterError
         print_params_help(defn)

@@ -226,6 +226,10 @@ help_for_start() {
       the session will run up to the maximum runtime configured for
       this system (or forever if no maximum is configured).
 
+    --geometry <width>x<height>
+      Optionally specify a geometry to request for the VNC session,
+      overriding the Clusterware installation or VNC server default.
+
 EOF
 }
 
