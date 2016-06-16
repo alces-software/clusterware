@@ -729,13 +729,24 @@ if [ "${#deps[@]}" -gt 0 ]; then
   for a in "${deps[@]}"; do
     n=$(($n+1))
     echo -n "Installing distro dependency ($n/${#deps[@]}): ${a} ..."
-    if #{sprintf(available_cmd,'"${a}"')}; then
-      if ! #{sprintf(install_cmd,'"${a}"')}; then
-        echo ' FAILED'
-        exit 1
-      else
-        echo ' OK'
+    c=0
+    while ! #{sprintf(available_cmd,'"${a}"')}; do
+      c=$(($c+1))
+      if [ $c -gt 5 ]; then
+        available_failed=true
+        break
       fi
+    done
+    if [ -z "$available_failed" ]; then
+      c=0
+      while ! #{sprintf(install_cmd,'"${a}"')}; do
+        c=$(($c+1))
+        if [ $c -gt 5 ]; then
+          echo ' FAILED'
+          exit 1
+        fi
+      done
+      echo ' OK'
     else
       echo ' NOT FOUND'
       exit 1

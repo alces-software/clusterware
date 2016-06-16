@@ -65,7 +65,11 @@ module Alces
             path = [path, *rest].join(' ')
             req = package_or_definition(path, variant)
             raise NotFoundError, "Couldn't resolve a package for #{path} (#{variant})" if req.nil?
-            reqs.delete_if {|e| e[1] == req}
+            reqs.delete_if do |e|
+              (e[1] == req &&
+               (e[3][:variant] == variant ||
+                e[3][:variant].nil? && variant == "default"))
+            end
             reqs.unshift(
               [
                 n.name.gsub('_default',''),
