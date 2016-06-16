@@ -5,6 +5,9 @@ This project adheres to [Semantic Versioning](http://semver.org/).
 
 ## [Unreleased] - 1.6.0
 
+### Added
+- The Gridware package repositories are now automatically updated after a period of time (#121)
+
 ## [1.5.3] - 2016-06-16
 
 ### Added
