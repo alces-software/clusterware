@@ -3,7 +3,7 @@
 All notable changes to this project will be documented in this file.
 This project adheres to [Semantic Versioning](http://semver.org/).
 
-## [1.5.3] - Unreleased
+## [1.5.3] - 2016-06-16
 
 ### Added
 - Added `--geometry` parameter to `alces session start` command (#85)
