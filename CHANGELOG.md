@@ -8,6 +8,9 @@ This project adheres to [Semantic Versioning](http://semver.org/).
 ### Added
 - The Gridware package repositories are now automatically updated after a period of time (#121)
 
+### Changed
+- Environment modules warnings are now suppressed (#169)
+
 ## [1.5.3] - 2016-06-16
 
 ### Added
