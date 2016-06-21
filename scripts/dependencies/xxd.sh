@@ -1,5 +1,5 @@
 #==============================================================================
-# Copyright (C) 2015-2016 Stephen F. Norledge and Alces Software Ltd.
+# Copyright (C) 2016 Stephen F. Norledge and Alces Software Ltd.
 #
 # This file/package is part of Alces Clusterware.
 #
@@ -19,8 +19,38 @@
 # For more information on the Alces Clusterware, please visit:
 # https://github.com/alces-software/clusterware
 #==============================================================================
-deps="git libyaml ruby bundler modules genders pdsh components tigervnc xwd serf pluginhook websockify jq jo xxd"
-serviceware="gridscheduler aws s3cmd galaxy simp_le alces-storage-manager-daemon clusterware-dropbox-cli"
-dists="el6 el7"
-dist_url=${cw_BUILD_dist_url:-https://s3-eu-west-1.amazonaws.com/packages.alces-software.com/clusterware/dist}
-target=${cw_BUILD_target_dir:-/opt/clusterware}
+detect_xxd() {
+    [ -d "${target}/opt/xxd" ]
+}
+
+fetch_xxd() {
+    title "Fetching xxd"
+    if fetch_handling_is_source; then
+        fetch_source https://github.com/ThatOtherPerson/xxd/archive/master.tar.gz "xxd-source.tar.gz"
+    else
+        fetch_dist xxd
+    fi
+}
+
+install_xxd() {
+    title "Installing xxd"
+    if fetch_handling_is_source; then
+        doing 'Extract'
+        tar -C "${dep_build}" -xzf "${dep_src}/xxd-source.tar.gz"
+        say_done $?
+
+        cd "${dep_build}"/xxd-*
+
+        doing 'Compile'
+        make &> "${dep_logs}/xxd-make.log"
+        say_done $?
+
+        doing 'Install'
+        mkdir -p "${target}"/opt/xxd/{bin,man/man1}
+        cp xxd "${target}"/opt/xxd/bin
+        cp xxd.1 "${target}"/opt/xxd/man/man1
+        say_done $?
+    else
+        install_dist xxd
+    fi
+}
