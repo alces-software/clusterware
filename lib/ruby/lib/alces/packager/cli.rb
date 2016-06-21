@@ -84,6 +84,7 @@ module Alces
           c.option '--ignore-bad', "Allow packages containing hard coded paths to be exported#{suffix}"
           c.option '--accept-bad PATTERN(S)', String, "Allow packages containing hard coded paths in matching files to be exported (comma-separated glob patterns)#{suffix}"
           c.option '--accept-elf', "Allow ELF files with acceptable hard coded search path to be exported#{suffix}"
+          c.option '--patch-binary PATTERN(S)', String, "Patch binary files containing hard coded paths in matching files (comma-separated glob patterns)#{suffix}"
         end
 
         def set_aliases(target, opts = {})

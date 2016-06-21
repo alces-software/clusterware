@@ -22,6 +22,7 @@
 require 'alces/tools/execution'
 require 'alces/packager/package'
 require 'alces/packager/errors'
+require 'alces/packager/import_export_utils'
 require 'find'
 
 module Alces
@@ -34,6 +35,7 @@ module Alces
       end
 
       include Alces::Tools::Execution
+      include Alces::Packager::ImportExportUtils
 
       attr_accessor :archive_path, :options
       delegate :say, :with_spinner, :doing, :title, :colored_path, :to => IoHandler
@@ -180,8 +182,12 @@ module Alces
               File.write(module_file,s)
               (tagging[:rewritten] || []).each do |f|
                 fname = File.join(dir, ENV['cw_DIST'], 'pkg', package_path, tagging[:tag], f)
-                s = File.read(fname).gsub('_DEPOT_',depot_path)
-                File.write(fname,s)
+                if text_file?(fname)
+                  s = File.read(fname).gsub('_DEPOT_',depot_path)
+                  File.write(fname,s)
+                else
+                  patch_binary(fname, depot_path.split('/').tap {|x| a = x.pop; x << '_^DEPOT_'}.join('/'), depot_path)
+                end
               end
 
               Package.first_or_create(type: type,
@@ -264,8 +270,12 @@ module Alces
             File.write(lib_module_file,s)
             (@metadata[:rewritten] || []).each do |f|
               fname = File.join(dir, ENV['cw_DIST'], 'pkg', 'compilers', name, version, f)
-              s = File.read(fname).gsub('_DEPOT_',depot_path)
-              File.write(fname,s)
+              if text_file?(fname)
+                s = File.read(fname).gsub('_DEPOT_',depot_path)
+                File.write(fname,s)
+              else
+                patch_binary(fname, depot_path.split('/').tap {|x| a = x.pop; x << '_^DEPOT_'}.join('/'), depot_path)
+              end
             end
 
             Package.first_or_create(type: type,
@@ -347,6 +357,12 @@ module Alces
         s.gsub!('if ! sudo /usr/bin/yum install -y --quiet "${a}"',
                 %(if ! sudo /usr/bin/yum install -y "${a}" >>#{Config.log_root}/depends.log 2>&1))
         File.write(depends_file,s)
+      end
+
+      def text_file?(file)
+        run(['file',file]) do |r|
+          r.success? && r.stdout.include?("text")
+        end
       end
     end
   end
