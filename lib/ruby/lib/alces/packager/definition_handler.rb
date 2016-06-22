@@ -111,12 +111,13 @@ module Alces
       end
 
       def install_defn(variant = nil)
-        install_dependencies(variant)
+        binary_viable = ((Config.prefer_binary && options.binary.nil?) || options.binary) &&
+          archive_path = binary_path(defn, variant)
+        install_dependencies(variant, binary_viable)
         say("Installing #{colored_path(defn)}".tap do |s|
           s << " (#{variant})" unless variant.nil?
             end)
-        if ((Config.prefer_binary && options.binary.nil?) || options.binary) &&
-           archive_path = binary_path(defn, variant)
+        if binary_viable
           ArchiveImporter.new(archive_path, options).import
           return
         end
@@ -126,9 +127,9 @@ module Alces
         Actions.install(defn, opts, IoHandler)
       end
 
-      def install_dependencies(variant = options.variant)
+      def install_dependencies(variant = options.variant, runtime_only = false)
         dh = DependencyHandler.new(defn, selected_compiler, variant, options.global, options.ignore_satisfied)
-        missing = dh.resolve_requirements_tree.reject { |_, _, installed, _| installed }
+        missing = dh.resolve_requirements_tree(dh.requirements_tree(runtime_only)).reject { |_, _, installed, _| installed }
         missing.pop
         return unless missing.any?
 
