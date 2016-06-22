@@ -143,6 +143,7 @@ module Alces
             p.type == @type && p.name == basename && p.version == version
           end
         end.flatten.first
+        variant = 'default' if variant.nil? && (md.metadata[:variants]||{}).include?('default')
 
         @tags.each do |tag|
           title "Export (#{tag})"
@@ -168,9 +169,13 @@ module Alces
           with_spinner do
             # modify depot in modulefiles
             p = Package.first(name: @name, type: @type, version: version, tag: tag)
-            reqs = md.base_requirements(:runtime) + \
-                   md.compiler_requirements(p.compiler_tag,:runtime) + \
-                   md.variant_requirements(variant, :runtime)
+            dh = DependencyHandler.new(md, p.compiler_tag.split('-').first, variant, false, false)
+            reqs = dh.resolve_requirements_tree.map do |req, pkg, installed, build_arg_hash|
+              [pkg.type, pkg.name, pkg.version].join('/')
+            end.tap {|o| o.pop}
+            specifiers = md.base_requirements(:runtime) + \
+                         md.compiler_requirements(p.compiler_tag,:runtime) + \
+                         md.variant_requirements(variant, :runtime)
 
             s = File.read(dest_module).gsub(depot_path,'_DEPOT_')
             File.write(dest_module,s)
@@ -180,6 +185,7 @@ module Alces
               tag: tag,
               compiler_tag: p.compiler_tag,
               requirements: reqs,
+              specifiers: specifiers,
               rewritten: rewritten_files
             }
           end
