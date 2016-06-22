@@ -11,6 +11,7 @@ This project adheres to [Semantic Versioning](http://semver.org/).
 
 ### Changed
 - Environment modules warnings are now suppressed (#169)
+- If we don't have permission to set CloudWatch metrics, disable metric scans (#174)
 
 ## [1.5.3] - 2016-06-16
 
