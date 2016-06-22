@@ -12,6 +12,7 @@ This project adheres to [Semantic Versioning](http://semver.org/).
 ### Changed
 - Environment modules warnings are now suppressed (#169)
 - If we don't have permission to set CloudWatch metrics, disable metric scans (#174)
+- The algorithm for determining the memory limit (`vmem`) for SGE execution hosts has been simplified to round down to nearest GiB of RAM (clusterware-handlers#31)
 
 ## [1.5.3] - 2016-06-16
 
