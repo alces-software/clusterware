@@ -59,6 +59,7 @@ EOF
 printf "    %-28s  %s\n" "$binname help" "More help about this command."
 printf "    %-28s  %s\n" "$binname node" "Perform initial node setup."
 printf "    %-28s  %s\n" "$binname autoscaling" "Control autoscaling behaviour."
+printf "    %-28s  %s\n" "$binname hyperthreading" "Control hyperthreading behaviour."
 cat <<EOF
 
 Please report bugs to support@alces-software.com
@@ -89,6 +90,20 @@ help_for_autoscaling() {
 
     Change or retrieve autoscaling behaviour.  If no action is
     specified, display autoscaling status.
+
+EOF
+}
+
+help_for_hyperthreading() {
+    cat <<EOF
+  SYNOPSIS:
+
+    alces configure hyperthreading [enable|disable|status]
+
+  DESCRIPTION:
+
+    Change or retrieve hyperthreading behaviour.  If no action is
+    specified, display hyperthreading status.
 
 EOF
 }

@@ -39,6 +39,9 @@ case $action in
     a|au|aut|auto|autos|autosc|autosca|autoscal|autoscali|autoscalin|autoscaling)
         exec /bin/bash "${cw_ROOT}"/libexec/configure/actions/autoscaling "$@"
         ;;
+    h|hy|hyp|hype|hyper|hypert|hyperth|hyperthr|hyperthre|hyperthrea|hyperthread|hyperthreadi|hyperthreadin|hyperthreading)
+        exec /bin/bash "${cw_ROOT}"/libexec/configure/actions/hyperthreading "$@"
+        ;;
     *)
         cat <<EOF
 Usage: $cw_BINNAME COMMAND [[OPTION]... [ARGS]]
@@ -49,6 +52,7 @@ EOF
 printf "    %-28s  %s\n" "$cw_BINNAME help" "More help about this command."
 printf "    %-28s  %s\n" "$cw_BINNAME node" "Perform initial node setup."
 printf "    %-28s  %s\n" "$cw_BINNAME autoscaling" "Control autoscaling behaviour."
+printf "    %-28s  %s\n" "$cw_BINNAME hyperthreading" "Control hyperthreading behaviour."
 cat <<EOF
 
 Please report bugs to support@alces-software.com

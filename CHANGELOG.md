@@ -8,6 +8,7 @@ This project adheres to [Semantic Versioning](http://semver.org/).
 ### Added
 - The Gridware package repositories are now automatically updated after a period of time (#121)
 - Gridware export/import can now patch binary files to handle hard-coded depot paths (#110)
+- Added `alces configure hyperthreading` action for modifying hyperthreading behaviour (#164)
 
 ### Changed
 - Environment modules warnings are now suppressed (#169)
