@@ -19,7 +19,7 @@
 # For more information on the Alces Clusterware, please visit:
 # https://github.com/alces-software/clusterware
 #==============================================================================
-cw_HANDLER_rev="HEAD" # clusterware#174 clusterware-handlers#31
+cw_HANDLER_rev="HEAD" # clusterware#174 clusterware-handlers#31 clusterware-handlers#34
 cw_SESSION_rev="HEAD"
 cw_SERVICE_rev="HEAD" # clusterware#74
 cw_STORAGE_rev="HEAD"
