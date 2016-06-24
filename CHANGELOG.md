@@ -10,6 +10,7 @@ This project adheres to [Semantic Versioning](http://semver.org/).
 - Gridware export/import can now patch binary files to handle hard-coded depot paths (#110)
 - Added `alces configure hyperthreading` action for modifying hyperthreading behaviour (#164)
 - Flight customization profiles can now be retrieved without S3 credentials (clusterware-handlers#34)
+- Storage backends and system-wide configurations enabled on the master node are now propogated to all slave nodes (clusterware-handlers#21)
 
 ### Changed
 - Environment modules warnings are now suppressed (#169)
