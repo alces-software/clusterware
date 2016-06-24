@@ -108,3 +108,18 @@ files_load_config() {
         fi
     fi
 }
+
+files_lock() {
+    local lockname fd
+    lockname="${1:-clusterware}"
+    fd=${2:-9}
+    mkdir -p "${cw_ROOT}"/var/lock
+    eval "exec ${fd}>\"${cw_ROOT}/var/lock/${lockname}.lock\""
+    flock -w30 $fd
+}
+
+files_unlock() {
+    local fd
+    fd=${2:-9}
+    eval "exec ${fd}>&-"
+}
