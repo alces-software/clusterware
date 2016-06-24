@@ -29,6 +29,19 @@ git_update() {
       cd - &>/dev/null
 }
 
+# Update local repo to match particular remote branch, even if they have
+# diverged.
+git_match_remote() {
+    local clonedir branch
+    clonedir="$1"
+    branch="$2"
+    cd "${clonedir}" && \
+      "$GIT" checkout "${branch}" --quiet && \
+      "$GIT" reset --hard origin --quiet && \
+      "$GIT" pull --ff-only &>/dev/null && \
+      cd - &>/dev/null
+}
+
 git_clone() {
     local repourl clonedir
     repourl="$1"
