@@ -36,6 +36,24 @@ module Alces
           super
         end
       end
+
+      def region_aware_root
+        if metadata[:region_map] && region
+          metadata[:region_map][region] || metadata[:region_map].values.first
+        elsif metadata[:root] == 'https://s3-eu-west-1.amazonaws.com/packages.alces-software.com/gridware/%24dist' ||
+              metadata[:region_map].nil? && metadata[:root].nil?
+          Config.default_binary_url
+        else
+          metadata[:root] || metadata[:region_map].values.first
+        end
+      end
+
+      private
+      def region
+        if File.exists?("#{ENV['cw_ROOT']}/etc/config/cluster/instance-aws.rc")
+          @region ||= `source #{ENV['cw_ROOT']}/etc/config/cluster/instance-aws.rc 2> /dev/null && echo ${cw_INSTANCE_aws_region}`.chomp
+        end
+      end
     end
   end
 end

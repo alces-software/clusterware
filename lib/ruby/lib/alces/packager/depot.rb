@@ -155,7 +155,24 @@ EOF
           h[:title] = name
           h[:summary] = "Summary of #{name}"
           h[:description] = "Description of #{name}"
-          h[:root] = Config.default_binary_url
+          h[:region_map] = {
+            'eu-west-1' => 'https://s3-eu-west-1.amazonaws.com/alces-gridware-eu-west-1/dist',
+            'eu-central-1' => 'https://s3-eu-central-1.amazonaws.com/alces-gridware-eu-central-1/dist',
+            'us-east-1' => 'https://s3.amazonaws.com/alces-gridware-eu-east-1/dist',
+            #'us-west-1' => 'https://s3-us-west-1.amazonaws.com/alces-gridware-us-west-1/dist',
+            #'us-west-2' => 'https://s3-us-west-2.amazonaws.com/alces-gridware-us-west-2/dist',
+            'us-west-1' => 'https://s3.amazonaws.com/alces-gridware-eu-east-1/dist',
+            'us-west-2' => 'https://s3.amazonaws.com/alces-gridware-eu-east-1/dist',
+            #'ap-northeast-1' => 'https://s3-ap-northeast-1.amazonaws.com/alces-gridware-ap-northeast-1/dist',
+            #'ap-northeast-2' => 'https://s3-ap-northeast-2.amazonaws.com/alces-gridware-ap-northeast-2/dist',
+            #'ap-southeast-1' => 'https://s3-ap-southeast-1.amazonaws.com/alces-gridware-ap-southeast-1/dist',
+            'ap-northeast-1' => 'https://s3-ap-southeast-2.amazonaws.com/alces-gridware-ap-southeast-2/dist',
+            'ap-northeast-2' => 'https://s3-ap-southeast-2.amazonaws.com/alces-gridware-ap-southeast-2/dist',
+            'ap-southeast-1' => 'https://s3-ap-southeast-2.amazonaws.com/alces-gridware-ap-southeast-2/dist',
+            'ap-southeast-2' => 'https://s3-ap-southeast-2.amazonaws.com/alces-gridware-ap-southeast-2/dist',
+            #'sa-east-1' => 'https://s3-sa-east-1.amazonaws.com/alces-gridware-sa-east-1/dist'
+            'sa-east-1' => 'https://s3.amazonaws.com/alces-gridware-eu-east-1/dist'
+          }
           h[:content] = []
           DataMapper.repository(name) do
             Package.each do |p|

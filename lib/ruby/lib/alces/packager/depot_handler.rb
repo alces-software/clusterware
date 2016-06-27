@@ -161,7 +161,7 @@ module Alces
             depot.content
           else
             depot.content.reject do |pkg|
-              remote_package_exists?(archive_path_for(depot.root,pkg))
+              remote_package_exists?(archive_path_for(depot.region_aware_root,pkg))
             end
           end
         if build_targets.any?
@@ -217,7 +217,7 @@ EOF
             # download and import
             import_opts = OptionSet.new(options)
             import_opts.depot = target_depot.name
-            ArchiveImporter.import(archive_path_for(depot.root,pkg), import_opts)
+            ArchiveImporter.import(archive_path_for(depot.region_aware_root,pkg), import_opts)
             say "\n"
           end
           build_targets.each do |pkg|
