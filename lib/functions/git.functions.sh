@@ -36,9 +36,8 @@ git_match_remote() {
     clonedir="$1"
     branch="$2"
     cd "${clonedir}" && \
-      "$GIT" checkout "${branch}" --quiet && \
-      "$GIT" reset --hard origin --quiet && \
-      "$GIT" pull --ff-only &>/dev/null && \
+      "$GIT" fetch origin --quiet && \
+      "$GIT" reset --hard "origin/${branch}" --quiet && \
       cd - &>/dev/null
 }
 
