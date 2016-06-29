@@ -1,0 +1,84 @@
+#!/bin/bash
+#==============================================================================
+# Copyright (C) 2016 Stephen F. Norledge and Alces Software Ltd.
+#
+# This file/package is part of Alces Clusterware.
+#
+# Alces Clusterware is free software: you can redistribute it and/or
+# modify it under the terms of the GNU Affero General Public License
+# as published by the Free Software Foundation, either version 3 of
+# the License, or (at your option) any later version.
+#
+# Alces Clusterware is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+# Affero General Public License for more details.
+#
+# You should have received a copy of the GNU Affero General Public License
+# along with this package.  If not, see <http://www.gnu.org/licenses/>.
+#
+# For more information on the Alces Clusterware, please visit:
+# https://github.com/alces-software/clusterware
+#==============================================================================
+setup() {
+    local a xdg_config
+    IFS=: read -a xdg_config <<< "${XDG_CONFIG_HOME:-$HOME/.config}:${XDG_CONFIG_DIRS:-/etc/xdg}"
+    for a in "${xdg_config[@]}"; do
+        if [ -e "${a}"/clusterware/config.rc ]; then
+            source "${a}"/clusterware/config.rc
+            break
+        fi
+    done
+    if [ -z "${cw_ROOT}" ]; then
+        echo "$0: unable to locate clusterware configuration"
+        exit 1
+    fi
+    kernel_load
+}
+
+main() {
+    local url input_file input args url_regex err
+    if [ "$1" == "-@" ]; then
+        input_file="$2"
+        shift 2
+    fi
+    if [ "${cw_FLIGHT_TRIGGER_url}" ]; then
+        url="${cw_FLIGHT_TRIGGER_url}"
+    else
+        url="$1"
+        shift
+    fi
+    if [ -z "${url}" ]; then
+        action_die "usage: $0 [-@ <file>] <url> [args...]"
+    elif ! [[ "${url}" =~ ${_URL_REGEX} ]]; then
+        action_die "invalid url: ${url}"
+    elif [ "${input_file}" ]; then
+        if [ ! -r "${input_file}" ]; then
+            action_die "unable to read input from: ${input_file}"
+        fi
+        input="$(cat "${input_file}")"
+    fi
+
+    if [ "$#" -gt 0 ]; then
+        args="$("${_JO}" -a -- "$@")"
+    else
+        args=[]
+    fi
+    "${_JO}" options={} args="${args}" input="${input}" | \
+        webapi_post "${url}" --mimetype "application/json"
+    err=$?
+    if [ $err -gt 0 ]; then
+        action_die "request failed ($err)" $err
+    fi
+}
+
+setup
+
+require action
+require webapi
+
+_URL_REGEX='(https?)://[-A-Za-z0-9\+&@#/%?=~_|!:,.;]*[-A-Za-z0-9\+&@#/%=~_|]'
+_JO="${cw_ROOT}"/opt/jo/bin/jo
+_JQ="${cw_ROOT}"/opt/jq/bin/jq
+
+main "$@"
