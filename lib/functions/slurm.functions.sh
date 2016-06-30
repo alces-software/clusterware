@@ -22,14 +22,34 @@
 
 require files
 require network
+require ruby
+
 files_load_config --optional cluster-slurm
 
-# cw_SLURM_CONFIG="$cw_ROOT/etc/slurm.conf" # TODO: Needed?
+export cw_SLURM_CONFIG="$cw_ROOT/opt/slurm/etc/slurm.conf"
 
 slurm_log() {
     local message
     message="$1"
     log "${message}" "${cw_CLUSTER_SLURM_log}"
+}
+
+_modify_compute_nodes() {
+    local functions_dir script
+    functions_dir=$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)
+    script="${functions_dir}/share/slurm-modify-compute-nodes.rb"
+
+    ruby_exec "${script}" "$@"
+}
+
+slurm_add_compute_node() {
+    local node_name="$1"
+    _modify_compute_nodes add "${node_name}"
+}
+
+slurm_remove_compute_node() {
+    local node_name="$1"
+    _modify_compute_nodes remove "${node_name}"
 }
 
 slurm_control_node_iptables_rule() {
