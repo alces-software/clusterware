@@ -37,7 +37,7 @@ setup() {
 }
 
 main() {
-    local url input_file input args url_regex err
+    local url input_file input args url_regex err auth post_args
     if [ "$1" == "-@" ]; then
         input_file="$2"
         shift 2
@@ -47,6 +47,9 @@ main() {
     else
         url="$1"
         shift
+    fi
+    if [ "${cw_FLIGHT_TRIGGER_auth}" ]; then
+        auth="${cw_FLIGHT_TRIGGER_auth}"
     fi
     if [ -z "${url}" ]; then
         action_die "usage: $0 [-@ <file>] <url> [args...]"
@@ -64,11 +67,17 @@ main() {
     else
         args=[]
     fi
+    post_args=(--mimetype "application/json" -k --location-trusted)
+    if [ "$auth" ]; then
+        post_args+=(--auth "${auth}")
+    fi
     "${_JO}" options={} args="${args}" input="${input}" | \
-        webapi_post "${url}" --mimetype "application/json"
+        webapi_post "${url}" "${post_args[@]}"
     err=$?
     if [ $err -gt 0 ]; then
         action_die "request failed ($err)" $err
+    else
+        echo ""
     fi
 }
 
