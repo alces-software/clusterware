@@ -111,7 +111,10 @@ _pull() {
                       ${target_dir}/ >> "$(xdg_cache_home)"/clusterware/flight-sync.log 2>&1; then
                 ${_S3CMD} get --force \
                           s3://${bucket}/sync/$(whoami)/${target}.yml \
-                          ${sync_cfg} >> "$(xdg_cache_home)"/clusterware/flight-sync.log 2>&1
+                          "${sync_cfg}.new" >> "$(xdg_cache_home)"/clusterware/flight-sync.log 2>&1
+                if [ -f "${sync_cfg}.new" ]; then
+                    mv "${sync_cfg}.new" "${sync_cfg}"
+                fi
                 encrypted_file="$(mktemp /tmp/sync.encrypted.XXXXXXXX)"
                 ${_S3CMD} get --force \
                           s3://${bucket}/sync/$(whoami)/${target}.dat \
