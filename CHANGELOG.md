@@ -11,6 +11,7 @@ This project adheres to [Semantic Versioning](http://semver.org/).
 - Added `alces configure hyperthreading` action for modifying hyperthreading behaviour (#164)
 - Flight customization profiles can now be retrieved without S3 credentials (clusterware-handlers#34)
 - Storage backends and system-wide configurations enabled on the master node are now propogated to all slave nodes (clusterware-handlers#21)
+- New `alces sync` tool for synchronizing directories (for e.g. your home directory) to an S3 bucket, with file exclusion and encryption for sensitive files (#92)
 
 ### Changed
 - Environment modules warnings are now suppressed (#169)
