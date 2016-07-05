@@ -1,0 +1,195 @@
+#!/bin/bash
+#==============================================================================
+# Copyright (C) 2016 Stephen F. Norledge and Alces Software Ltd.
+#
+# This file/package is part of Alces Clusterware.
+#
+# Alces Clusterware is free software: you can redistribute it and/or
+# modify it under the terms of the GNU Affero General Public License
+# as published by the Free Software Foundation, either version 3 of
+# the License, or (at your option) any later version.
+#
+# Alces Clusterware is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+# Affero General Public License for more details.
+#
+# You should have received a copy of the GNU Affero General Public License
+# along with this package.  If not, see <http://www.gnu.org/licenses/>.
+#
+# For more information on the Alces Clusterware, please visit:
+# https://github.com/alces-software/clusterware
+#==============================================================================
+setup() {
+    local a xdg_config
+    IFS=: read -a xdg_config <<< "${XDG_CONFIG_HOME:-$HOME/.config}:${XDG_CONFIG_DIRS:-/etc/xdg}"
+    for a in "${xdg_config[@]}"; do
+        if [ -e "${a}"/clusterware/config.rc ]; then
+            source "${a}"/clusterware/config.rc
+            break
+        fi
+    done
+    if [ -z "${cw_ROOT}" ]; then
+        echo "$0: unable to locate clusterware configuration"
+        exit 1
+    fi
+    kernel_load
+}
+
+_record_posix_data() {
+    local sync_cfg
+    sync_cfg="$1"
+    ruby_run <<RUBY
+require 'yaml'
+require 'find'
+require 'etc'
+Dir.chdir("$(_target_for "${sync_cfg}")")
+config = (YAML.load_file("$1") rescue nil) || {}
+exclusions = config[:exclude] || []
+exclusions << "$(xdg_cache_home)/clusterware/flight-sync.log".gsub(ENV['HOME'] + '/','')
+files = {}
+excluded = lambda do |f|
+  exclusions.any? do |p|
+    File.fnmatch?(p, f) ||
+      (p[-1] == "/" &&
+       f == p[0..-2] || File.fnmatch?("#{p}*", f))
+  end
+end
+Find.find('.').each do |f|
+  next if f == '.' || excluded.call(f[2..-1])
+  stat = File.stat(f)
+  files[f[2..-1]] = [].tap do |a|
+    a << (Etc.getpwuid(stat.uid).name rescue stat.uid.to_s)
+    a << (Etc.getgrgid(stat.gid).name rescue stat.gid.to_s)
+    a << (stat.mode & 07777).to_s(8)
+    a << stat.atime.to_i.to_s
+    a << stat.mtime.to_i.to_s
+  end.join(':')
+end
+config[:files] = files
+File.write("${sync_cfg}", config.to_yaml)
+RUBY
+}
+
+_populate_exclusions_file() {
+    local config_file exclusions_file
+    config_file="$1"
+    exclusions_file="$2"
+    ruby_run <<RUBY
+require 'yaml'
+config = (YAML.load_file("${config_file}") rescue nil) || {}
+exclusions = (config[:exclude] || []) + (config[:encrypt] || [])
+exclusions << "$(xdg_cache_home)/clusterware/flight-sync.log".gsub(ENV['HOME'] + '/','')
+File.write("${exclusions_file}",exclusions.join("\n"))
+RUBY
+}
+
+_prepare_encrypt_set() {
+    local sync_cfg encrypted_file password
+    sync_cfg="$1"
+    encrypted_file="$2"
+
+    set -f
+    encrypted_set=($(ruby_run <<RUBY
+require 'yaml'
+config = (YAML.load_file("${sync_cfg}") rescue nil) || {}
+puts((config[:encrypt] || []).join(" "))
+RUBY
+                      ))
+    set +f
+    if [ "${encrypted_set}" ]; then
+        unset password
+        trap _int_handler INT
+        password=$(_get_password "Encryption passphrase (CTRL+C to skip)")
+        trap - INT
+        if [ "$_INTERRUPTED" ]; then
+            return 1
+        fi
+        export password
+        cd "$(_target_for "${sync_cfg}")"
+        tar -cz ${encrypted_set[*]} 2>/dev/null |
+            openssl enc -e -aes256 -out "${encrypted_file}" -pass env:password
+        cd - &>/dev/null
+    else
+        return 1
+    fi
+}
+
+_push() {
+    local sync_cfg bucket exclusions_file target encrypted_file target_dir
+    sync_cfg="$1"
+    target="$2"
+
+    bucket="${cw_SYNC_bucket}"
+    if [ -z "$bucket" ] && network_is_ec2; then
+        bucket="alces-flight-$(network_ec2_hashed_account)"
+    else
+        action_die "target bucket name could not be determined"
+    fi
+
+    export AWS_SECRET_ACCESS_KEY="${AWS_SECRET_ACCESS_KEY:-${cw_SYNC_aws_secret_access_key}}"
+    export AWS_ACCESS_KEY_ID="${AWS_ACCESS_KEY_ID:-${cw_SYNC_aws_access_key_id}}"
+    if ${_S3CMD} ls s3://${bucket}/sync/$(whoami) &>/dev/null; then
+        exclusions_file="$(mktemp /tmp/sync.exclusions.XXXXXXXX)"
+        encrypted_file="$(mktemp /tmp/sync.encrypted.XXXXXXXX)"
+        chmod 0600 "${exclusions_file}" "${encrypted_file}"
+        target_dir="$(_target_for "${sync_cfg}")"
+        if [ ! -d "${target_dir}" ]; then
+            action_die "not found: ${target_dir}"
+        fi
+        title "Synchronizing directory '${target_dir}' to s3://${bucket}"
+        _populate_exclusions_file "${sync_cfg}" "${exclusions_file}"
+        doing "Permissions"
+        _record_posix_data "${sync_cfg}"
+        say_done $?
+        mkdir -p "$(xdg_cache_home)"/clusterware
+        if _prepare_encrypt_set "${sync_cfg}" "${encrypted_file}"; then
+            doing "Sync"
+            ${_S3CMD} --no-progress --no-mime-magic put \
+                      "${encrypted_file}" \
+                      s3://${bucket}/sync/$(whoami)/${target}.dat >> "$(xdg_cache_home)"/clusterware/flight-sync.log 2>&1
+        else
+            doing "Sync"
+        fi
+        ${_S3CMD} --no-progress --no-mime-magic put \
+                  "${sync_cfg}" \
+                  s3://${bucket}/sync/$(whoami)/${target}.yml >> "$(xdg_cache_home)"/clusterware/flight-sync.log 2>&1
+        ${_S3CMD} --no-progress --no-mime-magic sync \
+                  --delete-removed \
+                  --exclude-from ${exclusions_file} \
+                  "$(_target_for "${sync_cfg}")"/ \
+                  s3://${bucket}/sync/$(whoami)/${target}/ >> "$(xdg_cache_home)"/clusterware/flight-sync.log 2>&1
+        say_done $?
+        rm -f "${exclusions_file}" "${encrypted_file}"
+    else
+        action_die "unable to access synchronization bucket '${bucket}' ($?)" $?
+    fi
+}
+
+main() {
+    local sync_cfg bucket target
+    target="${1:-default}"
+    sync_cfg="$(xdg_config_home)"/clusterware/sync.${target}.yml
+    if [ -f "${sync_cfg}" ]; then
+        _push "${sync_cfg}" "${target}"
+    else
+        action_die "invalid target '${target}'"
+    fi
+}
+
+setup
+
+require action
+require xdg
+require network
+require files
+require ruby
+require ui
+
+. "${cw_ROOT}/libexec/sync/share/functions.sh"
+
+_S3CMD="${cw_ROOT}"/opt/s3cmd/s3cmd
+
+files_load_config --optional sync
+
+main "$@"
