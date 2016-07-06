@@ -77,6 +77,8 @@ title "Creating clusterware directory structure"
 doing 'Create'
 [[ -d "${target}" ]] || mkdir -p "${target}"
 mkdir -p "${target}"/var/lock
+touch "${target}"/var/lock/clusterware.session.lock
+chmod 0644 "${target}"/var/lock/clusterware.session.lock
 cp -R "${source}/bin" "${source}/lib" "${source}/libexec" "${target}"
 if [ ! -d "${target}/etc" ]; then
     cp -R "${source}/etc" "${target}"

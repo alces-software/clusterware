@@ -22,6 +22,7 @@ This project adheres to [Semantic Versioning](http://semver.org/).
 ### Fixed
 - `/sys/hypervisor/uuid` now only read if it exists (#148)
 - Fix a bug that was allowing Gridware depots to be added to global `modulespath` more than once
+- Prevent sessions from failing to start if they are started in quick succession (#84)
 
 ## [1.5.3] - 2016-06-16
 

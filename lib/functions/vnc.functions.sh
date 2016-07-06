@@ -1,5 +1,5 @@
 #==============================================================================
-# Copyright (C) 2015 Stephen F. Norledge and Alces Software Ltd.
+# Copyright (C) 2015-2016 Stephen F. Norledge and Alces Software Ltd.
 #
 # This file/package is part of Alces Clusterware.
 #
@@ -21,6 +21,7 @@
 #==============================================================================
 require xdg
 require repo
+require files
 
 cw_VNC_SESSIONSDIR="$(xdg_cache_home)"/clusterware/sessions
 # XXX
@@ -70,16 +71,20 @@ vnc_start_server() {
     # Set session geometry variable for VNC server process so the session
     # scripts for session types which do not obey the VNC server's geometry
     # parameter can be forced to resize to the given geometry.
-    cw_SESSION_geometry="${geometry}" $cw_VNC_VNCSERVER -autokill \
-        -sessiondir "${sessiondir}" \
-        -sessionscript "${sessiondir}/session.sh" \
-        -vncpasswd "${sessiondir}/password.dat" \
-        -exedir "${cw_VNC_BINDIR}" \
-        -geometry "${geometry}" \
-        "$@" 2>"${sessiondir}/vncserver.err" > "${sessiondir}/vncserver.out"
-
-    files_mark_tempfile "${sessiondir}/vncserver.out"
-    files_mark_tempfile "${sessiondir}/vncserver.err"
+    if files_lock clusterware.session 5r 60; then
+        cw_SESSION_geometry="${geometry}" $cw_VNC_VNCSERVER -autokill \
+                           -sessiondir "${sessiondir}" \
+                           -sessionscript "${sessiondir}/session.sh" \
+                           -vncpasswd "${sessiondir}/password.dat" \
+                           -exedir "${cw_VNC_BINDIR}" \
+                           -geometry "${geometry}" \
+                           "$@" 2>"${sessiondir}/vncserver.err" > "${sessiondir}/vncserver.out" 5<&-
+        files_unlock 5r
+        files_mark_tempfile "${sessiondir}/vncserver.out"
+        files_mark_tempfile "${sessiondir}/vncserver.err"
+    else
+        return 1
+    fi
 }
 
 vnc_read_vars() {
