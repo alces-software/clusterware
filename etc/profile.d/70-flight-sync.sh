@@ -5,6 +5,7 @@
 ##
 ################################################################################
 if [ ! -f "${XDG_CONFIG_HOME:-$HOME/.config}/clusterware/sync.rc" ]; then
+    mkdir -p "${XDG_CONFIG_HOME:-$HOME/.config}/clusterware"
     cat <<EOF > "${XDG_CONFIG_HOME:-$HOME/.config}/clusterware/sync.rc"
 ################################################################################
 ##
