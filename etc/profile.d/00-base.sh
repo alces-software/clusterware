@@ -74,9 +74,9 @@ alces() {
     return $errlvl
 }
 if [ "$ZSH_VERSION" ]; then
-  export alces
+  export alces _cw_root
 else
-  export -f alces
+  export -f alces _cw_root
 fi
 alias al=alces
 
