@@ -169,12 +169,13 @@ module Alces
           with_spinner do
             # modify depot in modulefiles
             p = Package.first(name: @name, type: @type, version: version, tag: tag)
-            dh = DependencyHandler.new(md, p.compiler_tag.split('-').first, variant, false, false)
+            compiler_tag = p.compiler_tag || md.compilers.keys.first
+            dh = DependencyHandler.new(md, compiler_tag.split('-').first, variant, false, false)
             reqs = dh.resolve_requirements_tree.map do |req, pkg, installed, build_arg_hash|
               [pkg.type, pkg.name, pkg.version].join('/')
             end.tap {|o| o.pop}
             specifiers = md.base_requirements(:runtime) + \
-                         md.compiler_requirements(p.compiler_tag,:runtime) + \
+                         md.compiler_requirements(compiler_tag,:runtime) + \
                          md.variant_requirements(variant, :runtime)
 
             s = File.read(dest_module).gsub(depot_path,'_DEPOT_')
@@ -183,7 +184,7 @@ module Alces
 
             h[:taggings] << {
               tag: tag,
-              compiler_tag: p.compiler_tag,
+              compiler_tag: compiler_tag,
               requirements: reqs,
               specifiers: specifiers,
               rewritten: rewritten_files
