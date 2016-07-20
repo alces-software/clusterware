@@ -19,8 +19,10 @@
 # For more information on the Alces Clusterware, please visit:
 # https://github.com/alces-software/clusterware
 #==============================================================================
+cw_LIBPATH="${cw_LIBPATH:-"${cw_ROOT}"/lib/functions}"
+
 function require() {
-    local name
+    local name dirs dir
     name="$1"
     if [ "${BASH_VERSINFO[0]}" == "4" -a "${BASH_VERSINFO[1]}" == "2" ]; then
         declare -A -g cw_LOADED_LIBS
@@ -28,9 +30,18 @@ function require() {
         cw_LOADED_LIBS="" declare -A cw_LOADED_LIBS
     fi
     if [ -z ${cw_LOADED_LIBS[$name]} ]; then
-        source "${cw_ROOT}"/lib/functions/"${name}.functions.sh"
-        cw_LOADED_LIBS[$name]=true
+        IFS=':' read -ra dirs <<< "${cw_LIBPATH}"
+        for dir in "${dirs[@]}"; do
+            if [ -f "${dir}"/"${name}.functions.sh" ]; then
+                source "${dir}"/"${name}.functions.sh"
+                cw_LOADED_LIBS[$name]=true
+                break
+            fi
+        done
+        if [ -z ${cw_LOADED_LIBS[$name]} ]; then
+            echo "Library not found: ${name}"
+        fi
     fi
 }
 export -f require
-export cw_ROOT
+export cw_ROOT cw_LIBPATH
