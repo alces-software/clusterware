@@ -120,3 +120,25 @@ handler_iptables_delete() {
         echo "iptables rule not present: $*"
     fi
 }
+
+handler_add_libdir() {
+    local dir libdir
+    libdir="$1"
+    if [ "${libdir:0:1}" == "/" ]; then
+        cw_LIBPATH="${cw_LIBPATH}:${libdir}"
+    else
+        libdir="/$1"
+        dir=$(cd "$(dirname "${BASH_SOURCE[-1]}")" && pwd)
+        cw_LIBPATH="${cw_LIBPATH}:${dir}${libdir}"
+    fi
+}
+
+handler_run_helper() {
+    local dir helper
+    helper="$1"
+    shift
+    if [ "${helper:0:1}" != "/" ]; then
+        dir=$(cd "$(dirname "${BASH_SOURCE[-1]}")" && pwd)
+    fi
+    "${dir}/${helper}" "$@"
+}
