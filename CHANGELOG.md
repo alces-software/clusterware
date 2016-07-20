@@ -12,17 +12,22 @@ This project adheres to [Semantic Versioning](http://semver.org/).
 - Flight customization profiles can now be retrieved without S3 credentials (clusterware-handlers#34)
 - Storage backends and system-wide configurations enabled on the master node are now propogated to all slave nodes (clusterware-handlers#21)
 - New `alces sync` tool for synchronizing directories (for e.g. your home directory) to an S3 bucket, with file exclusion and encryption for sensitive files (#92)
+- Added Slurm scheduler support (clusterware-handlers#27, clusterware-services#17)
+- Added OpenLava scheduler support (clusterware-handlers#28, clusterware-services#20)
 
 ### Changed
 - Environment modules warnings are now suppressed (#169)
 - If we don't have permission to set CloudWatch metrics, disable metric scans (#174)
 - The algorithm for determining the memory limit (`vmem`) for SGE execution hosts has been simplified to round down to nearest GiB of RAM (clusterware-handlers#31)
 - Binary gridware packages and upstream source fallbacks are now retrieved from region-specific buckets (#139)
+- Autoscaling has been refactored into a separate handler (clusterware-handlers#36)
+- Reported metrics for autoscaling have been updated to facilitate better scaling rules (#111)
 
 ### Fixed
 - `/sys/hypervisor/uuid` now only read if it exists (#148)
 - Fix a bug that was allowing Gridware depots to be added to global `modulespath` more than once
 - Prevent sessions from failing to start if they are started in quick succession (#84)
+- Stop the scheduler queues on the final instance in an autoscaling group from getting stuck in disabled state (clusterware-handlers#37)
 
 ## [1.5.3] - 2016-06-16
 
