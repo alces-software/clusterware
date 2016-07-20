@@ -32,6 +32,7 @@ member_register() {
     role="${member[2]}"
     tags="${member[3]}"
 
+    name=${name%%.*}
     if [ ! -f "${cw_MEMBER_DIR}"/"${name}" ]; then
         mkdir -p "${cw_MEMBER_DIR}"
         cat <<EOF > "${cw_MEMBER_DIR}"/"${name}"

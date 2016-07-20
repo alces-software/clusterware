@@ -1,5 +1,6 @@
+#!/bin/bash
 #==============================================================================
-# Copyright (C) 2015 Stephen F. Norledge and Alces Software Ltd.
+# Copyright (C) 2016 Stephen F. Norledge and Alces Software Ltd.
 #
 # This file/package is part of Alces Clusterware.
 #
@@ -19,29 +20,29 @@
 # For more information on the Alces Clusterware, please visit:
 # https://github.com/alces-software/clusterware
 #==============================================================================
-cw_LIBPATH="${cw_LIBPATH:-"${cw_ROOT}"/lib/functions}"
+require action
 
-function require() {
-    local name dirs dir
-    name="$1"
-    if [ "${BASH_VERSINFO[0]}" == "4" -a "${BASH_VERSINFO[1]}" == "2" ]; then
-        declare -A -g cw_LOADED_LIBS
-    elif [ -z "$cw_LOADED_LIBS" ]; then
-        cw_LOADED_LIBS="" declare -A cw_LOADED_LIBS
+# Action to package built serviceware for uploading to S3.
+# Note: This action currently has the limitation that it will only package
+# Serviceware that is self-contained within a directory in "$cw_ROOT/opt/", so
+# e.g. Slurm which consists of "$cw_ROOT/opt/{slurm,munge}" will not be
+# correctly packaged by this.
+
+# TODO: This action could do with some autocompletion.
+
+main() {
+    local service
+    service="$1"
+    if [ -z "$service" ]; then
+        action_die "service not specified"
     fi
-    if [ -z ${cw_LOADED_LIBS[$name]} ]; then
-        IFS=':' read -ra dirs <<< "${cw_LIBPATH}"
-        for dir in "${dirs[@]}"; do
-            if [ -f "${dir}"/"${name}.functions.sh" ]; then
-                source "${dir}"/"${name}.functions.sh"
-                cw_LOADED_LIBS[$name]=true
-                break
-            fi
-        done
-        if [ -z ${cw_LOADED_LIBS[$name]} ]; then
-            echo "Library not found: ${name}"
-        fi
+    tarball="/tmp/${service}.tar.gz"
+
+    if (cd "${cw_ROOT}" && tar -zcvf "${tarball}" "opt/${service}"); then
+        action_die "packaged ${tarball}"
+    else
+        action_die "could not package ${service}"
     fi
 }
-export -f require
-export cw_ROOT cw_LIBPATH
+
+main "$@"
