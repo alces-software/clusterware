@@ -14,6 +14,7 @@ This project adheres to [Semantic Versioning](http://semver.org/).
 - New `alces sync` tool for synchronizing directories (for e.g. your home directory) to an S3 bucket, with file exclusion and encryption for sensitive files (#92)
 - Added Slurm scheduler support (clusterware-handlers#27, clusterware-services#17)
 - Added OpenLava scheduler support (clusterware-handlers#28, clusterware-services#20)
+- Added `--binary-only` option for `gridware install` and `gridware depot install` actions (clusterware#161)
 
 ### Changed
 - Environment modules warnings are now suppressed (#169)

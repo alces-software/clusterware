@@ -186,6 +186,10 @@ module Alces
             end
           end.join(', ')
 
+          if options.binary_only
+            raise NotFoundError, "Aborting installation due to missing binary packages: #{build_targets_str}"
+          end
+
           msg = <<EOF
 
 #{'WARNING'.color(:yellow)}: Depot contains the following packages to be built from source:

@@ -120,6 +120,11 @@ module Alces
         if binary_viable
           ArchiveImporter.new(archive_path, options).import
           return
+        elsif options.binary_only
+          msg = "Binary package could not be found for '#{colored_path(defn)}".tap do |s|
+            s << " (#{variant})" if variant
+          end << "'"
+          raise NotFoundError, msg
         end
         opts = install_opts.tap do |h|
           h[:variant] = variant unless variant.nil?
