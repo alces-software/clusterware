@@ -100,11 +100,20 @@ if [ "$BASH_VERSION" ]; then
         ls -1 "${_cw_ROOT}"/var/lib/${repo}/repos/*
     }
 
+    _alces_repo_list_dirs() {
+       local repo="$1" a
+       for a in "${_cw_ROOT}"/var/lib/${repo}/repos/*/*; do
+         if [ -d "$a" ]; then
+           basename $a
+         fi
+       done
+    }
+
     _alces_repo_list_disabled() {
         local repo="$1" state="$2"
         state="${state:-${repo}}"
-        echo -e "$(ls -1 "${_cw_ROOT}"/var/lib/${repo}/repos/*)\n$(ls -1 "${_cw_ROOT}"/etc/${state})" \
-            | sort | uniq -u
+        echo -e "$(_alces_repo_list_dirs "${repo}")\n$(ls -1 "${_cw_ROOT}"/etc/${state})" \
+            | sed -r 's/^[0-9]+-//g' | sort | uniq -u
     }
 
     _alces_handler_action() {
