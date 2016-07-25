@@ -31,6 +31,7 @@ This project adheres to [Semantic Versioning](http://semver.org/).
 - Fix a bug that was allowing Gridware depots to be added to global `modulespath` more than once
 - Prevent sessions from failing to start if they are started in quick succession (#84)
 - Stop the scheduler queues on the final instance in an autoscaling group from getting stuck in disabled state (clusterware-handlers#37)
+- Autocompletion for `gridware depot` actions now suggest depots rather than packages (#159)
 
 ## [1.5.3] - 2016-06-16
 
