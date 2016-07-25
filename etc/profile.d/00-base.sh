@@ -124,20 +124,7 @@ if [ "$BASH_VERSION" ]; then
         local cur="$1" prev="$2" values
         case $prev in
             e|en|ena|enab|enabl|enable)
-                values="$(alces service avail --components | sed -r "s:\x1B\[[0-9;]*[mK]::g" | grep -v '\[\*\]' | cut -f2 -d'/')"
-                ;;
-            i|in|ins|inst|insta|instal|install|b|bu|bui|buil|build)
-                values="$(alces service avail | sed -r "s:\x1B\[[0-9;]*[mK]::g" |grep -v '\[\*\]' | cut -f2 -d'/')"
-                ;;
-        esac
-        echo "$values"
-    }
-
-    _alces_service_action() {
-        local cur="$1" prev="$2" values
-        case $prev in
-            e|en|ena|enab|enabl|enable)
-                values="$(alces service avail --components | sed -r "s:\x1B\[[0-9;]*[mK]::g" | grep -v '\[\*\]' | cut -f2 -d'/')"
+                values="$(alces service avail --components | sed -r "s:\x1B\[[0-9;]*[mK]::g" | grep -v '\[\*\]' | cut -f2- -d'/')"
                 ;;
             i|in|ins|inst|insta|instal|install|b|bu|bui|buil|build)
                 values="$(alces service avail | sed -r "s:\x1B\[[0-9;]*[mK]::g" |grep -v '\[\*\]' | cut -f2 -d'/')"
