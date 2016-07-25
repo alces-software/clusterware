@@ -46,7 +46,7 @@ Alces::Tools::Logging.default = Alces::Tools::Logger.new(File::expand_path(File.
 module Alces
   module Packager
     class HandlerProxy
-      ACTIONS_REQUIRING_UPDATE = [
+      ACTIONS_REQUIRING_PACKAGE_REPO_UPDATE = [
         :import,
         :info,
         :install,
@@ -74,18 +74,18 @@ module Alces
       def handle_action(action, args)
         Bundler.with_clean_env do
           @handler = Handler.new(*args)
-          if action_requires_update?(action)
-            update_repositories
+          if action_requires_package_repo_update?(action)
+            update_package_repositories
           end
           @handler.send(action)
         end
       end
 
-      def action_requires_update?(action)
-        ACTIONS_REQUIRING_UPDATE.include? action
+      def action_requires_package_repo_update?(action)
+        ACTIONS_REQUIRING_PACKAGE_REPO_UPDATE.include? action
       end
 
-      def update_repositories
+      def update_package_repositories
         repos_requiring_update = Repository.requiring_update
         say_repos_requiring_update_message(repos_requiring_update)
         repos_requiring_update.map do |repo|

@@ -26,13 +26,19 @@ require 'alces/packager/definition_handler'
 module Alces
   module Packager
     class DepotHandler
+      ACTIONS_REQUIRING_DEPOT_REPO_UPDATE = [
+        :info,
+        :install,
+        :list
+      ]
+
       class << self
         def handle(options)
           ENV['cw_GRIDWARE_notify'] = 'false' unless options.notify
           handler_opts = OptionSet.new(options)
           op = options.args.first
           handler_opts.args = options.args[1..-1]
-          handler = new(handler_opts)
+          @handler = new(handler_opts)
           instance_methods(false).each do |m|
             if is_method_shortcut(op, m)
               if [:info, :init, :install].include?(m) && op.length < 3
@@ -40,11 +46,34 @@ module Alces
               elsif [:export, :enable].include?(m) && m =~ op.length < 2
                 raise DepotError, "Ambiguous depot operation: #{op} (maybe: enable, export?)"
               end
-              handler.send(m)
+              if action_requires_depot_repo_update?(m)
+                update_depot_repositories
+              end
+              @handler.send(m)
               return
             end
           end
           raise DepotError, "Unrecognised depot operation: #{op}"
+        end
+
+        def action_requires_depot_repo_update?(action)
+          ACTIONS_REQUIRING_DEPOT_REPO_UPDATE.include? action
+        end
+
+        def update_depot_repositories
+          repos_requiring_update = DepotRepo.requiring_update
+          say_repos_requiring_update_message(repos_requiring_update)
+          repos_requiring_update.map do |repo|
+            @handler.update_repository(repo)
+          end
+        end
+
+        def say_repos_requiring_update_message(repos_requiring_update)
+          if repos_requiring_update.any?
+            num_repos = repos_requiring_update.length
+            repo_needs_str = num_repos  > 1 ? 'repositories need' : 'repository needs'
+            say "#{repos_requiring_update.length} #{repo_needs_str} to update ..."
+          end
         end
 
         def remote_package_exists?(path)
@@ -81,16 +110,23 @@ module Alces
         depot_repo_name = options.args.first || 'official'
         repo = DepotRepo.get(depot_repo_name)
         raise NotFoundError, "Repository '#{depot_repo_name}' not found" if repo.nil?
-        say "Updating depot repository: #{depot_repo_name}"
+        update_repository(repo)
+      end
+
+      def update_repository(repo)
+        say "Updating depot repository: #{repo.name}"
         doing 'Update'
         begin
-          case repo.update!
+          status, rev = repo.update!
+          case status
           when :ok
-            say 'OK'.color(:green)
+            say "#{'OK'.color(:green)} (At: #{rev})"
           when :uptodate
-            say "#{'OK'.color(:green)} (Already up-to-date)"
+            say "#{'OK'.color(:green)} (Up-to-date: #{rev})"
           when :not_updateable
             say "#{'SKIP'.color(:yellow)} (Not updateable, no remote configured)"
+          when :outofsync
+            say "#{'SKIP'.color(:yellow)} (Out of sync: #{rev})"
           end
         rescue
           say "#{'FAIL'.color(:red)} (#{$!.message})"

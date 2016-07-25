@@ -16,6 +16,7 @@ This project adheres to [Semantic Versioning](http://semver.org/).
 - Added OpenLava scheduler support (clusterware-handlers#28, clusterware-services#20)
 - Added TORQUE scheduler support (clusterware-handlers#26, clusterware-services#18)
 - Added `--binary-only` option for `gridware install` and `gridware depot install` actions (clusterware#161)
+- Gridware depot repositories are now automatically updated after a period of time (#176)
 
 ### Changed
 - Environment modules warnings are now suppressed (#169)
