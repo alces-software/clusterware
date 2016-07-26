@@ -18,6 +18,7 @@ This project adheres to [Semantic Versioning](http://semver.org/).
 - Added `--binary-only` option for `gridware install` and `gridware depot install` actions (clusterware#161)
 - Gridware depot repositories are now automatically updated after a period of time (#176)
 - A new `services/clusterware` modulefile is provided to facilitate access to core Clusterware utilities (clusterware-services#22)
+- Introduce `alces customizer` action to allow customizaton profiles to be manually triggered (#143)
 
 ### Changed
 - Environment modules warnings are now suppressed (#169)
