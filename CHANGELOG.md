@@ -17,6 +17,7 @@ This project adheres to [Semantic Versioning](http://semver.org/).
 - Added TORQUE scheduler support (clusterware-handlers#26, clusterware-services#18)
 - Added `--binary-only` option for `gridware install` and `gridware depot install` actions (clusterware#161)
 - Gridware depot repositories are now automatically updated after a period of time (#176)
+- A new `services/clusterware` modulefile is provided to facilitate access to core Clusterware utilities (clusterware-services#22)
 
 ### Changed
 - Environment modules warnings are now suppressed (#169)
@@ -25,6 +26,7 @@ This project adheres to [Semantic Versioning](http://semver.org/).
 - Binary gridware packages and upstream source fallbacks are now retrieved from region-specific buckets (#139)
 - Autoscaling has been refactored into a separate handler (clusterware-handlers#36)
 - Reported metrics for autoscaling have been updated to facilitate better scaling rules (#111)
+- `pdsh` is no longer placed on the `PATH` by default - access is now provided via the `services/pdsh` module (clusterware-services#22)
 
 ### Fixed
 - `/sys/hypervisor/uuid` now only read if it exists (#148)

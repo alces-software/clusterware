@@ -86,7 +86,8 @@ if [ ! -d "${target}/etc" ]; then
     sed -i -e "s,_ROOT_,${target},g" "${target}/etc/ruby.rc" \
         "${target}/etc/gridware/global/modulespath" \
         "${target}/etc/profile.d/05-packager.csh" \
-        "${target}"/etc/sudoers.d/*
+        "${target}"/etc/sudoers.d/* \
+        "${target}"/etc/modules/services/*
     if [ "$cw_BUILD_dist_url" ]; then
         sed -e "s,^cw_SERVICE_url=.*,cw_SERVICE_url=${cw_BUILD_dist_url}/,g" -i "${target}/etc"/serviceware.rc
     else
