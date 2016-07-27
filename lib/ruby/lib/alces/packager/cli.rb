@@ -159,6 +159,7 @@ module Alces
         c.option '-m', '--modules STRING', String, 'Specify modules to load before build'
         c.option '-l', '--latest', 'Install latest if multiple versions of package available'
         c.option '-b', '--[no-]binary', 'Toggle use of binary packages when available'
+        c.option '--[no-]defaults', 'Toggle use of default parameters for package builds'
         c.option '--binary-depends', 'Prefer binary packages for dependencies when available'
         c.option '--binary-only', 'Fail if a binary package is not available'
       end
@@ -205,6 +206,7 @@ module Alces
         c.option '-d', '--depot STRING', String, 'Specify target depot [install]'
         c.option '-g', '--global', 'Allow use of packages across all depots when resolving missing dependencies [install]'
         c.option '-b', '--binary', 'Prefer binary downloads when resolving missing dependencies [install]'
+        c.option '--[no-]defaults', 'Toggle use of default parameters for package builds [install]'
         c.option '--binary-only', 'Fail if a binary package is not available [install]'
         c.option '-1', '--oneline', 'List one depot per line [list]'
         c.option '--[no-]notify', "(Dis)allow clusterware notifications (default: allow) [init, install, enable, disable, purge]"

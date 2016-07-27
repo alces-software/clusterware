@@ -28,6 +28,7 @@ module Alces
         buildroot: '/usr/src/alces',
         gridware: '/opt/gridware',
         depotroot: '/opt/gridware',
+        use_default_params: false
       }
 
       class << self

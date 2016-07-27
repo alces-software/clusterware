@@ -20,11 +20,13 @@
 # https://github.com/alces-software/clusterware
 #==============================================================================
 require 'memoist'
+require 'alces/packager/parameter_utils'
 
 module Alces
   module Packager
     class DefinitionHandler
       extend Memoist
+      include ParameterUtils
 
       class << self
         def install(*a)
@@ -113,6 +115,8 @@ module Alces
       def install_defn(variant = nil)
         binary_viable = ((Config.prefer_binary && options.binary.nil?) || options.binary) &&
           archive_path = binary_path(defn, variant)
+        # trigger an early check for any missing parameters for the target package
+        params unless binary_viable
         install_dependencies(variant, binary_viable)
         say("Installing #{colored_path(defn)}".tap do |s|
           s << " (#{variant})" unless variant.nil?
@@ -158,7 +162,7 @@ EOF
             unless ((Config.prefer_binary && options.binary.nil?) || options.binary || options.binary_depends) &&
                    binary_available?(pkg, build_arg_hash[:variant])
               (build_arg_hash[:params] || '').split(',').each do |p|
-                if !params(false)[p.to_sym]
+                if !params(false,pkg)[p.to_sym]
                   (missing_params[pkg] ||= []) << p
                 end
               end
@@ -194,31 +198,23 @@ EOF
         options.compiler == :first ? defn.compilers.keys.first : options.compiler
       end
 
-      def params(validate = true)
+      def params(validate = true, pkg = defn)
         {}.tap do |params|
+          params.merge!(default_params(pkg)) if (Config.use_default_params && options.defaults != false) || options.defaults
           a = options.args[1..-1]
           while param = a.shift do
             k,v = param.split('=')
             raise InvalidParameterError, "No value found for parameter '#{k}' -- did you forget the '='?" if v.nil?
             params[k.to_sym] = v
           end
-          defn.validate_params!(params) if validate
+          pkg.validate_params!(params) if validate
         end
       rescue InvalidParameterError
-        print_params_help(defn)
+        print_params_help(pkg)
         say "\n"
         raise
       end
       memoize :params
-
-      def print_params_help(defn)
-        if defn.metadata[:params] && defn.metadata[:params].any?
-          say "\n  #{'Required parameters'.underline} (param=value)\n\n"
-          defn.params.each do |k,v|
-            say sprintf("%15s: %s\n", k, v)
-          end
-        end
-      end
 
       def install_opts
         {

@@ -20,12 +20,14 @@
 # https://github.com/alces-software/clusterware
 #==============================================================================
 require 'memoist'
+require 'alces/packager/parameter_utils'
 
 module Alces
   module Packager
     class DisplayHandler
       extend Memoist
       include Alces::Tools::Logging
+      include ParameterUtils
 
       class << self
         def list(*a)
@@ -165,15 +167,6 @@ module Alces
                                 headings: headings,
                                 rows: rows,
                                 style: {width: cols < 80 ? 80 : cols - 5}).to_s
-      end
-
-      def print_params_help(defn)
-        if defn.metadata[:params] && defn.metadata[:params].any?
-          say "\n  #{'Required parameters'.underline} (param=value)\n\n"
-          defn.params.each do |k,v|
-            say sprintf("%15s: %s\n", k, v)
-          end
-        end
       end
     end
   end

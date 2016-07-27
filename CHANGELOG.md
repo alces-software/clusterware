@@ -20,6 +20,7 @@ This project adheres to [Semantic Versioning](http://semver.org/).
 - A new `services/clusterware` modulefile is provided to facilitate access to core Clusterware utilities (clusterware-services#22)
 - Introduce `alces customizer` action to allow customizaton profiles to be manually triggered (#143)
 - Administrative users are now provided with access to the cluster access key even if they accidentally remove it (#118)
+- Gridware package parameters can now be provided with defaults which can be selected via configuration or command-line parameter (#123)
 
 ### Changed
 - Environment modules warnings are now suppressed (#169)

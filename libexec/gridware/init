@@ -91,8 +91,15 @@ _create_gridware_configuration() {
 :default_binary_url: https://${cw_GRIDWARE_s3_host:-s3-eu-west-1.amazonaws.com}/${cw_GRIDWARE_s3_bucket:-alces-gridware-eu-west-1}/${cw_GRIDWARE_s3_binary_prefix:-dist}
 :fetch_timeout: 10
 :prefer_binary: ${cw_GRIDWARE_prefer_binary:-false}
+:use_default_params: ${cw_GRIDWARE_use_default_params:-false}
 :update_period: 3
 :last_update_filename: .last_update
+EOF
+    cat <<EOF > "${cw_GRIDWARE_root}"/etc/params.yml
+'apps/example':
+  :optimize: true
+'apps/example/1.0.1':
+  :optimize: false
 EOF
 }
 
