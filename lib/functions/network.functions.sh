@@ -67,7 +67,7 @@ network_get_mapped_address() {
         table)
             lookup_param=${3:-access}
             if [ -f "${cw_ROOT}"/etc/mappingstab ]; then
-                mapping=$(sed -rn "s/^${lookup}\s+${lookup_param}\s+(.*)/\1/gp" "${cw_ROOT}"/etc/mappingstab | head -n1)
+                mapping=$(sed -rn -e "s/\s*$//g" -e "s/^${lookup}\s+${lookup_param}\s+(.*)/\1/gp" "${cw_ROOT}"/etc/mappingstab | head -n1)
             fi
             ;;
     esac
