@@ -54,7 +54,7 @@ module Alces
           doing 'Download'
           target = File.expand_path(File.join(Config.archives_dir,'dist',File.basename(archive_path)))
           FileUtils.mkdir_p(File.dirname(target))
-          if File.exists?(target)
+          if File.exists?(target) && up_to_date?(target, archive_path)
             say "#{'SKIP'.color(:yellow)} (Existing source file detected)"
           else
             with_spinner do
@@ -363,6 +363,23 @@ module Alces
         run(['file',file]) do |r|
           r.success? && r.stdout.include?("text")
         end
+      end
+
+      def up_to_date?(target, archive_path)
+        # get md5sum of archive_path
+        remote_md5sum = run(['curl','-f','-s','-I',archive_path]) do |r|
+          if r.success?
+            r.stdout.split("\n").find { |l| l =~ /^ETag: "(.*)"/ }
+            $1
+          end
+        end
+        # get md5sum of target
+        local_md5sum = run(['md5sum',target]) do |r|
+          if r.success?
+            r.stdout.split(' ').first
+          end
+        end
+        remote_md5sum && local_md5sum && remote_md5sum == local_md5sum
       end
     end
   end
