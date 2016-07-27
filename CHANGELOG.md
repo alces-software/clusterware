@@ -19,6 +19,7 @@ This project adheres to [Semantic Versioning](http://semver.org/).
 - Gridware depot repositories are now automatically updated after a period of time (#176)
 - A new `services/clusterware` modulefile is provided to facilitate access to core Clusterware utilities (clusterware-services#22)
 - Introduce `alces customizer` action to allow customizaton profiles to be manually triggered (#143)
+- Administrative users are now provided with access to the cluster access key even if they accidentally remove it (#118)
 
 ### Changed
 - Environment modules warnings are now suppressed (#169)
@@ -28,6 +29,7 @@ This project adheres to [Semantic Versioning](http://semver.org/).
 - Autoscaling has been refactored into a separate handler (clusterware-handlers#36)
 - Reported metrics for autoscaling have been updated to facilitate better scaling rules (#111)
 - `pdsh` is no longer placed on the `PATH` by default - access is now provided via the `services/pdsh` module (clusterware-services#22)
+- EC2-style metadata service address is now blocked for non-superuser accounts
 
 ### Fixed
 - `/sys/hypervisor/uuid` now only read if it exists (#148)
@@ -38,6 +40,7 @@ This project adheres to [Semantic Versioning](http://semver.org/).
 - Autocompletion for `service enable` action now suggests components (#177)
 - Autocompletion for `handler enable` action no longer includes auxilliary files (#179)
 - Added license and readme files to services, storage and sessions repositories (#114)
+- Looking up entries in `mappingstab` now strips whitespace from the end of lines (#75)
 
 ## [1.5.3] - 2016-06-16
 
