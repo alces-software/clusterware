@@ -22,6 +22,16 @@
 network_get_public_address() {
     local public_ipv4 tmout
     tmout=${1:-5}
+
+    # Try and read from metadata
+    if [ -f "${cw_ROOT}"/etc/meta.d/network.rc ]; then
+        eval $(grep '^cw_META_network_public_ip_address=' "${cw_ROOT}"/etc/meta.d/network.rc)
+        if [ "${cw_META_network_public_ip_address}" ]; then
+            echo "${cw_META_network_public_ip_address}"
+            return 0
+        fi
+    fi
+
     if [ "${tmout}" -gt 0 ]; then
         # Attempt to determine our public IP address using the standard EC2
         # API.
@@ -41,6 +51,16 @@ network_get_public_address() {
 network_get_public_hostname() {
     local public_hostname tmout dig_tmout
     tmout=${1:-5}
+
+    # Try and read from metadata
+    if [ -f "${cw_ROOT}"/etc/meta.d/network.rc ]; then
+        eval $(grep '^cw_META_network_platform_hostname=' "${cw_ROOT}"/etc/meta.d/network.rc)
+        if [ "${cw_META_network_platform_hostname}" ]; then
+            echo "${cw_META_network_platform_hostname}"
+            return 0
+        fi
+    fi
+
     if [ "${tmout}" -gt 0 ]; then
         # Attempt to determine our public DNS name using the standard EC2
         # API.
@@ -124,7 +144,7 @@ network_get_free_port() {
 network_has_metadata_service() {
     local tmout
     tmout="${1:-5}"
-    [ "$cw_TEST_metadata_service" == "true" ] ||
+    [ "$cw_TEST_metadata_service" == "true" -a "$(id -un)" == "root" ] ||
         curl -f --connect-timeout $tmout http://169.254.169.254/ &>/dev/null
 }
 
@@ -151,7 +171,8 @@ network_is_ec2() {
 
 network_fetch_ec2_document() {
     if [ "$cw_TEST_mock_ec2_document" ]; then
-        cat <<EOF
+        if [ "$(id -un)" == "root" ]; then
+            cat <<EOF
 {
   "region": "${cw_TEST_mock_ec2_region:-eu-west-1}",
   "pendingTime": "$(date -u +%Y-%m-%dT%H:%M:%SZ)",
@@ -159,6 +180,9 @@ network_fetch_ec2_document() {
   "accountId": "1234567890"
 }
 EOF
+        else
+            return 1
+        fi
     else
         curl -s http://169.254.169.254/latest/dynamic/instance-identity/document
     fi
@@ -169,8 +193,8 @@ network_fetch_ec2_metadata() {
     item="$1"
     tmout="${2:-5}"
     if [ "$cw_TEST_metadata_service" == "true" ]; then
-        itemvar=cw_TEST_mock_ec2_$(echo "${item}" | tr '-' '_')
-        if [ "${!itemvar}" ]; then
+        itemvar=cw_TEST_mock_ec2_$(echo "${item}" | tr '/-' '_')
+        if [ "$(id -un)" == "root" -a "${!itemvar}" ]; then
             echo "${!itemvar}"
         else
             return 1
