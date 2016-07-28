@@ -295,12 +295,12 @@ fi
 say_done $?
 
 title "Setting up documents area"
-if [ -d "${target}/var/lib/docs" ]; then
+if [ -d "${target}/var/lib/docs/base" ]; then
     doing 'Detect'
 else
     doing "Initialize"
-    mkdir -p "${target}/var/lib/docs/guides" "${target}/var/lib/docs/templates"
-    cp "${source}/dist/guides"/* "${target}/var/lib/docs/guides"
+    mkdir -p "${target}/var/lib/docs/base/guides" "${target}/var/lib/docs/base/templates"
+    cp "${source}/dist/guides"/* "${target}/var/lib/docs/base/guides"
 fi
 say_done $?
 
