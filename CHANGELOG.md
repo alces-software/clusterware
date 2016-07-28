@@ -21,6 +21,8 @@ This project adheres to [Semantic Versioning](http://semver.org/).
 - Introduce `alces customizer` action to allow customizaton profiles to be manually triggered (#143)
 - Administrative users are now provided with access to the cluster access key even if they accidentally remove it (#118)
 - Gridware package parameters can now be provided with defaults which can be selected via configuration or command-line parameter (#123)
+- How-to guides and script templates can now be located in additional locations specified by the CW_DOCPATH environment variable (#127)
+- Interactive sessions can now be located in additional locations specified by the CW_SESSIONPATH environment variable (#127)
 
 ### Changed
 - Environment modules warnings are now suppressed (#169)
