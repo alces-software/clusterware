@@ -28,7 +28,7 @@ cw_VNC_SESSIONSDIR="$(xdg_cache_home)"/clusterware/sessions
 cw_VNC_VNCSERVER="${cw_ROOT}/libexec/session/share/vncserver"
 cw_VNC_BINDIR="${cw_ROOT}/opt/tigervnc/bin"
 cw_VNC_VNCPASSWD="${cw_VNC_BINDIR}/vncpasswd"
-cw_SESSION_PLUGINDIR="${cw_ROOT}/etc/sessions"
+cw_SESSION_dir="${cw_ROOT}/etc/sessions"
 cw_SESSION_DEFAULT_REPO="base"
 cw_SESSION_DEFAULT_REPO_URL="${cw_SESSION_DEFAULT_REPO_URL:-https://:@github.com/alces-software/clusterware-sessions}"
 cw_SESSION_REPODIR="${cw_ROOT}/var/lib/sessions/repos"
@@ -325,7 +325,7 @@ vnc_sessions_dir() {
 }
 
 session_is_enabled() {
-    repo_plugin_is_enabled "${cw_SESSION_PLUGINDIR}" "$@"
+    repo_plugin_is_enabled "${cw_SESSION_dir}" "$@"
 }
 
 session_repo_exists() {
@@ -341,11 +341,11 @@ session_install() {
 }
 
 session_enable() {
-    repo_plugin_enable "${cw_SESSION_REPODIR}" "${cw_SESSION_PLUGINDIR}" "$@"
+    repo_plugin_enable "${cw_SESSION_REPODIR}" "${cw_SESSION_dir}" "$@"
 }
 
 session_disable() {
-    repo_plugin_disable "${cw_SESSION_PLUGINDIR}" "$@"
+    repo_plugin_disable "${cw_SESSION_dir}" "$@"
 }
 
 session_check_quota() {

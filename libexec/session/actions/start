@@ -79,7 +79,8 @@ main() {
     if ! session_check_quota; then
         action_die "sorry, your session quota has been reached on this host (${cw_SESSION_quota})."
     fi
-    local sessionscript password vnc_vars host_address terse params sessionvars sessiontype runtime geometry
+    local sessionscript password vnc_vars host_address terse params
+    local sessionvars sessiontype runtime geometry sessiondirs dir
     local -A vnc
 
     #
@@ -133,17 +134,30 @@ main() {
     elif [ -f "$sessionscript" ]; then
         cp "$sessionscript" "${_SESSIONDIR}/session.sh"
         sessiontype="custom ($sessionscript)"
-    elif [ -f "${cw_ROOT}/etc/sessions/${sessionscript}/session.sh" ]; then
-        cp "${cw_ROOT}/etc/sessions/${sessionscript}/session.sh" "${_SESSIONDIR}/session.sh"
-        sessiontype="${sessionscript}"
-    elif [ "$sessionscript" ]; then
-        action_die "unable to locate session script: $sessionscript"
     else
-        for a in "${cw_ROOT}/etc/sessions"/*; do
-            sessionscripts="$sessionscripts, $(basename $a)"
+        IFS=: read -a sessiondirs <<< "${cw_SESSION_dir}:${CW_SESSIONPATH}"
+        for dir in "${sessiondirs[@]}"; do
+            if [ -f "${dir}/${sessionscript}/session.sh" ]; then
+                cp "${dir}/${sessionscript}/session.sh" "${_SESSIONDIR}/session.sh"
+                sessiontype="${sessionscript}"
+                break
+            fi
         done
-        sessionscripts="${sessionscripts:2}"
-        action_die "no session script provided - specify path or specify one of: $sessionscripts"
+        if [ -z "${sessiontype}" ]; then
+            if [ "$sessionscript" ]; then
+                action_die "unable to locate session script: $sessionscript"
+            else
+                for dir in "${sessiondirs[@]}"; do
+                    shopt -s nullglob
+                    for a in "${dir}"/*; do
+                        sessionscripts="$sessionscripts, $(basename $a)"
+                    done
+                    shopt -u nullglob
+                done
+                sessionscripts="${sessionscripts:2}"
+                action_die "no session script provided - specify path or specify one of: $sessionscripts"
+            fi
+        fi
     fi
     files_mark_tempfile "${_SESSIONDIR}/session.sh"
 
