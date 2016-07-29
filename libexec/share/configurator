@@ -24,8 +24,8 @@ setup() {
     local a xdg_config
     IFS=: read -a xdg_config <<< "${XDG_CONFIG_HOME:-$HOME/.config}:${XDG_CONFIG_DIRS:-/etc/xdg}"
     for a in "${xdg_config[@]}"; do
-        if [ -e "${a}"/clusterware/config.vars.sh ]; then
-            source "${a}"/clusterware/config.vars.sh
+        if [ -e "${a}"/clusterware/config.rc ]; then
+            source "${a}"/clusterware/config.rc
             break
         fi
     done
@@ -40,7 +40,12 @@ main() {
     echo "$$" > /var/run/clusterware-configurator.pid
     files_load_config --optional configurator
     if [ "${cw_CONFIGURATOR_skip}" == true ]; then
-	action_die "skipping configurator execution" 0
+        action_die "skipping configurator execution" 0
+    elif [ "${cw_CONFIGURATOR_delay_file}" ]; then
+        if ! files_wait_for_file "${cw_CONFIGURATOR_delay_file}" 300; then
+            handler_run_hook fail "$@"
+            action_die "delay file was never created: ${cw_CONFIGURATOR_delay_file}"
+        fi
     fi
     handler_run_hook initialize "$@"
     if files_wait_for_file "${cw_ROOT}/etc/config.yml" 300; then
@@ -50,7 +55,7 @@ main() {
         handler_run_hook start "$@"
         handler_run_hook node-started "$@"
     else
-	handler_run_hook fail "$@"
+        handler_run_hook fail "$@"
         action_die "unable to load configuration: ${cw_ROOT}/etc/config.yml"
     fi
 }
