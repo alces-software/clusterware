@@ -24,6 +24,7 @@ This project adheres to [Semantic Versioning](http://semver.org/).
 - How-to guides and script templates can now be located in additional locations specified by the CW_DOCPATH environment variable (#127)
 - Interactive sessions can now be located in additional locations specified by the CW_SESSIONPATH environment variable (#127)
 - Allow configurator to be delayed until a flag file is written to allow more fine-grained control over Clusterware configuration files by cloud-init
+- Added PBS Pro scheduler support (clusterware-handlers#39, clusterware-services#26)
 
 ### Changed
 - Environment modules warnings are now suppressed (#169)
