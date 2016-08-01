@@ -34,13 +34,13 @@ namespace eval ::alces {
             set s ""
             for { set i 0 } { $i < [llength $p]} { incr i } {
                 if { $i == 0 } {
-                    set c {[38;5;5m}
+                    set c "\[38;5;[alces getenv cw_THEME_mid 127]m"
                 } elseif { $i == 1 } {
-                    set c {[38;5;221m}
+                    set c "\[38;5;[alces getenv cw_THEME_sec2 172]m"
                 } elseif { $i == 2 } {
-                    set c {[38;5;74m}
+                    set c "\[38;5;[alces getenv cw_THEME_prim 67]m"
                 } else {
-                    set c {[38;5;68m}
+                    set c "\[38;5;[alces getenv cw_THEME_sec1 68]m"
                 }
                 set s "${s}${c}[lindex $p $i]${reset}/"
             }

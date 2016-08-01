@@ -34,7 +34,7 @@ _show_config() {
     else
         default=" "
     fi
-    echo -e "[$default] \e[35m${name}\e[0m (\e[38;5;221m${type}\e[0m)"
+    echo -e "[$default] \e[38;5;${cw_THEME_mid}m${name}\e[0m (\e[38;5;${cw_THEME_sec2}m${type}\e[0m)"
 }
 
 main() {

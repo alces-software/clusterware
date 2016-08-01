@@ -31,6 +31,30 @@ fi
 
 trap "action_exit 1" TERM INT
 
+case ${cw_SETTINGS_theme:-standard} in
+    dark)
+        cw_THEME_prim=${cw_THEME_prim:-74}
+        cw_THEME_sec1=${cw_THEME_sec1:-68}
+        cw_THEME_sec2=${cw_THEME_sec2:-221}
+        cw_THEME_mid=${cw_THEME_mid:-169}
+        cw_THEME_comp=${cw_THEME_comp:-215}
+    ;;
+    light)
+        cw_THEME_prim=${cw_THEME_prim:-31}
+        cw_THEME_sec1=${cw_THEME_sec1:-61}
+        cw_THEME_sec2=${cw_THEME_sec2:-172}
+        cw_THEME_mid=${cw_THEME_mid:-90}
+        cw_THEME_comp=${cw_THEME_comp:-130}
+    ;;
+    *)
+        cw_THEME_prim=${cw_THEME_prim:-67}
+        cw_THEME_sec1=${cw_THEME_sec1:-68}
+        cw_THEME_sec2=${cw_THEME_sec2:-172}
+        cw_THEME_mid=${cw_THEME_mid:-127}
+        cw_THEME_comp=${cw_THEME_comp:-136}
+    ;;
+esac
+
 action_always_murder() {
   # ensure all children die when we do
   trap "if [ -z \"\$cw_CLEANED\" ]; then export PGID=\$BASHPID; ( /bin/kill -- -\$PGID &>/dev/null ) & fi" EXIT

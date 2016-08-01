@@ -36,6 +36,7 @@ This project adheres to [Semantic Versioning](http://semver.org/).
 - `pdsh` is no longer placed on the `PATH` by default - access is now provided via the `services/pdsh` module (clusterware-services#22)
 - EC2-style metadata service address is now blocked for non-superuser accounts
 - Remote binary packages are checked to see if they are different from previously downloaded versions and, if so, are redownloaded (#134)
+- Apply user-selectible theme for dark/light terminals to all tools (#140)
 
 ### Fixed
 - `/sys/hypervisor/uuid` now only read if it exists (#148)

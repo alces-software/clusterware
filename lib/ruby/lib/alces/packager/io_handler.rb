@@ -29,7 +29,7 @@ module Alces
           prim: 'rgb_' + [64,136,184].map {|i| sprintf('%02x', i) }.join,
           sec1: 'rgb_' + [77,91,194].map {|i| sprintf('%02x', i) }.join,
           sec2: 'rgb_' + [255,206,78].map {|i| sprintf('%02x', i) }.join,
-          mid: 'rgb_' + [140,0,140].map {|i| sprintf('%02x', i) }.join,
+          mid: 'rgb_' + [0xd0,0x2f,0xa9].map {|i| sprintf('%02x', i) }.join,
           comp: 'rgb_' + [255,177,78].map {|i| sprintf('%02x', i) }.join
         },
         'light' => {
