@@ -98,6 +98,7 @@ member_each() {
     callback="$1"
     shift
     base_args=("$@" --)
+    shopt -s nullglob
     for member in "${cw_MEMBER_DIR}"/*; do
         args=("${base_args[@]}")
         args+=($(basename "$member"))
@@ -105,6 +106,7 @@ member_each() {
         args+=("${cw_MEMBER_ip}" "${cw_MEMBER_role}" "${cw_MEMBER_tags}")
         ${callback} "${args[@]}"
     done
+    shopt -u nullglob
 }
 
 member_load_vars() {

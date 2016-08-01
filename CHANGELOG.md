@@ -49,6 +49,7 @@ This project adheres to [Semantic Versioning](http://semver.org/).
 - Autocompletion for `handler enable` action no longer includes auxilliary files (#179)
 - Added license and readme files to services, storage and sessions repositories (#114)
 - Looking up entries in `mappingstab` now strips whitespace from the end of lines (#75)
+- Prevent `No such file or directory` errors when using `member_each` function before any members are present (#151)
 
 ## [1.5.3] - 2016-06-16
 
