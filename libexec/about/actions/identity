@@ -23,6 +23,7 @@
 require action
 require files
 require process
+require network
 
 _show() {
     local name val
@@ -32,13 +33,24 @@ _show() {
 }
 
 main() {
-    local a
+    local a master_ip
     files_load_config config config/cluster
+    _show "Cluster name" "${cw_CLUSTER_name}"
     _show "Cluster UUID" "${cw_CLUSTER_uuid}"
+
     if [ -r "${cw_ROOT}"/etc/config/cluster/auth.rc ]; then
         files_load_config auth config/cluster
         _show "Cluster security token" "${cw_CLUSTER_auth_token}"
     fi
+
+    if [ "${cw_INSTANCE_role}" == "master" ]; then
+        master_ip="$(network_get_iface_address ${cw_CLUSTER_iface:-$(network_get_first_iface)})"
+    elif [ "${cw_CLUSTER_master}" ]; then
+        master_ip="${cw_CLUSTER_master}"
+    else
+        master_ip="none (autodetect)"
+    fi
+    _show "Master node IP address" "${master_ip}"
 }
 
 if sudo -l | grep -q ' ALL$'; then
