@@ -247,6 +247,16 @@ if [ "$BASH_VERSION" ]; then
                         "help enable configure forget use avail put get rm list mkbucket rmbucket addbucket"
     }
 
+    _alces_about() {
+        local actions
+        shopt -s nullglob
+        for a in "${_cw_ROOT}"/etc/meta.d/*.rc; do
+            actions="${actions} $(basename "$a" .rc)"
+        done
+        shopt -u nullglob
+        COMPREPLY=( $(compgen -W "help ${actions}" -- "$cur") )
+    }
+
     _alces() {
         local cur="$2" prev="$3" cmds opts _cw_ROOT
 
@@ -277,7 +287,7 @@ if [ "$BASH_VERSION" ]; then
                     _alces_action "$cur" "$prev" "configure"
                     ;;
                 a|ab|abo|abou|about)
-                    _alces_action "$cur" "$prev" "about"
+                    _alces_about "$cur" "$prev" "about"
                     ;;
                 ho|how|howt|howto)
                     _alces_action "$cur" "$prev" "howto"

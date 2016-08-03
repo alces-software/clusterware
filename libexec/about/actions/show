@@ -22,21 +22,20 @@
 #==============================================================================
 require action
 require files
-require network
 
 _show() {
     local name val
     name="$1"
     val="$2"
+    _SHOWN=true
     printf "%25s: %s\n" "${name}" "${val}"
 }
 
 main() {
-    local a
-    files_load_config meta
-    files_load_config clusterware
-    _show "Clusterware release" "${cw_RELEASE}"
-    for a in $(cat "${cw_ROOT}"/etc/meta.rc | grep ^cw_META | cut -f1 -d=); do
+    local name a
+    name="$1"
+    files_load_config meta.d/"${name}"
+    for a in $(cat "${cw_ROOT}"/etc/meta.d/"${name}.rc" | grep '^\s*cw_META' | cut -f1 -d=); do
         case $a in
             *_desc)
                 :
@@ -49,6 +48,9 @@ main() {
                 ;;
         esac
     done
+    if [ -z "${_SHOWN}" ]; then
+        action_die "no data currently available: ${name}"
+    fi
 }
 
 main "$@"

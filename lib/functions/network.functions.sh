@@ -24,8 +24,8 @@ network_get_public_address() {
     tmout=${1:-5}
 
     # Try and read from metadata
-    if [ -f "${cw_ROOT}"/etc/config/network.rc ]; then
-        eval $(grep '^cw_NETWORK_public_ip=' "${cw_ROOT}"/etc/config/network.rc)
+    if [ -f "${cw_ROOT}"/etc/network.rc ]; then
+        eval $(grep '^cw_NETWORK_public_ip=' "${cw_ROOT}"/etc/network.rc)
         if [ "${cw_NETWORK_public_ip}" ]; then
             echo "${cw_NETWORK_public_ip}"
             return 0
@@ -53,8 +53,8 @@ network_get_public_hostname() {
     tmout=${1:-5}
 
     # Try and read from metadata
-    if [ -f "${cw_ROOT}"/etc/config/network.rc ]; then
-        eval $(grep '^cw_NETWORK_public_hostname=' "${cw_ROOT}"/etc/config/network.rc)
+    if [ -f "${cw_ROOT}"/etc/network.rc ]; then
+        eval $(grep '^cw_NETWORK_public_hostname=' "${cw_ROOT}"/etc/network.rc)
         if [ "${cw_NETWORK_public_hostname}" ]; then
             echo "${cw_NETWORK_public_hostname}"
             return 0

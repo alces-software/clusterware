@@ -66,9 +66,8 @@ function extract_info() {
   }
 EOF
     ) $1)
-    if [ -z "$info" ]; then
-        unset cmd_NAME cmd_SYNOPSIS cmd_VERSION
-    else
+    unset cmd_NAME cmd_SYNOPSIS cmd_VERSION cmd_HELP
+    if [ "$info" ]; then
         eval "$info"
     fi
 }
