@@ -28,6 +28,7 @@ This project adheres to [Semantic Versioning](http://semver.org/).
 - Added support for Ubuntu 16.04 LTS (Xenial Xerus) (clusterware#115)
 - Added LXDE session (Ubuntu only) (clusterware-sessions#5)
 - Added KDE session (clusterware-sessions#6)
+- Clusterware VPN configurations are now provided as handy archives for download (clusterware-handlers#19)
 
 ### Changed
 - Environment modules warnings are now suppressed (#169)
