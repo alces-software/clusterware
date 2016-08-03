@@ -26,7 +26,7 @@ detect_serf() {
 fetch_serf() {
     title "Fetching Serf"
     if fetch_handling_is_source; then
-        fetch_source https://dl.bintray.com/mitchellh/serf/0.6.4_linux_amd64.zip serf-source.zip
+        fetch_source https://releases.hashicorp.com/serf/0.6.4/serf_0.6.4_linux_amd64.zip serf-source.zip
     else
         fetch_dist serf
     fi

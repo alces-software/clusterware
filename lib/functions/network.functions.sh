@@ -24,10 +24,10 @@ network_get_public_address() {
     tmout=${1:-5}
 
     # Try and read from metadata
-    if [ -f "${cw_ROOT}"/etc/meta.d/network.rc ]; then
-        eval $(grep '^cw_META_network_public_ip_address=' "${cw_ROOT}"/etc/meta.d/network.rc)
-        if [ "${cw_META_network_public_ip_address}" ]; then
-            echo "${cw_META_network_public_ip_address}"
+    if [ -f "${cw_ROOT}"/etc/config/network.rc ]; then
+        eval $(grep '^cw_NETWORK_public_ip=' "${cw_ROOT}"/etc/config/network.rc)
+        if [ "${cw_NETWORK_public_ip}" ]; then
+            echo "${cw_NETWORK_public_ip}"
             return 0
         fi
     fi
@@ -53,10 +53,10 @@ network_get_public_hostname() {
     tmout=${1:-5}
 
     # Try and read from metadata
-    if [ -f "${cw_ROOT}"/etc/meta.d/network.rc ]; then
-        eval $(grep '^cw_META_network_platform_hostname=' "${cw_ROOT}"/etc/meta.d/network.rc)
-        if [ "${cw_META_network_platform_hostname}" ]; then
-            echo "${cw_META_network_platform_hostname}"
+    if [ -f "${cw_ROOT}"/etc/config/network.rc ]; then
+        eval $(grep '^cw_NETWORK_public_hostname=' "${cw_ROOT}"/etc/config/network.rc)
+        if [ "${cw_NETWORK_public_hostname}" ]; then
+            echo "${cw_NETWORK_public_hostname}"
             return 0
         fi
     fi

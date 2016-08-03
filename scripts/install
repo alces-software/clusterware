@@ -336,6 +336,11 @@ doing 'Install'
 install_startup_hooks &> "${dep_logs}/install-startup-hooks.log"
 say_done $?
 
+title "Performing distro-specific customizations"
+doing 'Install'
+install_distro_specific &> "${dep_logs}/distro-specific.log"
+say_done $?
+
 if [ "$(type -t lsof)" ]; then
     ppid=`ps -p $$ -o ppid=`
     user_shell=`lsof -p $ppid | awk '(NR==2) {print $1}'`

@@ -25,6 +25,7 @@ This project adheres to [Semantic Versioning](http://semver.org/).
 - Interactive sessions can now be located in additional locations specified by the CW_SESSIONPATH environment variable (#127)
 - Allow configurator to be delayed until a flag file is written to allow more fine-grained control over Clusterware configuration files by cloud-init
 - Added PBS Pro scheduler support (clusterware-handlers#39, clusterware-services#26)
+- Added support for Ubuntu 16.04 LTS (Xenial Xerus) (clusterware#115)
 
 ### Changed
 - Environment modules warnings are now suppressed (#169)

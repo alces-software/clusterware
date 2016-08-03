@@ -51,7 +51,7 @@ module Alces
       private
       def region
         if File.exists?("#{ENV['cw_ROOT']}/etc/config/cluster/instance-aws.rc")
-          @region ||= `source #{ENV['cw_ROOT']}/etc/config/cluster/instance-aws.rc 2> /dev/null && echo ${cw_INSTANCE_aws_region}`.chomp
+          @region ||= `bash -c 'source #{ENV['cw_ROOT']}/etc/config/cluster/instance-aws.rc 2> /dev/null && echo ${cw_INSTANCE_aws_region}'`.chomp
         end
       end
     end

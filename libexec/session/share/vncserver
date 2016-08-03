@@ -238,18 +238,20 @@ if (-e "/tmp/.X11-unix/X$displayNumber" ||
 $ENV{VNCDESKTOP}= $desktopName;
 
 if ($opt{'-fg'}) {
-    system("$sessionScript >> " . &quotedString($sessionLog) . " 2>&1");
+    my @args = ("/bin/bash","-c","$sessionScript >> " . &quotedString($sessionLog) . " 2>&1");
+    system(@args);
     if (kill 0, `cat $pidFile`) {
         $opt{'-kill'} = ':'.$displayNumber;
         &Kill();
     }
 } else {
     if ($opt{'-autokill'}) {
-        system("($sessionScript; $0 -sessiondir $sessionDir -kill) >> "
-            . &quotedString($sessionLog) . " 2>&1 &");
+        my @args = ("/bin/bash","-c","(/bin/bash $sessionScript; $0 -sessiondir $sessionDir -kill) >> "
+                    . &quotedString($sessionLog) . " 2>&1 &");
+        system(@args);
     } else {
-        system("$sessionScript >> " . &quotedString($sessionLog)
-            . " 2>&1 &");
+        my @args = ("/bin/bash","-c","$sessionScript >> " . &quotedString($sessionLog) . " 2>&1 &");
+        system(@args);
     }
 }
 

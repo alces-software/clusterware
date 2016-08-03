@@ -34,6 +34,7 @@ install_components() {
     title "Installing Ruby components"
     if fetch_handling_is_source; then
         cd "${target}/lib/ruby"
+        rm -rf vendor/ruby
         doing 'Configure'
 	# XXX - path into opt/clusterware-bundle or something to allow
 	# for easier dev separation...? .bundle file probably still

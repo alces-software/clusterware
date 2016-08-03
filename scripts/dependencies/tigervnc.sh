@@ -26,7 +26,11 @@ detect_tigervnc() {
 fetch_tigervnc() {
     title "Fetching TigerVNC"
     if fetch_handling_is_source; then
-        fetch_source https://github.com/TigerVNC/tigervnc/archive/v1.5.0.tar.gz tigervnc-source.tar.gz
+        if [ "$os" == "ubuntu1604" ]; then
+            fetch_source https://github.com/TigerVNC/tigervnc/archive/v1.6.90.tar.gz tigervnc-source.tar.gz
+        else
+            fetch_source https://github.com/TigerVNC/tigervnc/archive/v1.5.0.tar.gz tigervnc-source.tar.gz
+        fi
     else
         fetch_dist tigervnc
     fi
@@ -57,8 +61,17 @@ install_tigervnc() {
         cd "${topdir}/unix/vncconfig"
         make &> "${dep_logs}/tigervnc-vncconfig-make.log"
         cd "${topdir}/unix/xserver"
-        cp -R /usr/share/xorg-x11-server-source/* .
-        patch -p1 < ../xserver115.patch &> "${dep_logs}/tigervnc-xserver-patch.log"
+        if [ -f /usr/src/xorg-server.tar.xz ]; then
+            tar --strip-components=1 -xJf /usr/src/xorg-server.tar.xz
+            patch -p1 < ${source}/scripts/dependencies/patches/tigervnc/xserver118.patch &> "${dep_logs}/tigervnc-xserver-patch.log"
+            build_args=()
+        elif [ -d /usr/share/xorg-x11-server-source ]; then
+            cp -R /usr/share/xorg-x11-server-source/* .
+            patch -p1 < ../xserver115.patch &> "${dep_logs}/tigervnc-xserver-patch.log"
+            build_args=(--disable-config-dbus --enable-install-libxf86config)
+        else
+            echo "Can't find xorg source."
+        fi
         # patch hw/vnc/xorg-version.h for 115
         # patch 'EXTRAS' out of hw/xwin/glx/Makefile.am
         #patch -p3 < ../../../xserver-fixes.patch
@@ -66,16 +79,17 @@ install_tigervnc() {
         ./configure --with-pic --without-dtrace --disable-static --disable-dri \
             --disable-xinerama --disable-xvfb --disable-xnest --disable-xorg \
             --disable-dmx --disable-xwin --disable-xephyr --disable-kdrive \
-            --disable-config-dbus --disable-config-hal --disable-config-udev \
+            --disable-config-hal --disable-config-udev \
             --disable-dri2 --disable-present \
             --disable-unit-tests \
-            --enable-install-libxf86config --enable-glx \
+            --enable-glx \
             --with-default-font-path="catalogue:/etc/X11/fontpath.d,built-ins" \
             --with-fontrootdir=/usr/share/X11/fonts \
             --with-xkb-path=/usr/share/X11/xkb \
             --with-xkb-output=/var/lib/xkb \
             --with-xkb-bin-directory=/usr/bin \
             --with-serverconfig-path=/usr/lib64/xorg \
+            "${build_args[@]}" \
             --prefix="${target}/opt/tigervnc" \
             &> "${dep_logs}/tigervnc-xserver-configure.log"
         make &> "${dep_logs}/tigervnc-xserver-make.log"
