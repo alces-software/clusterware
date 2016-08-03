@@ -1,11 +1,12 @@
 # Installing Alces Clusterware
 
-## Supported platforms
+## Available platforms
 
-Alces Clusterware currently supports the following platforms/distributions:
+Alces Clusterware currently operates on the following platforms/distributions:
 
-* Enterprise Linux 6 distributions: RHEL, CentOS, Scientific Linux (`el6`)
 * Enterprise Linux 7 distributions: RHEL, CentOS, Scientific Linux (`el7`)
+* Enterprise Linux 6 distributions: RHEL, CentOS, Scientific Linux (`el6`)
+* Ubuntu LTS 16.04 (Xenial Xerus) (`ubuntu1604`)
 
 ## Prerequisites
 
@@ -21,7 +22,7 @@ Clusterware is a system-level package and must be installed by the `root` user.
    sudo -s
    ```
 
-2. Set the `cw_DIST` environment variable to match the distribution on which you are installing. Currently supported options are `el6` and `el7`:
+2. Set the `cw_DIST` environment variable to match the distribution on which you are installing. Currently available options are `el7`, `el6` and `ubuntu1604`:
 
      ```bash
      export cw_DIST=el7

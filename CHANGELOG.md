@@ -55,7 +55,7 @@ This project adheres to [Semantic Versioning](http://semver.org/).
 - Added license and readme files to services, storage and sessions repositories (#114)
 - Looking up entries in `mappingstab` now strips whitespace from the end of lines (#75)
 - Prevent `No such file or directory` errors when using `member_each` function before any members are present (#151)
-- Prevent `unable to write 'randome state'` error when configuring VPN certificates (#150)
+- Prevent `unable to write 'random state'` error when configuring VPN certificates (#150)
 
 ## [1.5.3] - 2016-06-16
 
@@ -151,40 +151,6 @@ This project adheres to [Semantic Versioning](http://semver.org/).
 - Remove hard-coded path in the Clusterware configuration files for `logrotate` (#104)
 - Allow Gridware distro dependencies to be installed while an `apps/python` module is loaded (#131)
 - Tolerate broken links when updating file modes during import (#135)
-
-## [1.5.0] - 2016-04-25
-
-### Added
-- Enhanced tab-completion under `bash` to allow local files to be suggested where appropriate (#82)
-- Added [`jo`](https://github.com/jpmens/jo) utility (#72)
-- Distribution package repositories (e.g. EPEL) are now handled via a configurable interface (#70)
-- Clusters now support auto-scaling by reporting job scheduler metrics and scaling-in idle nodes (clusterware-handlers#24)
-- Gridware package requirements can now be automatically installed (#47)
-- Updated heuristics for determining bad paths on package export, specifically only reject absolute library paths in ELF binaries (#91)
-- Allow files matching specified patterns to be ignored when exporting packages (#95)
-- Introduced depot repositories (#87)
-- Significantly enhanced depot feature set (export, compile from source) (#42)
-- Importing packages automatically imports or compiles package requirements (#100)
-- Provide option to import existing binaries at install time (#100)
-- The AWS CLI utility now has a serviceware modulefile and is loaded for users by default (clusterware-services#16)
-- The Gridware repository has been split into "main" and "volatile" repositories; the "volatile" repository (which is disabled by default) contains all existing Gridware and the "main" repository contains Gridware that has undergone verification for use on Clusterware systems (#89)
-- Enhanced the login banner to incorporate an Alces Flight logo in the medium of ASCII art (#102)
-
-### Changed
-- The algorithm for determining the memory limit (`vmem`) for SGE execution hosts has been updated so as not to exceed total RAM + swap (clusterware-handlers#22)
-- The AWS CLI tool has been updated to the latest version (v1.10.19) in order to make use of autoscaling features (clusterware-services#15)
-- Depot `fetch` command has been removed and replaced by depot repository and `install` functionality (#42)
-- Version comparisons have been enhanced to deal more intelligently with package versions that don't conform to sematic versioning (#98)
-- When updating package a repository, better feedback is now provided regarding what revision has been selected, or if the local tree has become out of sync with the upstream repository somehow (#109)
-- Gridware operations that could cause errors when being executed under non-superuser accounts have been made available to all users within the `gridware` group (#88)
-
-### Fixed
-- Correctly parse output from packager scripts when output is less than 10 lines long (#96)
-- Gridware packages are now listed in semantic version order (#97)
-- Correct a problem that could cause exported packages to have incorrect dependency data (#93)
-- Prevent dependency data from being installed in the wrong place if a package is imported before any others hae been built (#94)
-- Set permissions correctly to provide access to `gridware` group members when packages are imported (#105)
-- Remove hard-coded path in the Clusterware configuration files for `logrotate` (#104)
 
 #### Issues/PRs
 

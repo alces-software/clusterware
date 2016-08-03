@@ -2,10 +2,11 @@
 
 A set of tools and conventions for improving the ease of use of HPC facilities -- within both traditional clusters and HPC cloud images.
 
-## Supported platforms
+## Available platforms
 
-* Enterprise Linux 6 distributions: RHEL, CentOS, Scientific Linux (`el6`)
 * Enterprise Linux 7 distributions: RHEL, CentOS, Scientific Linux (`el7`)
+* Enterprise Linux 6 distributions: RHEL, CentOS, Scientific Linux (`el6`)
+* Ubuntu LTS 16.04 (Xenial Xerus) (`ubuntu1604`)
 
 ## Prerequisites
 
@@ -31,7 +32,7 @@ Clusterware is a system-level package and must be installed by the `root` user.
    sudo -s
    ```
 
-2. Set the `cw_DIST` environment variable to match the distribution on which you are installing. Currently supported options are `el6` and `el7`:
+2. Set the `cw_DIST` environment variable to match the distribution on which you are installing. Currently available options are `el7`, `el6` and `ubuntu1604`:
 
      ```bash
      export cw_DIST=el7
