@@ -41,6 +41,7 @@ This project adheres to [Semantic Versioning](http://semver.org/).
 - Remote binary packages are checked to see if they are different from previously downloaded versions and, if so, are redownloaded (#134)
 - Apply user-selectible theme for dark/light terminals to all tools (#140)
 - Improve feedback from the `alces configure node` tool (#78)
+- Updated `alces about` tool to be more flexible
 
 ### Fixed
 - `/sys/hypervisor/uuid` now only read if it exists (#148)
