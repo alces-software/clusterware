@@ -138,7 +138,11 @@ handler_run_helper() {
     helper="$1"
     shift
     if [ "${helper:0:1}" != "/" ]; then
-        dir=$(cd "$(dirname "${BASH_SOURCE[-1]}")" && pwd)
+        dir=$(handler_dir)/
     fi
-    "${dir}/${helper}" "$@"
+    "${dir}${helper}" "$@"
+}
+
+handler_dir() {
+    cd "$(dirname "${BASH_SOURCE[-1]}")" && pwd
 }
