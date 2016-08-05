@@ -269,7 +269,8 @@ storage_sync_to_slaves() {
         if [ "$default" ]; then
             if [ -f "${dir}/storage.rc" ]; then
                 if [ "$all" ]; then
-                    "${cw_ROOT}"/opt/pdsh/bin/pdcp -g slave -p "${dir}/storage.rc" "${dir}/storage.rc"
+                    "${cw_ROOT}"/opt/pdsh/bin/pdcp -F "${cw_ROOT}"/etc/genders \
+                                -g slave -p "${dir}/storage.rc" "${dir}/storage.rc"
                 else
                     for host in "$@"; do
                         scp -p "${dir}/storage.rc" $host:"${dir}/storage.rc"
@@ -279,7 +280,8 @@ storage_sync_to_slaves() {
         else
             if [ -d "${dir}/storage" ]; then
                 if [ "$all" ]; then
-                    "${cw_ROOT}"/opt/pdsh/bin/pdcp -g slave -p -r "${dir}/storage" "${dir}"
+                    "${cw_ROOT}"/opt/pdsh/bin/pdcp -F "${cw_ROOT}"/etc/genders \
+                                -g slave -p -r "${dir}/storage" "${dir}"
                 else
                     for host in "$@"; do
                         scp -pr "${dir}/storage" $host:"${dir}"
