@@ -258,7 +258,9 @@ storage_sync_to_slaves() {
     files_load_config --optional instance config/cluster
     if [ "${cw_INSTANCE_role}" == "master" ]; then
         if [ "$1" == "--all" ]; then
-            all=true
+            if [ -z "$("${cw_ROOT}"/opt/genders/bin/nodeattr -f "${cw_ROOT}"/etc/genders -q slave)" ]; then
+                return 0
+            fi
             shift
         fi
         if [ "$1" == "--default" ]; then
