@@ -35,6 +35,18 @@ distro_enable_service() {
     fi
 }
 
+distro_disable_service() {
+    local service
+    service="$1"
+    if [ "${cw_DIST}" == "el7" ]; then
+        systemctl disable ${service}
+    elif [ "${cw_DIST}" == "ubuntu1604" ]; then
+        systemctl disable ${service}
+    elif [ "${cw_DIST}" == "el6" ]; then
+        chkconfig ${service} off
+    fi
+}
+
 distro_start_service() {
     local service
     service="$1"
