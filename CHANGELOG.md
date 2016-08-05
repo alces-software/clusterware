@@ -7,6 +7,7 @@ This project adheres to [Semantic Versioning](http://semver.org/).
 
 ### Added
 - The Gridware package repositories are now automatically updated after a period of time (#121)
+- Added HTTP serviceware allowing HTTP-based services to plug in to a central web server (#74)
 - Gridware export/import can now patch binary files to handle hard-coded depot paths (#110)
 - Added `alces configure hyperthreading` action for modifying hyperthreading behaviour (#164)
 - Flight customization profiles can now be retrieved without S3 credentials (clusterware-handlers#34)
@@ -29,6 +30,8 @@ This project adheres to [Semantic Versioning](http://semver.org/).
 - Added LXDE session (Ubuntu only) (clusterware-sessions#5)
 - Added KDE session (clusterware-sessions#6)
 - Clusterware VPN configurations are now provided as handy archives for download (clusterware-handlers#19)
+- Added an attractive default web page for HTTP serviceware via new `cluster-www` handler (clusterware-services#27)
+- Added a VPN section for HTTP serviceware if `cluster-www` handler is enabled (clusterware-handlers#40)
 
 ### Changed
 - Environment modules warnings are now suppressed (#169)
