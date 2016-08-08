@@ -123,6 +123,15 @@ network_get_first_iface() {
         | sed 's/^.: \(\S*\):.*/\1/g'
 }
 
+network_get_iface_mac() {
+    local target_iface
+    target_iface="$1"
+
+    ip -o -4 address show dev ${target_iface} \
+        | head -n 1 \
+        | sed 's/.*link\/ether\s*\(\S*\)\s*.*/\1/g'
+}
+
 network_get_iface_address() {
     local target_iface
     target_iface="$1"
@@ -152,9 +161,10 @@ network_get_iface_network() {
     local target_iface
     target_iface="$1"
 
-    ip -o -4 route show dev ${target_iface} \
+    ip -o -4 address show dev ${target_iface} \
         | head -n 1 \
-        | sed 's/\(\S*\).*/\1/g'
+        | grep ' brd ' \
+        | sed 's/.*inet \(\S*\) brd.*/\1/g'
 }
 
 # Adapted from https://forums.gentoo.org/viewtopic-t-888736-start-0.html
@@ -167,6 +177,20 @@ network_cidr_to_mask() {
 network_is_ec2() {
     [ -f /sys/hypervisor/uuid ] && [ "$(head -c3 /sys/hypervisor/uuid)" == "ec2" ] ||
         [ "${cw_TEST_ec2}" == "true" ]
+}
+
+network_get_ec2_vpc_cidr_block() {
+    local mac
+    if [ "$cw_TEST_metadata_service" == "true" ]; then
+        echo "${cw_TEST_mock_ec2_vpc_cidr_block}"
+    else
+        if [ -z "$1" ]; then
+            mac=$(network_get_iface_mac "$(network_get_first_iface)")
+        else
+            mac=$(network_get_iface_mac "$1")
+        fi
+        network_fetch_ec2_metadata network/interfaces/macs/$mac/vpc-ipv4-cidr-block
+    fi
 }
 
 network_fetch_ec2_document() {
