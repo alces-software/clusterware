@@ -130,5 +130,12 @@ serviceware_add() {
     else
 	src_name="${name}"
     fi
-    curl -# -L "${cw_SERVICE_url}/${cw_DIST}"/${src_name}.tar.gz | tar -C "${cw_ROOT}" -xz
+    {
+        curl -# \
+             -L "${cw_SERVICE_url}/${cw_DIST}"/${src_name}.tar.gz \
+             2>&1 1>&3 3>&- | \
+            stdbuf -oL \
+                   bash -c \
+                   "(tr '\r' '\n' | grep -Eo '[0-9]{2,3}\.[0-9]' | cut -f1 -d'.' | uniq -w1 | sed 's/\(.*\)/Progress: \1%/')";
+    } 3>&1 1>&2 | tar -C "${cw_ROOT}" -xz
 }
