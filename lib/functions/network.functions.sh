@@ -127,7 +127,7 @@ network_get_iface_mac() {
     local target_iface
     target_iface="$1"
 
-    ip -o -4 address show dev ${target_iface} \
+    ip -o -4 link show dev ${target_iface} \
         | head -n 1 \
         | sed 's/.*link\/ether\s*\(\S*\)\s*.*/\1/g'
 }
@@ -263,7 +263,7 @@ write_files:
   permissions: '0640'
 EOF
         else
-            curl -f --connect-timeout ${tmout} http://169.254.169.254/latest/user-data
+            curl -sS -f --connect-timeout ${tmout} http://169.254.169.254/latest/user-data
         fi
     fi
 }
