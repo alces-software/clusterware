@@ -94,8 +94,11 @@ _pull() {
 
     bucket="${cw_SYNC_bucket}"
     if [ -z "$bucket" ] && network_is_ec2; then
-        bucket="alces-flight-$(network_ec2_hashed_account)"
-    else
+        if files_load_config --optional instance-aws config/cluster; then
+            bucket="alces-flight-${cw_INSTANCE_aws_account_hash}"
+        fi
+    fi
+    if [ -z "$bucket" ]; then
         action_die "source bucket name could not be determined"
     fi
 
