@@ -43,10 +43,9 @@ _show() {
 
     bucket="${cw_SYNC_bucket}"
     if [ -z "$bucket" ]; then
-        if network_is_ec2; then
-            bucket="s3://alces-flight-$(network_ec2_hashed_account)/sync/$(whoami)/${target}"
-        else
-            bucket="<not available>"
+        bucket="<not available>"
+        if network_is_ec2 && files_load_config --optional instance-aws config/cluster; then
+            bucket="s3://alces-flight-${cw_INSTANCE_aws_account_hash}/sync/$(whoami)/${target}"
         fi
     else
         bucket="${bucket}/sync/$(whoami)/${target}"
