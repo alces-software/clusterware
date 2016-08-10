@@ -56,7 +56,7 @@ main() {
         files_load_config --optional instance-aws-iam config/cluster
         export AWS_SECRET_ACCESS_KEY="${AWS_SECRET_ACCESS_KEY:-${cw_SYNC_aws_secret_access_key:-${cw_INSTANCE_aws_iam_role_secret_access_key}}}"
         export AWS_ACCESS_KEY_ID="${AWS_ACCESS_KEY_ID:-${cw_SYNC_aws_access_key_id:-${cw_INSTANCE_aws_iam_role_access_key_id}}}"
-        export AWS_SECURITY_TOKEN="${cw_INSTANCE_aws_iam_role_security_token}"
+        export AWS_SECURITY_TOKEN="${AWS_SECURITY_TOKEN:-${cw_INSTANCE_aws_iam_role_security_token}}"
         if ${_S3CMD} ls s3://${bucket}/sync/$(whoami) &>/dev/null; then
             path="s3://${bucket}/sync/$(whoami)/${target}"
             while [ "$confirm" != "y" -a "$confirm" != "n" ]; do
