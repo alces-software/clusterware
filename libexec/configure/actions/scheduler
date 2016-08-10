@@ -1,0 +1,107 @@
+#!/bin/bash
+#==============================================================================
+# Copyright (C) 2016 Stephen F. Norledge and Alces Software Ltd.
+#
+# This file/package is part of Alces Clusterware.
+#
+# Alces Clusterware is free software: you can redistribute it and/or
+# modify it under the terms of the GNU Affero General Public License
+# as published by the Free Software Foundation, either version 3 of
+# the License, or (at your option) any later version.
+#
+# Alces Clusterware is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+# Affero General Public License for more details.
+#
+# You should have received a copy of the GNU Affero General Public License
+# along with this package.  If not, see <http://www.gnu.org/licenses/>.
+#
+# For more information on the Alces Clusterware, please visit:
+# https://github.com/alces-software/clusterware
+#==============================================================================
+require action
+require files
+require process
+
+_setup_schedulers() {
+    local a scheduler
+    _SCHEDULERS=()
+    for a in "${cw_ROOT}"/var/lib/scheduler/*; do
+        if [ -f "$a" ]; then
+            . "${a}"
+            scheduler=$(basename "$a" .functions.sh)
+            if type -t ${scheduler}_features &>/dev/null && \
+                    [[ "$(${scheduler}_features)" == *':configurable:'* ]]; then
+                _SCHEDULERS+=(${scheduler})
+            fi
+        fi
+    done
+}
+
+_schedulers_run() {
+    local fn title scheduler result
+    fn="$1"
+    title="$2"
+    for scheduler in "${_SCHEDULERS[@]}"; do
+        if type -t ${scheduler}_${fn} &>/dev/null; then
+            if ! result=$(${scheduler}_${fn} "${value}" 2>/dev/null); then
+                action_warn "${scheduler}: ${result}"
+            else
+                action_warn "${scheduler}: ${title} set to: ${value}"
+            fi
+        else
+            action_warn "${scheduler}: ${title} unsupported"
+        fi
+    done
+}
+
+_status() {
+    local scheduler
+    for scheduler in "${_SCHEDULERS[@]}"; do
+        echo "======================================================================"
+        printf "%*s\n" $(((${#scheduler} + 70) / 2)) "${scheduler}"
+        echo "======================================================================"
+        if type -t ${scheduler}_status &>/dev/null; then
+            ${scheduler}_status
+        else
+            echo "(no data)"
+        fi
+        echo ""
+    done
+}
+
+main() {
+    local operation value
+    operation="${1:-status}"
+    value="$2"
+
+    if [ "${operation}" != "status" -a -z "${value}" ]; then
+        echo "Usage: ${cw_BINNAME} <directive> <value>"
+        exit
+    fi
+    _setup_schedulers
+    case ${operation} in
+        s|st|sta|stat|statu|status)
+            _status
+            ;;
+        a|al|all|allo|alloc|alloca|allocat|allocati|allocatio|allocation)
+            _schedulers_run set_allocation_strategy "allocation strategy"
+            ;;
+        s|su|sub|subm|submi|submis|submiss|submissi|submissio|submission)
+            _schedulers_run set_submission_strategy "submission strategy"
+            ;;
+        *)
+            action_die "unknown configuration directive: ${operation}"
+            ;;
+    esac
+    if [ -z "${_SCHEDULERS[*]}" ]; then
+        action_die "no configurable schedulers available"
+    fi
+}
+
+if [ -n "$1" -a "$1" != "status" ]; then
+    process_reexec_sudo "$@"
+fi
+
+main "$@"

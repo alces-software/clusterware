@@ -233,6 +233,11 @@ if [ "$BASH_VERSION" ]; then
                         st|sto|stor|stora|storag|storage)
                             values=$(_alces_storage_action "$cur" "$prev")
                             ;;
+                        c|co|con|conf|confi|config|configu|configur|configure)
+                            if ((COMP_CWORD == 3)); then
+                                values="status allocation packing"
+                            fi
+                            ;;
                     esac
                     if [ "$values" ]; then
                         COMPREPLY=( $(compgen -W "$values" -- "$cur") )

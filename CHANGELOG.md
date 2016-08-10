@@ -33,6 +33,7 @@ This project adheres to [Semantic Versioning](http://semver.org/).
 - Added an attractive default web page for HTTP serviceware via new `cluster-www` handler (clusterware-services#27)
 - Added a VPN section for HTTP serviceware if `cluster-www` handler is enabled (clusterware-handlers#40)
 - The master node can now behave as a NAT gateway for slave nodes (clusterware-handlers#20)
+- Scheduler behaviour can be configured using `alces configure scheduler`
 
 ### Changed
 - Environment modules warnings are now suppressed (#169)
