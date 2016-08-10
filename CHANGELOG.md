@@ -47,6 +47,7 @@ This project adheres to [Semantic Versioning](http://semver.org/).
 - Apply user-selectible theme for dark/light terminals to all tools (#140)
 - Improve feedback from the `alces configure node` tool (#78)
 - Updated `alces about` tool to be more flexible
+- Updated `s3cmd` to latest development version (1.6.1-ba5196f1f6)
 
 ### Fixed
 - `/sys/hypervisor/uuid` now only read if it exists (#148)
