@@ -75,7 +75,8 @@ main() {
 	try_skip_suffix=true
 	shift
     fi
-    basename="${1:-mycluster}"
+    basename="${1:-flight}"
+    sane_name="$(echo "${basename}" | tr "[A-Z]" "[a-z]" | sed -e 's/[^a-z0-9_]/-/g' -e 's/-[-]*/-/g' -e 's/-$//g')"
     shift
     if ! files_load_config --optional access; then
 	if [ "${try_skip_suffix}" ]; then
