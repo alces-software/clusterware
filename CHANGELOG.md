@@ -34,6 +34,7 @@ This project adheres to [Semantic Versioning](http://semver.org/).
 - Added a VPN section for HTTP serviceware if `cluster-www` handler is enabled (clusterware-handlers#40)
 - The master node can now behave as a NAT gateway for slave nodes (clusterware-handlers#20)
 - Scheduler behaviour can be configured using `alces configure scheduler`
+- SSL certificates are allocated if `host_naming` strategy for `cluster` is set to `allocate` in `config.yml` (clusterware#184)
 
 ### Changed
 - Environment modules warnings are now suppressed (#169)
