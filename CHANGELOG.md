@@ -63,6 +63,7 @@ This project adheres to [Semantic Versioning](http://semver.org/).
 - Looking up entries in `mappingstab` now strips whitespace from the end of lines (#75)
 - Prevent `No such file or directory` errors when using `member_each` function before any members are present (#151)
 - Prevent `unable to write 'random state'` error when configuring VPN certificates (#150)
+- Cluster name in prompt now matches the branding colour (#188)
 
 ## [1.5.3] - 2016-06-16
 
