@@ -50,6 +50,7 @@ This project adheres to [Semantic Versioning](http://semver.org/).
 - Improve feedback from the `alces configure node` tool (#78)
 - Updated `alces about` tool to be more flexible
 - Updated `s3cmd` to latest development version (1.6.1-ba5196f1f6)
+- When using the S3 backend with `alces storage` output now appears during uploads so progress can be monitored (#187)
 
 ### Fixed
 - `/sys/hypervisor/uuid` now only read if it exists (#148)
