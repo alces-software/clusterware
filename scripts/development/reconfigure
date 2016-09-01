@@ -28,9 +28,11 @@ fi
 # Script to help when developing Clusterware handlers - correctly set variables
 # below, add commits to given branches, and run this script to go through
 # motions of reconfiguring node (mostly) as if from scratch. You may still need
-# to remove handler-specific files if, remove serviceware dir if modifying
+# to remove handler-specific files, remove serviceware dir if modifying
 # serviceware, adapt this script sometimes etc.
 
+# TODO: Read these from environment variables rather than hard-coding, and
+# check they are set before proceeding.
 clusterware_services_branch='feature/add-slurm-serviceware'
 clusterware_handlers_branch='feature/cluster-slurm-handler'
 handler_name='cluster-slurm'
@@ -39,7 +41,7 @@ cw_ROOT='/opt/clusterware'
 ALCES="${cw_ROOT}/bin/alces"
 
 # Rerun handler installation.
-"$ALCES" handler disable cluster-slurm
+"$ALCES" handler disable "${handler_name}"
 
 # Ensure services will be re-enabled when needed.
 rm "${cw_ROOT}/etc/services/"*
