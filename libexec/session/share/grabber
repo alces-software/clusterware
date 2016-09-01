@@ -39,7 +39,14 @@ setup() {
 take_screenshot() {
     local display
     display=$1
-    xwd -root -silent -display :${display} | xwdtopnm | pnmtopng | base64
+
+    # Dump image of session X window.
+    xwd -root -silent -display ":${display}" | \
+
+        # Convert to base64-encoded PNG.
+        xwdtopnm | \
+        pnmtopng | \
+        base64
 }
 
 main() {
