@@ -63,7 +63,7 @@ main() {
     sleep 10
     while true; do
         action_warn "$(date --rfc-3339=seconds): Taking screenshot"
-        take_screenshot $display | handler_run_hook session-screenshot "$sessionid"
+        take_screenshot "$display" | handler_run_hook session-screenshot "$sessionid"
         sleep 60 &>/dev/null </dev/null &
         wait
     done
