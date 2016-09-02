@@ -111,7 +111,10 @@ module Alces
         end
       end
 
-      $terminal.wrap_at = HighLine::SystemExtensions.terminal_size.first - 5 rescue 80 if $stdin.tty?
+      if $stdin.tty?
+        term_width = HighLine::SystemExtensions.terminal_size.first rescue 80
+        $terminal.wrap_at = (term_width < 80 ? 80 : term_width) - 5
+      end
 
       program :name, 'alces gridware'
       program :version, '1.0.0'
