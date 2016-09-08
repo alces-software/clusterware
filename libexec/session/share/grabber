@@ -46,12 +46,7 @@ take_screenshot() {
         # Convert to base64-encoded PNG.
         xwdtopnm | \
         pnmtopng | \
-        base64 | \
-
-        # Pipeline so far gives multiple whitespace-separated lines as output;
-        # convert to single line with internal whitespace stripped.
-        xargs | \
-        tr -d "[:space:]"
+        base64 -w0
 }
 
 main() {
