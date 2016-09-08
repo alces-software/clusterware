@@ -35,6 +35,7 @@ This project adheres to [Semantic Versioning](http://semver.org/).
 - The master node can now behave as a NAT gateway for slave nodes (clusterware-handlers#20)
 - Scheduler behaviour can be configured using `alces configure scheduler`
 - SSL certificates are allocated if `host_naming` strategy for `cluster` is set to `allocate` in `config.yml` (clusterware#184)
+- Gridware source packages may be retrieved from Amazon S3 using the `aws` tool (clusterware#198 -- thanks @lurcio)
 
 ### Changed
 - Environment modules warnings are now suppressed (#169)
