@@ -75,6 +75,7 @@ member_unregister() {
     local member name
     member=($(cat))
     name="${member[0]}"
+    name=${name%%.*}
     if [ -f "${cw_MEMBER_DIR}"/"${name}" ]; then
         rm -f "${cw_MEMBER_DIR}"/"${name}"
     fi
