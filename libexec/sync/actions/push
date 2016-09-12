@@ -55,8 +55,7 @@ excluded = lambda do |f|
        f == p[0..-2] || File.fnmatch?("#{p}*", f))
   end
 end
-Find.find('.').each do |f|
-  next if f == '.' || excluded.call(f[2..-1])
+record = lambda do |f|
   stat = File.stat(f)
   files[f[2..-1]] = [].tap do |a|
     a << (Etc.getpwuid(stat.uid).name rescue stat.uid.to_s)
@@ -66,8 +65,29 @@ Find.find('.').each do |f|
     a << stat.mtime.to_i.to_s
   end.join(':')
 end
+Find.find('.').each do |f|
+  next if f == '.' || excluded.call(f[2..-1])
+  record.call(f)
+  if File.directory?(f) && Dir.entries(f).size <= 2
+    empty = File.join(f,'.empty')
+    File.write(empty,f)
+    record.call(empty)
+  end
+end
 config[:files] = files
 File.write("${sync_cfg}", config.to_yaml)
+RUBY
+}
+
+_remove_empty_flags() {
+    ruby_run <<RUBY
+require 'find'
+Dir.chdir("$(_target_for "${sync_cfg}")")
+Find.find('.').each do |f|
+  if f =~ /\/.empty$/ && File.file?(f)
+    File.unlink(f) if File.read(f) == File.directory(f)
+  end
+end
 RUBY
 }
 
@@ -165,6 +185,7 @@ _push() {
                   "$(_target_for "${sync_cfg}")"/ \
                   s3://${bucket}/sync/$(whoami)/${target}/ >> "$(xdg_cache_home)"/clusterware/flight-sync.log 2>&1
         say_done $?
+        _remove_empty_flags
         rm -f "${exclusions_file}" "${encrypted_file}"
     else
         action_die "unable to access synchronization bucket '${bucket}' ($?)" $?

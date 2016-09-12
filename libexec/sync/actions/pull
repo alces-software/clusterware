@@ -65,6 +65,18 @@ end
 RUBY
 }
 
+_remove_empty_flags() {
+    ruby_run <<RUBY
+require 'find'
+Dir.chdir("$(_target_for "${sync_cfg}")")
+Find.find('.').each do |f|
+  if f =~ /\/.empty$/ && File.file?(f)
+    File.unlink(f) if File.read(f) == File.directory(f)
+  end
+end
+RUBY
+}
+
 _decrypt_encrypt_set() {
     local sync_cfg encrypted_file password
     sync_cfg="$1"
@@ -132,6 +144,7 @@ _pull() {
                 _apply_posix_data "${sync_cfg}"
                 say_done $?
             fi
+            _remove_empty_flags
             echo ""
         fi
     else
