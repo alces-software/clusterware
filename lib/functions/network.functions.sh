@@ -267,3 +267,22 @@ EOF
         fi
     fi
 }
+
+network_get_edition() {
+    local user_id
+    if network_is_ec2; then
+        user_id=$(network_ec2_hashed_account)
+    elif [ -f /root/.ssh/account.pub ]; then
+        user_id=$(ssh-keygen -lf /root/.ssh/account.pub | cut -f2 -d' ' | tr -d ':')
+    else
+        user_id=$(uuid)
+    fi
+    result=$(dig _license.${user_id}.cloud.alces.network +short TXT | cut -f2 -d'"')
+    if [[ " $result " == *' edition=enterprise '* ]]; then
+        echo "enterprise"
+    elif [[ " $result " == *' edition=enhanced '* ]]; then
+        echo "enhanced"
+    else
+        echo "community"
+    fi
+}
