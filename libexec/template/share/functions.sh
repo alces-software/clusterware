@@ -1,6 +1,5 @@
-#!/bin/bash
 #==============================================================================
-# Copyright (C) 2015 Stephen F. Norledge and Alces Software Ltd.
+# Copyright (C) 2016 Stephen F. Norledge and Alces Software Ltd.
 #
 # This file/package is part of Alces Clusterware.
 #
@@ -20,27 +19,19 @@
 # For more information on the Alces Clusterware, please visit:
 # https://github.com/alces-software/clusterware
 #==============================================================================
-require action
-require document
+require files
 
-main() {
-    local idx template
-    idx="$1"
-    if template="$(document_get "$idx" templates .tpl .sh.tpl)"; then
-        _template_render "${template}" | less -F
-    else
-        errlvl=$?
-        if [ $errlvl == 1 ]; then
-            action_die "no templates found"
-        elif [ $errlvl == 3 ]; then
-            action_die "please specify a template index or name"
-        else
-            action_die "invalid template requested: ${idx}"
-        fi
+_template_render() {
+    local vars template
+    template="$1"
+    vars=$(grep '^#@ ' "${template}" | cut -c4-)
+    if [ "$vars" ]; then
+        declare -A cw_TEMPLATE
+        eval "$vars"
     fi
-    action_cleanup
+    files_load_config --optional gridware
+    grep -v '^#@ ' "${template}" |
+        sed -e "s,_GRIDWARE_,${cw_GRIDWARE_root:-/opt/gridware},g" \
+            -e "s/_DATADIR_/${cw_TEMPLATE[datadir]:-$(basename "${template}" .sh.tpl)}/g" \
+            -e "s/_TEMPLATE_/$(basename "${template}" .sh.tpl)/g"
 }
-
-. "${cw_ROOT}/libexec/template/share/functions.sh"
-
-main "$@"

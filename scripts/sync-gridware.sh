@@ -20,7 +20,8 @@ cd $(dirname "$0")
 for r in $regions; do
     echo ""
     echo "== Syncing: ${r} =="
-    s3cmd sync ${dry_run} --exclude '$dist/*' --exclude '$test/*' --delete-removed -F -P s3://packages.alces-software.com/gridware/ s3://alces-gridware-${r}/upstream/
+    s3cmd sync ${dry_run} --exclude '$dist/*' --exclude '$test/*' --exclude '$data/*' --delete-removed -F -P s3://packages.alces-software.com/gridware/ s3://alces-gridware-${r}/upstream/
     s3cmd sync ${dry_run} --delete-removed -F -P 's3://packages.alces-software.com/gridware/$dist/' s3://alces-gridware-${r}/dist/
+    s3cmd sync ${dry_run} --delete-removed -F -P 's3://packages.alces-software.com/gridware/$data/' s3://alces-gridware-${r}/data/
     echo "==================="
 done

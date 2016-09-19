@@ -155,7 +155,7 @@ if [ "$BASH_VERSION" ]; then
     _alces_template_action() {
         local cur="$1" prev="$2" values
         case $prev in
-            s|sh|sho|show|i|in|inf|info|c|co|cop|copy)
+            s|sh|sho|show|i|in|inf|info|c|co|cop|copy|p|pr|pre|prep|prepa|prepar|prepare)
                 values="$(alces template list | sed -r "s:\x1B\[[0-9;]*[mK]::g" | cut -c7- | awk '{print $1;}')"
                 ;;
         esac

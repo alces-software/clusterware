@@ -27,7 +27,7 @@ main() {
     shift
 
     case $action in
-        help|list|show|copy|info)
+        help|list|show|copy|info|prepare)
             help_for_${action}
             ;;
         ?*)
@@ -99,6 +99,20 @@ help_for_show() {
 EOF
 }
 
+help_for_prepare() {
+    cat <<EOF
+  SYNOPSIS:
+
+    alces template prepare <index|name>
+
+  DESCRIPTION:
+
+    Perform prepartion required before the job script can be executed,
+    such as downloading required data files.
+
+EOF
+}
+
 help_for_help() {
     cat <<EOF
   SYNOPSIS:
@@ -133,6 +147,7 @@ printf "    %-22s  %s\n" "$binname list" "List available templates."
 printf "    %-22s  %s\n" "$binname info" "Display information about a template."
 printf "    %-22s  %s\n" "$binname show" "Display a template."
 printf "    %-22s  %s\n" "$binname copy" "Copy a template for your use."
+printf "    %-22s  %s\n" "$binname prepare" "Prepare the environment for use of the template."
 cat <<EOF
 
 Please report bugs to support@alces-software.com
