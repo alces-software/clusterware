@@ -206,8 +206,24 @@ storage_configuration_exists() {
 }
 
 storage_forget_configuration() {
-    local name path paths
+    local name sys_path path paths system
+    if [ "$1" == "--system" ]; then
+        system="$1"
+        shift
+    fi
     name="$1"
+
+    if [ "$system" ]; then
+        sys_path="$(xdg_search "$(xdg_config_dirs)" "clusterware/storage")"
+        if [ "${sys_path}" ]; then
+            paths=("${sys_path}"/"${name}".*.rc)
+            if [ "${paths}" != "${sys_path}/${name}.*.rc" ]; then
+                rm -f "${sys_path}"/"${name}".*
+                return 0
+            fi
+        fi
+    fi
+
     path="$(xdg_config_home)"/clusterware/storage/"${name}"
     paths=("${path}".*)
     if [ "${paths}" != "${path}.*" ]; then

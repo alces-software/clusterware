@@ -22,14 +22,20 @@
 #==============================================================================
 require action
 require storage
+require process
 
 main() {
-    local name
+    local name system
+    if [ "$1" == "--system" ]; then
+        process_reexec_sudo "$@"
+        system="$1"
+        shift
+    fi
     name="$1"
     if [ -z "${name}" ]; then
         action_die "please supply storage configuration name"
     else
-        if storage_forget_configuration "${name}"; then
+        if storage_forget_configuration ${system} "${name}"; then
             action_die "storage configuration forgotten" 0
         else
             action_die "no storage configuration found for '${name}'"
