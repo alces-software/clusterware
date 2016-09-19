@@ -71,7 +71,7 @@ require 'find'
 Dir.chdir("$(_target_for "${sync_cfg}")")
 Find.find('.').each do |f|
   if f =~ /\/.empty$/ && File.file?(f)
-    File.unlink(f) if File.read(f) == File.directory(f)
+    File.unlink(f) if File.read(f) == File.directory?(f)
   end
 end
 RUBY
