@@ -13,7 +13,7 @@ require network
 files_load_config clusterware
 cw_META_node_clusterware_release_desc="Clusterware release"
 cw_META_node_clusterware_release="${cw_RELEASE}"
-cw_META_node_external_ip_address_desc="External IP address"
+cw_META_node_external_ip_address_desc="Primary IP address"
 cw_META_node_external_ip_address="$(network_get_public_address)"
 cw_META_node_platform_host_name_desc="Platform host name"
 cw_META_node_platform_host_name="$(network_get_public_hostname)"
