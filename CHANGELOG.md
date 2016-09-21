@@ -14,6 +14,10 @@ This project adheres to [Semantic Versioning](http://semver.org/).
 ### Fixed
 - Nothing yet
 
+#### Issues/PRs
+
+[Core 1.7.0], [Handlers 1.7.0], [Services 1.7.0], [Storage 1.7.0], [Sessions 1.7.0]
+
 ## [1.6.0] - 2016-09-21
 
 ### Added
@@ -82,6 +86,10 @@ This project adheres to [Semantic Versioning](http://semver.org/).
 - Session screenshot data is now sent in the correct format
 - Narrow terminal widths no longer break `alces gridware` output
 - Correct name handling when cluster ring members are deregistereed
+
+#### Issues/PRs
+
+[Core 1.6.0], [Handlers 1.6.0], [Services 1.6.0], [Storage 1.6.0], [Sessions 1.6.0]
 
 ## [1.5.3] - 2016-06-16
 
@@ -264,6 +272,11 @@ This project adheres to [Semantic Versioning](http://semver.org/).
 - Initial release
 
 [Unreleased]: https://github.com/alces-software/clusterware/compare/1.6.0...develop
+[Core 1.7.0]: https://github.com/alces-software/clusterware/issues?q=milestone%3A1.7-release
+[Handlers 1.7.0]: https://github.com/alces-software/clusterware/issues?q=milestone%3A1.7-release
+[Services 1.7.0]: https://github.com/alces-software/clusterware/issues?q=milestone%3A1.7-release
+[Storage 1.7.0]: https://github.com/alces-software/clusterware/issues?q=milestone%3A1.7-release
+[Sessions 1.7.0]: https://github.com/alces-software/clusterware/issues?q=milestone%3A1.7-release
 [1.6.0]: https://github.com/alces-software/clusterware/compare/1.5.3...1.6.0
 [Core 1.6.0]: https://github.com/alces-software/clusterware/issues?q=milestone%3A1.6-release
 [Handlers 1.6.0]: https://github.com/alces-software/clusterware/issues?q=milestone%3A1.6-release
@@ -274,11 +287,11 @@ This project adheres to [Semantic Versioning](http://semver.org/).
 [1.5.2]: https://github.com/alces-software/clusterware/compare/1.5.1...1.5.2
 [1.5.1]: https://github.com/alces-software/clusterware/compare/1.5.0...1.5.1
 [1.5.0]: https://github.com/alces-software/clusterware/compare/1.4.1...1.5.0
-[Core 1.5.0]: https://github.com/alces-software/clusterware/issues?q=milestone%3A1.5.0
-[Handlers 1.5.0]: https://github.com/alces-software/clusterware-handlers/issues?q=milestone%3A1.5.0
-[Services 1.5.0]: https://github.com/alces-software/clusterware-services/issues?q=milestone%3A1.5.0
-[Storage 1.5.0]: https://github.com/alces-software/clusterware-storage/issues?q=milestone%3A1.5.0
-[Sessions 1.5.0]: https://github.com/alces-software/clusterware-sessions/issues?q=milestone%3A1.5.0
+[Core 1.5.0]: https://github.com/alces-software/clusterware/issues?q=milestone%3A1.5-release
+[Handlers 1.5.0]: https://github.com/alces-software/clusterware-handlers/issues?q=milestone%3A1.5-release
+[Services 1.5.0]: https://github.com/alces-software/clusterware-services/issues?q=milestone%3A1.5-release
+[Storage 1.5.0]: https://github.com/alces-software/clusterware-storage/issues?q=milestone%3A1.5-release
+[Sessions 1.5.0]: https://github.com/alces-software/clusterware-sessions/issues?q=milestone%3A1.5-release
 [1.4.1]: https://github.com/alces-software/clusterware/compare/1.4.0...1.4.1
 [1.4.0]: https://github.com/alces-software/clusterware/compare/1.3.0...1.4.0
 [Core 1.4.0]: https://github.com/alces-software/clusterware/issues?q=milestone%3A1.4.0
