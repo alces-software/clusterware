@@ -36,6 +36,7 @@ This project adheres to [Semantic Versioning](http://semver.org/).
 - Scheduler behaviour can be configured using `alces configure scheduler`
 - SSL certificates are allocated if `host_naming` strategy for `cluster` is set to `allocate` in `config.yml` (clusterware#184)
 - Gridware source packages may be retrieved from Amazon S3 using the `aws` tool (clusterware#198 -- thanks @lurcio)
+- Added `prepare` action to `alces template` to perform any necessary preparation before the template can be used, such as downloading input data
 
 ### Changed
 - Environment modules warnings are now suppressed (#169)
@@ -52,6 +53,7 @@ This project adheres to [Semantic Versioning](http://semver.org/).
 - Updated `alces about` tool to be more flexible
 - Updated `s3cmd` to latest development version (1.6.1-ba5196f1f6)
 - When using the S3 backend with `alces storage` output now appears during uploads so progress can be monitored (#187)
+- Display a message regarding VNC encryption when an interactive session is started
 
 ### Fixed
 - `/sys/hypervisor/uuid` now only read if it exists (#148)
@@ -66,6 +68,9 @@ This project adheres to [Semantic Versioning](http://semver.org/).
 - Prevent `No such file or directory` errors when using `member_each` function before any members are present (#151)
 - Prevent `unable to write 'random state'` error when configuring VPN certificates (#150)
 - Cluster name in prompt now matches the branding colour (#188)
+- Session screenshot data is now sent in the correct format
+- Narrow terminal widths no longer break `alces gridware` output
+- Correct name handling when cluster ring members are deregistereed
 
 ## [1.5.3] - 2016-06-16
 
