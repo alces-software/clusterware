@@ -3,7 +3,7 @@
 All notable changes to this project will be documented in this file.
 This project adheres to [Semantic Versioning](http://semver.org/).
 
-## [Unreleased] - 1.6.0
+## [1.6.0] - 2016-09-21
 
 ### Added
 - The Gridware package repositories are now automatically updated after a period of time (#121)
@@ -252,16 +252,21 @@ This project adheres to [Semantic Versioning](http://semver.org/).
 
 - Initial release
 
-[Unreleased]: https://github.com/alces-software/clusterware/compare/1.5.3...develop
+[1.6.0]: https://github.com/alces-software/clusterware/compare/1.5.3...release/1.6
+[Core 1.6.0]: https://github.com/alces-software/clusterware/issues?q=milestone%3A1.6-release
+[Handlers 1.6.0]: https://github.com/alces-software/clusterware/issues?q=milestone%3A1.6-release
+[Services 1.6.0]: https://github.com/alces-software/clusterware/issues?q=milestone%3A1.6-release
+[Storage 1.6.0]: https://github.com/alces-software/clusterware/issues?q=milestone%3A1.6-release
+[Sessions 1.6.0]: https://github.com/alces-software/clusterware/issues?q=milestone%3A1.6-release
 [1.5.3]: https://github.com/alces-software/clusterware/compare/1.5.2...1.5.3
 [1.5.2]: https://github.com/alces-software/clusterware/compare/1.5.1...1.5.2
 [1.5.1]: https://github.com/alces-software/clusterware/compare/1.5.0...1.5.1
 [1.5.0]: https://github.com/alces-software/clusterware/compare/1.4.1...1.5.0
-[Core 1.5.0]: https://github.com/alces-software/clusterware/issues?q=milestone%3A1.5.0
-[Handlers 1.5.0]: https://github.com/alces-software/clusterware-handlers/issues?q=milestone%3A1.5.0
-[Services 1.5.0]: https://github.com/alces-software/clusterware-services/issues?q=milestone%3A1.5.0
-[Storage 1.5.0]: https://github.com/alces-software/clusterware-storage/issues?q=milestone%3A1.5.0
-[Sessions 1.5.0]: https://github.com/alces-software/clusterware-sessions/issues?q=milestone%3A1.5.0
+[Core 1.5.0]: https://github.com/alces-software/clusterware/issues?q=milestone%3A1.5-release
+[Handlers 1.5.0]: https://github.com/alces-software/clusterware-handlers/issues?q=milestone%3A1.5-release
+[Services 1.5.0]: https://github.com/alces-software/clusterware-services/issues?q=milestone%3A1.5-release
+[Storage 1.5.0]: https://github.com/alces-software/clusterware-storage/issues?q=milestone%3A1.5-release
+[Sessions 1.5.0]: https://github.com/alces-software/clusterware-sessions/issues?q=milestone%3A1.5-release
 [1.4.1]: https://github.com/alces-software/clusterware/compare/1.4.0...1.4.1
 [1.4.0]: https://github.com/alces-software/clusterware/compare/1.3.0...1.4.0
 [Core 1.4.0]: https://github.com/alces-software/clusterware/issues?q=milestone%3A1.4.0
