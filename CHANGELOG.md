@@ -72,6 +72,10 @@ This project adheres to [Semantic Versioning](http://semver.org/).
 - Narrow terminal widths no longer break `alces gridware` output
 - Correct name handling when cluster ring members are deregistereed
 
+#### Issues/PRs
+
+[Core 1.6.0], [Handlers 1.6.0], [Services 1.6.0], [Storage 1.6.0], [Sessions 1.6.0]
+
 ## [1.5.3] - 2016-06-16
 
 ### Added
