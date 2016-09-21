@@ -38,7 +38,7 @@ main() {
             action_die "file already exists at target location '${target}'"
         fi
         source_name="$(basename "${template}" .tpl)"
-        if _template_render > "${target}"; then
+        if _template_render "${template}" > "${target}"; then
             chmod 755 "${target}"
             action_die "template '$(basename "${source_name}" .sh)' copied to '${target}'" 0
         else
