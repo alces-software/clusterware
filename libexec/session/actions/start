@@ -27,6 +27,7 @@ require service
 require vnc
 require handler
 require process
+require xdg
 
 action_cleanup() {
     if [ "$_CLEANED" ]; then return; fi
@@ -231,6 +232,35 @@ EOF
         handler_run_hook session-end "$_SESSIONID"
         action_cleanup
     } &>/dev/null &
+
+    if [ -t 1 ]; then
+        seen_file="$(xdg_config_home)/clusterware/session-warning-seen"
+        if [ ! -f "${seen_file}" ]; then
+           cat <<EOF
+$(echo -e "\e[1;33m")========
+ NOTICE
+========$(echo -e "\e[0m")
+Please note that the VNC protocol does not provide encryption by default.
+
+You should consider securing your session by:
+
+ * connecting via an Alces Flight Access service
+ * connecting via the Clusterware VPN
+ * using an SSH port forward (either manually, or via a tool like "ssvnc")
+
+Please run the "alces howto secure-vnc-sessions" command for further details or
+refer to the Alces Flight Compute documentation <http://docs.alces-flight.com>.
+
+EOF
+           while [ "$confirm" != "y" -a "${confirm}" != "n" ]; do
+               read -N1 -p "Show this message next time you start a session (Y/N)? " confirm
+               confirm=$(echo "$confirm" | tr 'A-Z' 'a-z')
+           done
+           if [ "$confirm" == "n" ]; then
+               touch "${seen_file}"
+           fi
+        fi
+    fi
 }
 
 _GRABBER="${cw_ROOT}/libexec/session/share/grabber"
