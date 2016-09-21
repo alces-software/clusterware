@@ -254,6 +254,7 @@ refer to the Alces Flight Compute documentation <http://docs.alces-flight.com>.
 EOF
            while [ "$confirm" != "y" -a "${confirm}" != "n" ]; do
                read -N1 -p "Show this message next time you start a session (Y/N)? " confirm
+               echo ""
                confirm=$(echo "$confirm" | tr 'A-Z' 'a-z')
            done
            if [ "$confirm" == "n" ]; then
