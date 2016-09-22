@@ -278,10 +278,8 @@ network_get_edition() {
         user_id=$(uuid)
     fi
     result=$(dig _license.${user_id}.cloud.alces.network +short TXT | cut -f2 -d'"')
-    if [[ " $result " == *' edition=enterprise '* ]]; then
-        echo "enterprise"
-    elif [[ " $result " == *' edition=enhanced '* ]]; then
-        echo "enhanced"
+    if [[ " $result " == *' edition=professional '* ]]; then
+        echo "professional"
     else
         echo "community"
     fi
