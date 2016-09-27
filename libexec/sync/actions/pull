@@ -119,6 +119,7 @@ _pull() {
     export AWS_ACCESS_KEY_ID="${AWS_ACCESS_KEY_ID:-${cw_SYNC_aws_access_key_id:-${cw_INSTANCE_aws_iam_role_access_key_id}}}"
     export AWS_SECURITY_TOKEN="${AWS_SECURITY_TOKEN:-${cw_INSTANCE_aws_iam_role_security_token}}"
     target_dir="$(_target_for "${sync_cfg}")"
+    ${_S3CMD} mb s3://${bucket} &>/dev/null
     if entries="$(${_S3CMD} ls s3://${bucket}/sync/$(whoami)/${target}/ 2>/dev/null)"; then
         if [ "$(echo "${entries}" | wc -l)" != "0" ]; then
             title "Synchronizing directory '${target_dir}' from s3://${bucket}"
