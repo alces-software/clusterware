@@ -48,6 +48,9 @@ case $action in
     build)
         exec /bin/bash $cw_ROOT/libexec/service/actions/build "$@"
         ;;
+    package)
+        exec /bin/bash $cw_ROOT/libexec/service/actions/package "$@"
+        ;;
     *)
         cat <<EOF
 Usage: $cw_BINNAME COMMAND [[OPTION]... [ARGS]]

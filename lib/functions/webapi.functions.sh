@@ -33,6 +33,7 @@ webapi_send() {
     verb="$1"
     url="$2"
     shift 2
+    params=()
     while [ "$1" ]; do
         case $1 in
             --auth)
@@ -48,12 +49,13 @@ webapi_send() {
                 shift
                 ;;
             *)
+                params+=($1)
                 shift
                 ;;
         esac
     done
     mimetype="${mimetype:-application/vnd.api+json}"
-    params=(-s -X ${verb} "$@")
+    params+=(-s -X ${verb})
     if [ "${auth}" ]; then
         params+=(-u "${auth}")
     fi

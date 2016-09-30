@@ -48,10 +48,6 @@ install_git() {
         doing 'Install'
         make prefix="${target}/opt/git" install &> "${dep_logs}/git-install.log"
         say_done $?
-
-        doing 'Modulefile'
-        sed -e "s,_cw_ROOT_,${target},g" ${source}/scripts/dependencies/contrib/git-module.template > "${target}"/etc/modules/services/git
-        say_done $?
     else
         install_dist git
     fi

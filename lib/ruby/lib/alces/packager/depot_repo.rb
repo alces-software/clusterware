@@ -46,6 +46,12 @@ module Alces
           @all ||= Config.depot_repo_paths.map { |path| new(path) }
         end
 
+        def requiring_update
+          select do |repo|
+            repo.last_update + Config.update_period < DateTime.now
+          end
+        end
+
         def get(name)
           find {|r| r.name == name}
         end
@@ -78,25 +84,60 @@ module Alces
 
       def update!
         if metadata.key?(:source)
-          r = Alces.git.sync(metadata_path, metadata[:source])
-          case r
-          when /^Branch master set up/, /^Updating/
-            # force reload of packages if needed
-            @packages = nil
-            :ok
+          case r = Alces.git.sync(metadata_path, metadata[:source])
+          when /^Branch master set up/
+            set_last_update
+            # force reload of depot metadata if needed
+            @depot_metadata = nil
+            [:ok, head_revision]
+          when /^Updating (\S*)\.\.(\S*)/
+            set_last_update
+            cur = $1
+            tgt = $2
+            head_rev = head_revision
+            if head_rev != tgt
+              [:outofsync, head_rev]
+            else
+              # force reload of packages if needed
+              @depot_metadata = nil
+              [:ok, tgt]
+            end
           when /^Already up-to-date./
-            :uptodate
+            set_last_update
+            [:uptodate, head_revision]
           else
             raise "Unrecognized response from synchronization: #{r.chomp}"
           end
         else
-          :not_updateable
+          set_last_update
+          [:not_updateable, nil]
         end
       rescue
         raise "Unable to sync repo: '#{name}' (#{$!.message})"
       end
 
+      def last_update
+        if File.exists?(last_update_file)
+          datetime_str = File.readlines(last_update_file).first
+          DateTime.parse(datetime_str)
+        else
+          # Return earliest possible datetime so update will (probably) run
+          # when next needed.
+          DateTime.new
+        end
+      end
+
+      def last_update=(datetime)
+        File.open(last_update_file, 'w') do |file|
+          file.write(datetime)
+        end
+      end
+
       private
+      def head_revision
+        Alces.git.head_revision(metadata_path)[0..6] rescue 'unknown'
+      end
+
       def load_depot_metadata
         info "Loading depot repo from path: #{path}"
         if File.directory?(path)
@@ -123,6 +164,14 @@ module Alces
         else
           {}
         end
+      end
+
+      def last_update_file
+        File.join(path, Config.last_update_filename)
+      end
+
+      def set_last_update
+        self.last_update = DateTime.now
       end
     end
   end

@@ -27,7 +27,7 @@ main() {
     shift
 
     case $action in
-        help|node|autoscaling)
+        help|node|autoscaling|hyperthreading|scheduler)
             help_for_${action}
             ;;
         ?*)
@@ -59,6 +59,7 @@ EOF
 printf "    %-28s  %s\n" "$binname help" "More help about this command."
 printf "    %-28s  %s\n" "$binname node" "Perform initial node setup."
 printf "    %-28s  %s\n" "$binname autoscaling" "Control autoscaling behaviour."
+printf "    %-28s  %s\n" "$binname hyperthreading" "Control hyperthreading behaviour."
 cat <<EOF
 
 Please report bugs to support@alces-software.com
@@ -89,6 +90,44 @@ help_for_autoscaling() {
 
     Change or retrieve autoscaling behaviour.  If no action is
     specified, display autoscaling status.
+
+EOF
+}
+
+help_for_hyperthreading() {
+    cat <<EOF
+  SYNOPSIS:
+
+    alces configure hyperthreading [enable|disable|status]
+
+  DESCRIPTION:
+
+    Change or retrieve hyperthreading behaviour.  If no action is
+    specified, display hyperthreading status.
+
+EOF
+}
+
+help_for_scheduler() {
+    cat <<EOF
+  SYNOPSIS:
+
+    alces configure scheduler [status]
+    alces configure scheduler allocation <strategy>
+    alces configure scheduler submission <strategy>
+
+  DESCRIPTION:
+
+    Change or retrieve scheduler behaviour.  If no action is
+    specified, display current scheduler configuration.
+
+    Valid 'allocation' strategies are 'packing' (pack jobs on to as
+    few nodes as possible) or 'spanning' (select the least busy nodes
+    for jobs).
+
+    Valid 'submission' strategies are 'all' (accept job submission
+    from all nodes) 'master' (accept job submission from the master
+    node only) or 'none' (disable job submission).
 
 EOF
 }

@@ -20,11 +20,13 @@
 # https://github.com/alces-software/clusterware
 #==============================================================================
 require 'memoist'
+require 'alces/packager/parameter_utils'
 
 module Alces
   module Packager
     class DefinitionHandler
       extend Memoist
+      include ParameterUtils
 
       class << self
         def install(*a)
@@ -111,14 +113,22 @@ module Alces
       end
 
       def install_defn(variant = nil)
-        install_dependencies(variant)
+        binary_viable = ((!options.compile && Config.prefer_binary && options.binary.nil?) ||
+                         options.binary) && archive_path = binary_path(defn, variant)
+        # trigger an early check for any missing parameters for the target package
+        params unless binary_viable
+        install_dependencies(variant, binary_viable)
         say("Installing #{colored_path(defn)}".tap do |s|
           s << " (#{variant})" unless variant.nil?
             end)
-        if ((Config.prefer_binary && options.binary.nil?) || options.binary) &&
-           archive_path = binary_path(defn, variant)
+        if binary_viable
           ArchiveImporter.new(archive_path, options).import
           return
+        elsif options.binary_only
+          msg = "Binary package could not be found for '#{colored_path(defn)}".tap do |s|
+            s << " (#{variant})" if variant
+          end << "'"
+          raise NotFoundError, msg
         end
         opts = install_opts.tap do |h|
           h[:variant] = variant unless variant.nil?
@@ -126,9 +136,9 @@ module Alces
         Actions.install(defn, opts, IoHandler)
       end
 
-      def install_dependencies(variant = options.variant)
+      def install_dependencies(variant = options.variant, runtime_only = false)
         dh = DependencyHandler.new(defn, selected_compiler, variant, options.global, options.ignore_satisfied)
-        missing = dh.resolve_requirements_tree.reject { |_, _, installed, _| installed }
+        missing = dh.resolve_requirements_tree(dh.requirements_tree(runtime_only)).reject { |_, _, installed, _| installed }
         missing.pop
         return unless missing.any?
 
@@ -149,10 +159,11 @@ EOF
         if options.yes || (!options.non_interactive && confirm(msg))
           missing_params = {}
           missing.each do |_, pkg, _, build_arg_hash|
-            unless ((Config.prefer_binary && options.binary.nil?) || options.binary || options.binary_depends) &&
+            unless ((!options.compile && Config.prefer_binary && options.binary.nil?) ||
+                    options.binary || options.binary_depends) &&
                    binary_available?(pkg, build_arg_hash[:variant])
               (build_arg_hash[:params] || '').split(',').each do |p|
-                if !params(false)[p.to_sym]
+                if !params(false,pkg)[p.to_sym]
                   (missing_params[pkg] ||= []) << p
                 end
               end
@@ -188,31 +199,23 @@ EOF
         options.compiler == :first ? defn.compilers.keys.first : options.compiler
       end
 
-      def params(validate = true)
+      def params(validate = true, pkg = defn)
         {}.tap do |params|
+          params.merge!(default_params(pkg)) if (Config.use_default_params && options.defaults != false) || options.defaults
           a = options.args[1..-1]
           while param = a.shift do
             k,v = param.split('=')
             raise InvalidParameterError, "No value found for parameter '#{k}' -- did you forget the '='?" if v.nil?
             params[k.to_sym] = v
           end
-          defn.validate_params!(params) if validate
+          pkg.validate_params!(params) if validate
         end
       rescue InvalidParameterError
-        print_params_help(defn)
+        print_params_help(pkg)
         say "\n"
         raise
       end
       memoize :params
-
-      def print_params_help(defn)
-        if defn.metadata[:params] && defn.metadata[:params].any?
-          say "\n  #{'Required parameters'.underline} (param=value)\n\n"
-          defn.params.each do |k,v|
-            say sprintf("%15s: %s\n", k, v)
-          end
-        end
-      end
 
       def install_opts
         {

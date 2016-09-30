@@ -39,7 +39,14 @@ setup() {
 take_screenshot() {
     local display
     display=$1
-    xwd -root -silent -display :${display} | xwdtopnm | pnmtopng | base64
+
+    # Dump image of session X window.
+    xwd -root -silent -display ":${display}" | \
+
+        # Convert to base64-encoded PNG.
+        xwdtopnm | \
+        pnmtopng | \
+        base64 -w0
 }
 
 main() {
@@ -51,7 +58,7 @@ main() {
     sleep 10
     while true; do
         action_warn "$(date --rfc-3339=seconds): Taking screenshot"
-        take_screenshot $display | handler_run_hook session-screenshot "$sessionid"
+        take_screenshot "$display" | handler_run_hook session-screenshot "$sessionid"
         sleep 60 &>/dev/null </dev/null &
         wait
     done

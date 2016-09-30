@@ -30,120 +30,17 @@ shift
 
 case $action in
     aliases|aliase|alias|alia|ali|al|a)
-        for a in $(echo $MODULEPATH | sed 's/:/ /g'); do
-            if [ -f "${a}/.aliases" ]; then
-                cat "${a}/.aliases"
-            fi
-        done
+        exec /bin/bash $cw_ROOT/libexec/module/actions/aliases "$@"
         ;;
     ls|l|av*)
-        for a in "$@"; do
-            case $a in
-                --human|-h|--long|-l|--terse|-t)
-                    ${cw_ROOT}/opt/Modules/bin/modulecmd $cw_SHELL avail "$@"
-                    exit $?
-                    ;;
-            esac
-        done
-        ${cw_ROOT}/opt/Modules/bin/modulecmd $cw_SHELL avail -t "$@" 2>&1 | (while read l; do
-            case $l in
-                *:)
-                    if [ "$cw_COLOUR" == "1" ]; then
-                        echo "--- [0;47;30m `echo $l | rev | cut -c2- | rev` [0m ---"
-                    else
-                        echo "---  `echo $l | rev | cut -c2- | rev`  ---"
-                    fi
-                    ;;
-                *)
-                    if [ -z "$l" ]; then
-                        echo ""
-                    else
-                        i=0
-                        full=$l
-                        unset parts
-                        while true; do
-                            part=${l%%/*}
-                            l=${l#*/}
-                            parts[i++]=$part
-                            if [ "$l" = "$part" ]; then
-                                break
-                            fi
-                        done
-                        if [ "${parts[i-1]%%(default)}" == "${parts[i-1]}" ]; then
-                            default=0
-                        else
-                            default=1
-                            parts[i-1]=${parts[i-1]%%(default)}
-                        fi
-                        version_default=0
-                        # full=${full%/*}
-                        # for a in $(echo $MODULEPATH | sed 's/:/ /g'); do
-                        #     if [ -f "${a}/.aliases" ]; then
-                        #       if grep -q "module-version $full default" "${a}/.aliases"; then
-                        #           version_default=1
-                        #           break
-                        #       fi
-                        #     fi
-                        # done
-                        c=0
-                        for part in "${parts[@]}"; do
-                            if [ "$cw_COLOUR" == "1" ]; then
-                                case $c in
-                                    0)
-                                        echo -n "  [38;5;5m"
-                                        ;;
-                                    1)
-                                        echo -n "/[38;5;221m"
-                                        ;;
-                                    2)
-                                        echo -n "/[38;5;74m"
-                                        ;;
-                                    *)
-                                        echo -n "/[38;5;68m"
-                                        ;;
-                                esac
-                                echo -n $part
-                                echo -n "[0m"
-                            else
-                                case $c in
-                                    0)
-                                        echo -n "  $part"
-                                        ;;
-                                    *)
-                                        echo -n "/$part"
-                                        ;;
-                                esac
-                            fi
-                            c=$(($c+1))
-                        done
-                        if [ $version_default == 1 -a $default == 1 ]; then
-                            if [ "$cw_COLOUR" == "1" ]; then
-                                echo -n " *[0;45;30mdefault[0m*"
-                            else
-                                echo -n " *default*"
-                            fi
-                        elif [ $version_default == 1 ]; then
-                            if [ "$cw_COLOUR" == "1" ]; then
-                                echo -n " *[0;46;30mdefault[0m*"
-                            else
-                                echo -n " *default*"
-                            fi
-                        elif [ $default == 1 ]; then
-                            if [ "$cw_COLOUR" == "1" ]; then
-                                echo -n " *[0;42;30mdefault[0m*"
-                            else
-                                echo -n " *default*"
-                            fi
-                        fi
-                        echo ""
-                    fi
-                    ;;
-            esac; done) 1>&2
+        exec /bin/bash $cw_ROOT/libexec/module/actions/avail "$@"
         ;;
     hel|he|h|--help|-h)
         display_help $0
         ;;
     *)
+        require action
+        export cw_THEME_prim cw_THEME_sec1 cw_THEME_sec2 cw_THEME_mid cw_THEME_comp
         ${cw_ROOT}/opt/Modules/bin/modulecmd $cw_SHELL $action "$@"
         ;;
 esac

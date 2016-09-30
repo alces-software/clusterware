@@ -4,3 +4,26 @@
 lib/ruby/vendor/ruby
 tmp
 *.pyc
+
+# Created by `scripts/develop`.
+bin/bin
+lib/lib
+libexec/libexec
+
+# Whitelist directories in libexec which are part of main Clusterware repo.
+# Many serviceware install scripts dump scripts they need into
+# "$cw_ROOT/libexec", which, when Clusterware development mode is enabled,
+# causes these to be too easy to accidentally add with `git add .` and also
+# clutter up `git status`.
+libexec/*
+!libexec/about
+!libexec/actions
+!libexec/configure
+!libexec/gridware
+!libexec/handler
+!libexec/howto
+!libexec/service
+!libexec/session
+!libexec/share
+!libexec/storage
+!libexec/template

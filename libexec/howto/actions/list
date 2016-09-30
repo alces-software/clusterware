@@ -39,9 +39,9 @@ main() {
             guide="$(basename "$a" ".md" | sed 's/^[0-9]*-\(.*\)/\1/g')"
             title="$(head -n1 "$a" | grep ' -- ' | sed 's/.*-- \(.*\)/\1/g')"
             if [ "$title" ]; then
-                titlepart=" ... \e[35m${title}\e[0m"
+                titlepart=" ... \e[38;5;${cw_THEME_prim}m${title}\e[0m"
             fi
-            echo -e "\e[38;5;68m$(printf "%2d" ${c})\e[0m -> \e[38;5;221m$(printf "%-${w}s" ${guide})\e[0m${titlepart}"
+            echo -e "\e[38;5;${cw_THEME_sec1}m$(printf "%2d" ${c})\e[0m -> \e[38;5;${cw_THEME_sec2}m$(printf "%-${w}s" ${guide})\e[0m${titlepart}"
             unset titlepart title
         done
     else

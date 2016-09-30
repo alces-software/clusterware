@@ -28,6 +28,18 @@ require process
 
 main() {
     local repo url rev
+    # --match-remote is a hidden option for use when developing, which is given
+    # a repo branch parameter and should update the local repo to match that
+    # branch, ignoring local changes.
+    if [[ "$1" == "--match-remote" ]]; then
+        match_remote_branch='master'
+        shift
+        if [[ "$1" ]]; then
+            match_remote_branch="$1"
+            shift
+        fi
+    fi
+
     if [ "$1" ]; then
         repo="$1"
         url="$2"
@@ -52,7 +64,12 @@ main() {
     else
         echo "Updating serviceware: ${repo}"
         doing 'Update'
-        git_update "${cw_SERVICEWARE_REPODIR}/${repo}"
+        clonedir="${cw_SERVICEWARE_REPODIR}/${repo}"
+        if [[ -n "${match_remote_branch}" ]]; then
+            git_match_remote "${clonedir}" "${match_remote_branch}"
+        else
+            git_update "${clonedir}"
+        fi
         say_done $?
     fi
     action_cleanup

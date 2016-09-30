@@ -82,7 +82,7 @@ ui_print_enabled_status_line() {
     sub_item="${4}"
 
     if [[ -n "${sub_item}" ]]; then
-        sub_item_section="/\e[35m${sub_item}\e[0m"
+        sub_item_section="/\e[38;5;${cw_THEME_mid}m${sub_item}\e[0m"
     fi
-    echo -e "[${enabled}] \e[38;5;68m${repo}\e[0m/\e[38;5;221m${item}\e[0m${sub_item_section}"
+    echo -e "[${enabled}] \e[38;5;${cw_THEME_sec1}m${repo}\e[0m/\e[38;5;${cw_THEME_sec2}m${item}\e[0m${sub_item_section}"
 }

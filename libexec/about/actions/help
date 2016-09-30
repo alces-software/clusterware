@@ -27,13 +27,18 @@ main() {
     shift
 
     case $action in
-        help|node|identity)
+        help)
             help_for_${action}
             ;;
         ?*)
-            echo "${cw_BINNAME}: no such topic: ${action}"
-            echo ""
-            general_help
+            if [ -f "$cw_ROOT"/etc/meta.d/${action}.rc ]; then
+                extract_info "$cw_ROOT"/etc/meta.d/${action}.rc
+                help_for_action
+            else
+                echo "${cw_BINNAME}: no such topic: ${action}"
+                echo ""
+                general_help
+            fi
             ;;
         *)
             general_help
@@ -41,29 +46,15 @@ main() {
     esac
 }
 
-help_for_node() {
+help_for_action() {
     cat <<EOF
   SYNOPSIS:
 
-    alces about node
+    alces about ${action}
 
   DESCRIPTION:
 
-    Display information about the networking and software
-    configuration of this node/instance.
-
-EOF
-}
-
-help_for_cluster() {
-    cat <<EOF
-  SYNOPSIS:
-
-    alces about identity
-
-  DESCRIPTION:
-
-    Display information about the identity of this cluster.
+$(fold -s -w66 <<< "${cmd_HELP}" | sed 's/^/    /g')
 
 EOF
 }
@@ -98,7 +89,10 @@ general_help() {
 
 EOF
 printf "    %-22s  %s\n" "$binname help" "More help about this command."
-printf "    %-22s  %s\n" "$binname node" "Display information about this node/instance."
+for a in "$cw_ROOT"/etc/meta.d/*.rc; do
+    extract_info "$a"
+    printf "    %-22s  %s\n" "$binname $(basename "$a" .rc)" "${cmd_SYNOPSIS}."
+done
 cat <<EOF
 
 Please report bugs to support@alces-software.com

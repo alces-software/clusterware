@@ -22,10 +22,12 @@
 #==============================================================================
 require action
 require storage
+require process
 
 main() {
     local name type system
     if [ "$1" == "--system" ]; then
+        process_reexec_sudo "$@"
         system="$1"
         shift
     fi

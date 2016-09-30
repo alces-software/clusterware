@@ -84,6 +84,7 @@ module Alces
           c.option '--ignore-bad', "Allow packages containing hard coded paths to be exported#{suffix}"
           c.option '--accept-bad PATTERN(S)', String, "Allow packages containing hard coded paths in matching files to be exported (comma-separated glob patterns)#{suffix}"
           c.option '--accept-elf', "Allow ELF files with acceptable hard coded search path to be exported#{suffix}"
+          c.option '--patch-binary PATTERN(S)', String, "Patch binary files containing hard coded paths in matching files (comma-separated glob patterns)#{suffix}"
         end
 
         def set_aliases(target, opts = {})
@@ -110,7 +111,10 @@ module Alces
         end
       end
 
-      $terminal.wrap_at = HighLine::SystemExtensions.terminal_size.first - 5 rescue 80 if $stdin.tty?
+      if $stdin.tty?
+        term_width = HighLine::SystemExtensions.terminal_size.first rescue 80
+        $terminal.wrap_at = (term_width < 80 ? 80 : term_width) - 5
+      end
 
       program :name, 'alces gridware'
       program :version, '1.0.0'
@@ -158,7 +162,9 @@ module Alces
         c.option '-m', '--modules STRING', String, 'Specify modules to load before build'
         c.option '-l', '--latest', 'Install latest if multiple versions of package available'
         c.option '-b', '--[no-]binary', 'Toggle use of binary packages when available'
+        c.option '--[no-]defaults', 'Toggle use of default parameters for package builds'
         c.option '--binary-depends', 'Prefer binary packages for dependencies when available'
+        c.option '--binary-only', 'Fail if a binary package is not available'
       end
       set_aliases(:install, min: 3)
 
@@ -203,6 +209,8 @@ module Alces
         c.option '-d', '--depot STRING', String, 'Specify target depot [install]'
         c.option '-g', '--global', 'Allow use of packages across all depots when resolving missing dependencies [install]'
         c.option '-b', '--binary', 'Prefer binary downloads when resolving missing dependencies [install]'
+        c.option '--[no-]defaults', 'Toggle use of default parameters for package builds [install]'
+        c.option '--binary-only', 'Fail if a binary package is not available [install]'
         c.option '-1', '--oneline', 'List one depot per line [list]'
         c.option '--[no-]notify', "(Dis)allow clusterware notifications (default: allow) [init, install, enable, disable, purge]"
         c.summary = "Perform a depot operation"

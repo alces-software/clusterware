@@ -44,6 +44,8 @@ install_modules() {
         doing 'Configure'
         if [ -f /usr/lib64/tclConfig.sh ]; then
             TCLLIB=/usr/lib64
+        elif [ -f /usr/lib/tcl8.6/tclConfig.sh ]; then
+            TCLLIB=/usr/lib/tcl8.6
         else
             TCLLIB=/usr/lib
         fi

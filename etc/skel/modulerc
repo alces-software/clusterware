@@ -1,9 +1,11 @@
 #%Module1.0#####################################################################
 ##
 ## Alces Clusterware - Environment modules initialization file
-## Copyright (c) 2008-2015 Alces Software Ltd
+## Copyright (c) 2008-2016 Alces Software Ltd
 ##
 ################################################################################
+module-log warn null
+
 if { [info exists ::env(cw_TRACE)] } {
     puts stderr " -> $::ModulesCurrentModulefile"
 }

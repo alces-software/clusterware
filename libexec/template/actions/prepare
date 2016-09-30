@@ -1,0 +1,89 @@
+#!/bin/bash
+#==============================================================================
+# Copyright (C) 2016 Stephen F. Norledge and Alces Software Ltd.
+#
+# This file/package is part of Alces Clusterware.
+#
+# Alces Clusterware is free software: you can redistribute it and/or
+# modify it under the terms of the GNU Affero General Public License
+# as published by the Free Software Foundation, either version 3 of
+# the License, or (at your option) any later version.
+#
+# Alces Clusterware is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+# Affero General Public License for more details.
+#
+# You should have received a copy of the GNU Affero General Public License
+# along with this package.  If not, see <http://www.gnu.org/licenses/>.
+#
+# For more information on the Alces Clusterware, please visit:
+# https://github.com/alces-software/clusterware
+#==============================================================================
+require action
+require document
+require storage
+
+main() {
+    local idx template source_name vars license f datadir
+    idx="$1"
+    if template="$(document_get "$idx" templates .tpl .sh.tpl)"; then
+        vars=$(grep '^#@ ' "${template}" | cut -c4-)
+        if [ "$vars" ]; then
+            declare -A cw_TEMPLATE
+            eval "$vars"
+            if [ "${cw_TEMPLATE[files]}" ]; then
+                datadir="${cw_TEMPLATE[datadir]:-$(basename "${template}" .sh.tpl)}"
+                if [ -w "${cw_GRIDWARE_root:-/opt/gridware}" ]; then
+                    datadir="${cw_GRIDWARE_root:-/opt/gridware}/data/${datadir}"
+                else
+                    datadir="$HOME/gridware/data/${datadir}"
+                fi
+                if [ -d "${datadir}" ]; then
+                    action_die "data directory already exists: ${datadir}" 1
+                fi
+                if storage_configuration_exists gridware-data; then
+                    type=$(storage_type_for gridware-data)
+                    if storage_load_functions "${type}"; then
+                        mkdir -p "${datadir}"
+                        for f in ${cw_TEMPLATE[files]}; do
+                            set -o pipefail
+                            if ! ${type}_storage_get gridware-data "$f" "${datadir}" | stdbuf -oL sed -e "s/^/$cw_BINNAME: /g"; then
+                                rm -rf "${datadir}"
+                                action_die "unable to download '$f' from 'gridware-data' storage backend - please consult the template documentation ('alces template info $1') for details regarding data acquisition" 1
+                            else
+                                if [[ "$f" == *.al.gr.tar.gz ]]; then
+                                    action_warn "extracting Gridware data archive"
+                                    (
+                                        cd "${datadir}"
+                                        action_warn "$(tar xvzf "$(basename "$f")" | sed 's/^/  /g')"
+                                    )
+                                fi
+                            fi
+                            set +o pipefail
+                        done
+                    else
+                        action_die "storage backend for the 'gridware-data' storage configuration cannot be loaded (${type})" 1
+                    fi
+                else
+                    action_die "unable to find 'gridware-data' storage configuration - please consult the template documentation ('alces template info $1') for details regarding data acquisition" 1
+                fi
+                :
+            else
+                action_die "no preparation required for template '$(basename "${template}" .sh.tpl)'" 0
+            fi
+        fi
+    else
+        errlvl=$?
+        if [ $errlvl == 1 ]; then
+            action_die "no templates found"
+        elif [ $errlvl == 3 ]; then
+            action_die "please specify a template index or name"
+        else
+            action_die "invalid template number requested: ${idx}"
+        fi
+    fi
+    action_cleanup
+}
+
+main "$@"

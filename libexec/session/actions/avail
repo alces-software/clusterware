@@ -25,7 +25,7 @@ require vnc
 require ui
 
 main() {
-    local repopath reponame sessionpath sessionname enabled
+    local repopath reponame sessionpath sessionname enabled sessiondirs
     for repopath in "${cw_SESSION_REPODIR}"/*; do
         reponame=$(basename "$repopath")
         for sessionpath in "${repopath}"/*; do
@@ -43,6 +43,20 @@ main() {
             fi
             ui_print_enabled_status_line "${enabled}" "${reponame}" "${sessionname}"
         done
+    done
+    IFS=: read -a sessiondirs <<< "${CW_SESSIONPATH}"
+    for dir in "${sessiondirs[@]}"; do
+        shopt -s nullglob
+        for sessionpath in "${dir}"/*; do
+            if [[ ! -d "$sessionpath" ]]; then
+                # We consider any directory within the repo to be for a
+                # session, and skip any other files.
+                continue
+            fi
+            sessionname="$(basename "$sessionpath")"
+            ui_print_enabled_status_line '=' "external" "${sessionname}"
+        done
+        shopt -u nullglob
     done
     action_cleanup
 }

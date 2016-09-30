@@ -75,10 +75,10 @@ main() {
 	try_skip_suffix=true
 	shift
     fi
-    basename="${1:-mycluster}"
+    basename="${1:-flight}"
+    sane_name="$(echo "${basename}" | tr "[A-Z]" "[a-z]" | sed -e 's/[^a-z0-9_]/-/g' -e 's/-[-]*/-/g' -e 's/-$//g')"
     shift
-    files_load_config meta
-    if [ -z "${cw_META_hostname}" ]; then
+    if ! files_load_config --optional access; then
 	if [ "${try_skip_suffix}" ]; then
 	    if _check_usable_name "${basename}"; then
 		name="${basename}"
@@ -89,10 +89,25 @@ main() {
 	else
             name="$(_get_usable_name ${basename})"
 	fi
-        echo "cw_META_fqdn_desc=\"Public host name\"" >> "${cw_ROOT}"/etc/meta.rc
-        echo "cw_META_fqdn=\"${name}.${cw_NAMING_domain}\"" >> "${cw_ROOT}"/etc/meta.rc
-        echo "cw_META_hostname_desc=\"Clusterware name\"" >> "${cw_ROOT}"/etc/meta.rc
-        echo "cw_META_hostname=\"${name}\"" >> "${cw_ROOT}"/etc/meta.rc
+        echo "cw_ACCESS_fqdn=\"${name}.${cw_NAMING_domain}\"" >> "${cw_ROOT}"/etc/access.rc
+        cat <<EOF > "${cw_ROOT}"/etc/meta.d/access.rc
+: '
+: SYNOPSIS: External access details
+: HELP: Display information about the allocated hostname for accessing this cluster from the public internet.
+: '
+################################################################################
+##
+## Alces Clusterware - Metadata file
+## Copyright (c) 2016 Alces Software Ltd
+##
+################################################################################
+require files
+files_load_config access
+EOF
+        echo "cw_META_access_fqdn_desc=\"Access host name\"" >> "${cw_ROOT}"/etc/meta.d/access.rc
+        echo 'cw_META_access_fqdn="${cw_ACCESS_fqdn}"' >> "${cw_ROOT}"/etc/meta.d/access.rc
+        echo "cw_META_access_hostname_desc=\"External cluster name\"" >> "${cw_ROOT}"/etc/meta.d/access.rc
+        echo "cw_META_access_hostname=\"${name}\"" >> "${cw_ROOT}"/etc/meta.d/access.rc
         _ensure_secret
         ip="${2:-$(network_get_public_address)}"
 
@@ -109,7 +124,7 @@ main() {
             fi
         fi
     else
-        name="${cw_META_hostname}"
+        name="${cw_ACCESS_fqdn}"
     fi
     if naming_cert_exists; then
         action_die "certificate already present"

@@ -108,3 +108,37 @@ files_load_config() {
         fi
     fi
 }
+
+files_lock() {
+    local lockname fd tmout readonly
+    lockname="${1:-clusterware}"
+    fd=${2:-9}
+    tmout=${3:-30}
+    if [ "${fd:$((${#fd}-1))}" == "r" ]; then
+        # readonly
+        touch "${cw_ROOT}/var/lock/${lockname}.lock" &>/dev/null
+        fd="${fd:0:$((${#fd}-1))}"
+        readonly=true
+    fi
+    mkdir -p "${cw_ROOT}"/var/lock
+    if [ "$readonly" ]; then
+        eval "exec ${fd}<\"${cw_ROOT}/var/lock/${lockname}.lock\""
+    else
+        eval "exec ${fd}>\"${cw_ROOT}/var/lock/${lockname}.lock\""
+    fi
+    flock -w$tmout $fd
+}
+
+files_unlock() {
+    local fd readonly
+    fd=${1:-9}
+    if [ "${fd:$((${#fd}-1))}" == "r" ]; then
+        fd="${fd:0:$((${#fd}-1))}"
+        readonly=true
+    fi
+    if [ "$readonly" ]; then
+        eval "exec ${fd}<&-"
+    else
+        eval "exec ${fd}>&-"
+    fi
+}

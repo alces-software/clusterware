@@ -27,9 +27,6 @@ setup() {
         if [ -e "${a}"/clusterware/config.rc ]; then
             source "${a}"/clusterware/config.rc
             break
-        elif [ -e "${a}"/clusterware/config.vars.sh ]; then
-            source "${a}"/clusterware/config.vars.sh
-            break
         fi
     done
     if [ -z "${cw_ROOT}" ]; then
@@ -40,15 +37,57 @@ setup() {
 }
 
 main() {
-    . "${cw_ROOT}"/etc/ruby.rc
-    export HOME=/root
-    export ALCES_RUBY_VERSION=$(ruby -se "puts RUBY_VERSION")
-    cd "${cw_ROOT}"/opt/alces-storage-manager-daemon
-    bin/alces-storage-manager-daemon start \
-       --pidfile /var/run/alces-storage-manager-daemon.pid \
-       -l /var/log/alces-storage-manager-daemon/runtime.log \
-       -e production
+    local url input_file input args url_regex err auth post_args
+    if [ "$1" == "-@" ]; then
+        input_file="$2"
+        shift 2
+    fi
+    if [ "${cw_FLIGHT_TRIGGER_url}" ]; then
+        url="${cw_FLIGHT_TRIGGER_url}"
+    else
+        url="$1"
+        shift
+    fi
+    if [ "${cw_FLIGHT_TRIGGER_auth}" ]; then
+        auth="${cw_FLIGHT_TRIGGER_auth}"
+    fi
+    if [ -z "${url}" ]; then
+        action_die "usage: $0 [-@ <file>] <url> [args...]"
+    elif ! [[ "${url}" =~ ${_URL_REGEX} ]]; then
+        action_die "invalid url: ${url}"
+    elif [ "${input_file}" ]; then
+        if [ ! -r "${input_file}" ]; then
+            action_die "unable to read input from: ${input_file}"
+        fi
+        input="$(cat "${input_file}")"
+    fi
+
+    if [ "$#" -gt 0 ]; then
+        args="$("${_JO}" -a -- "$@")"
+    else
+        args=[]
+    fi
+    post_args=(--mimetype "application/json" -k --location-trusted)
+    if [ "$auth" ]; then
+        post_args+=(--auth "${auth}")
+    fi
+    "${_JO}" options={} args="${args}" input="${input}" | \
+        webapi_post "${url}" "${post_args[@]}"
+    err=$?
+    if [ $err -gt 0 ]; then
+        action_die "request failed ($err)" $err
+    else
+        echo ""
+    fi
 }
 
 setup
+
+require action
+require webapi
+
+_URL_REGEX='(https?)://[-A-Za-z0-9\+&@#/%?=~_|!:,.;]*[-A-Za-z0-9\+&@#/%=~_|]'
+_JO="${cw_ROOT}"/opt/jo/bin/jo
+_JQ="${cw_ROOT}"/opt/jq/bin/jq
+
 main "$@"

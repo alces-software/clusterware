@@ -43,9 +43,9 @@ main() {
                 eval "$vars"
             fi
             if [ "${cw_TEMPLATE[name]}" ]; then
-                namepart=" ... \e[35m${cw_TEMPLATE[name]}\e[0m"
+                namepart=" ... \e[38;5;${cw_THEME_prim}m${cw_TEMPLATE[name]}\e[0m"
             fi
-            echo -e "\e[38;5;68m$(printf "%2d" ${c})\e[0m -> \e[38;5;221m$(printf "%-${w}s" ${tmpl})\e[0m${namepart}"
+            echo -e "\e[38;5;${cw_THEME_sec1}m$(printf "%2d" ${c})\e[0m -> \e[38;5;${cw_THEME_sec2}m$(printf "%-${w}s" ${tmpl})\e[0m${namepart}"
             unset cw_TEMPLATE namepart
         done
     else

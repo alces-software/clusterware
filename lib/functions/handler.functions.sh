@@ -30,7 +30,7 @@ cw_HANDLER_REPODIR="${cw_ROOT}/var/lib/handler/repos"
 cw_HANDLER_DEFAULT_REPO="base"
 cw_HANDLER_DEFAULT_REPO_URL="${cw_HANDLER_DEFAULT_REPO_URL:-https://:@github.com/alces-software/clusterware-handlers}"
 cw_HANDLER_BROADCASTER="${cw_ROOT}/opt/serf/bin/serf"
-cw_HANDLER_name="$(cd "$(dirname "$0")" && basename "$(pwd)"):$(basename "$0")"
+cw_HANDLER_name="$(cd "$(dirname "$0")" && basename "$(pwd)" | sed 's/^[0-9]*-//g'):$(basename "$0")"
 
 handler_run_hook() {
     local event
@@ -64,14 +64,25 @@ handler_disable() {
 }
 
 handler_broadcast() {
-    local event
+    local event quietly
+    if [ "$1" == "--quiet" ]; then
+        quietly="true"
+        shift
+    fi
     event="$1"
     if [ -f "${cw_ROOT}"/etc/config/cluster/auth.rc ]; then
         . "${cw_ROOT}"/etc/config/cluster/auth.rc
-        "${cw_HANDLER_BROADCASTER}" event \
-            -coalesce=false \
-            -rpc-auth="${cw_CLUSTER_auth_token}" \
-            "${event}" "$*"
+        if [ "$quietly" ]; then
+            "${cw_HANDLER_BROADCASTER}" event \
+              -coalesce=false \
+              -rpc-auth="${cw_CLUSTER_auth_token}" \
+              "${event}" "$*" &>/dev/null
+        else
+            "${cw_HANDLER_BROADCASTER}" event \
+              -coalesce=false \
+              -rpc-auth="${cw_CLUSTER_auth_token}" \
+              "${event}" "$*"
+        fi
     else
         return 1
     fi
@@ -108,4 +119,30 @@ handler_iptables_delete() {
     else
         echo "iptables rule not present: $*"
     fi
+}
+
+handler_add_libdir() {
+    local dir libdir
+    libdir="$1"
+    if [ "${libdir:0:1}" == "/" ]; then
+        cw_LIBPATH="${cw_LIBPATH}:${libdir}"
+    else
+        libdir="/$1"
+        dir=$(cd "$(dirname "${BASH_SOURCE[-1]}")" && pwd)
+        cw_LIBPATH="${cw_LIBPATH}:${dir}${libdir}"
+    fi
+}
+
+handler_run_helper() {
+    local dir helper
+    helper="$1"
+    shift
+    if [ "${helper:0:1}" != "/" ]; then
+        dir=$(handler_dir)/
+    fi
+    "${dir}${helper}" "$@"
+}
+
+handler_dir() {
+    cd "$(dirname "${BASH_SOURCE[-1]}")" && pwd
 }

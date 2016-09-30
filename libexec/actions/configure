@@ -39,6 +39,12 @@ case $action in
     a|au|aut|auto|autos|autosc|autosca|autoscal|autoscali|autoscalin|autoscaling)
         exec /bin/bash "${cw_ROOT}"/libexec/configure/actions/autoscaling "$@"
         ;;
+    h|hy|hyp|hype|hyper|hypert|hyperth|hyperthr|hyperthre|hyperthrea|hyperthread|hyperthreadi|hyperthreadin|hyperthreading)
+        exec /bin/bash "${cw_ROOT}"/libexec/configure/actions/hyperthreading "$@"
+        ;;
+    s|sc|sch|sche|sched|schedu|schedul|schedule|scheduler)
+        exec /bin/bash "${cw_ROOT}"/libexec/configure/actions/scheduler "$@"
+        ;;
     *)
         cat <<EOF
 Usage: $cw_BINNAME COMMAND [[OPTION]... [ARGS]]
@@ -46,9 +52,11 @@ Perform configuration tasks.
 
 Commands:
 EOF
-printf "    %-28s  %s\n" "$cw_BINNAME help" "More help about this command."
-printf "    %-28s  %s\n" "$cw_BINNAME node" "Perform initial node setup."
-printf "    %-28s  %s\n" "$cw_BINNAME autoscaling" "Control autoscaling behaviour."
+printf "    %-30s  %s\n" "$cw_BINNAME help" "More help about this command."
+printf "    %-30s  %s\n" "$cw_BINNAME node" "Perform initial node setup."
+printf "    %-30s  %s\n" "$cw_BINNAME autoscaling" "Control autoscaling behaviour."
+printf "    %-30s  %s\n" "$cw_BINNAME hyperthreading" "Control hyperthreading behaviour."
+printf "    %-30s  %s\n" "$cw_BINNAME scheduler" "Control scheduler behaviour."
 cat <<EOF
 
 Please report bugs to support@alces-software.com

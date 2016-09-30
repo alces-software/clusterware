@@ -1,0 +1,96 @@
+#!/bin/bash
+#==============================================================================
+# Copyright (C) 2016 Stephen F. Norledge and Alces Software Ltd.
+#
+# This file/package is part of Alces Clusterware.
+#
+# Alces Clusterware is free software: you can redistribute it and/or
+# modify it under the terms of the GNU Affero General Public License
+# as published by the Free Software Foundation, either version 3 of
+# the License, or (at your option) any later version.
+#
+# Alces Clusterware is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+# Affero General Public License for more details.
+#
+# You should have received a copy of the GNU Affero General Public License
+# along with this package.  If not, see <http://www.gnu.org/licenses/>.
+#
+# For more information on the Alces Clusterware, please visit:
+# https://github.com/alces-software/clusterware
+#==============================================================================
+setup() {
+    local a xdg_config
+    IFS=: read -a xdg_config <<< "${XDG_CONFIG_HOME:-$HOME/.config}:${XDG_CONFIG_DIRS:-/etc/xdg}"
+    for a in "${xdg_config[@]}"; do
+        if [ -e "${a}"/clusterware/config.rc ]; then
+            source "${a}"/clusterware/config.rc
+            break
+        fi
+    done
+    if [ -z "${cw_ROOT}" ]; then
+        echo "$0: unable to locate clusterware configuration"
+        exit 1
+    fi
+    kernel_load
+}
+
+main() {
+    local target confirm
+    target="$1"
+    cfg_file="$(xdg_config_home)"/clusterware/sync.${target}.yml
+
+    if [ -z "$target" ]; then
+        action_die "usage: ${cw_BINNAME} <target name>"
+    elif [ -f "${cfg_file}" ]; then
+        bucket="${cw_SYNC_bucket}"
+        if [ -z "$bucket" ] && network_is_ec2; then
+            if files_load_config --optional instance-aws config/cluster; then
+                bucket="alces-flight-${cw_INSTANCE_aws_account_hash}"
+            fi
+        fi
+        if [ -z "$bucket" ]; then
+            action_die "target bucket name could not be determined"
+        fi
+        files_load_config --optional instance-aws-iam config/cluster
+        export AWS_SECRET_ACCESS_KEY="${AWS_SECRET_ACCESS_KEY:-${cw_SYNC_aws_secret_access_key:-${cw_INSTANCE_aws_iam_role_secret_access_key}}}"
+        export AWS_ACCESS_KEY_ID="${AWS_ACCESS_KEY_ID:-${cw_SYNC_aws_access_key_id:-${cw_INSTANCE_aws_iam_role_access_key_id}}}"
+        export AWS_SECURITY_TOKEN="${AWS_SECURITY_TOKEN:-${cw_INSTANCE_aws_iam_role_security_token}}"
+        if ${_S3CMD} ls s3://${bucket}/sync/$(whoami) &>/dev/null; then
+            path="s3://${bucket}/sync/$(whoami)/${target}"
+            while [ "$confirm" != "y" -a "$confirm" != "n" ]; do
+                read -p "Purge all files for '${target}' at '${path}' (Y/N)? " -n1 confirm
+                echo ""
+                confirm="$(echo "${confirm}" | tr '[A-Z]' '[a-z]')"
+            done
+            if [ "$confirm" == "y" ]; then
+                ${_S3CMD} rm --recursive ${path}/ >> "$(xdg_cache_home)"/clusterware/flight-sync.log 2>&1
+                ${_S3CMD} rm ${path}.dat >> "$(xdg_cache_home)"/clusterware/flight-sync.log 2>&1
+                ${_S3CMD} rm ${path}.yml >> "$(xdg_cache_home)"/clusterware/flight-sync.log 2>&1
+                action_die "purged '${target}'" 0
+            else
+                action_die "not purging '${target}'" 0
+            fi
+        fi
+    else
+        action_die "target not found: '${target}'"
+    fi
+}
+
+setup
+
+require action
+require xdg
+require files
+require network
+
+_S3CMD="${cw_ROOT}"/opt/s3cmd/s3cmd
+
+files_load_config --optional sync
+
+if [ "$UID" == "0" ]; then
+    action_die "this command cannot be executed as the superuser" 1
+fi
+
+main "$@"

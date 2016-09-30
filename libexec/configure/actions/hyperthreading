@@ -1,0 +1,113 @@
+#!/bin/bash
+#==============================================================================
+# Copyright (C) 2016 Stephen F. Norledge and Alces Software Ltd.
+#
+# This file/package is part of Alces Clusterware.
+#
+# Alces Clusterware is free software: you can redistribute it and/or
+# modify it under the terms of the GNU Affero General Public License
+# as published by the Free Software Foundation, either version 3 of
+# the License, or (at your option) any later version.
+#
+# Alces Clusterware is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+# Affero General Public License for more details.
+#
+# You should have received a copy of the GNU Affero General Public License
+# along with this package.  If not, see <http://www.gnu.org/licenses/>.
+#
+# For more information on the Alces Clusterware, please visit:
+# https://github.com/alces-software/clusterware
+#==============================================================================
+require action
+require process
+
+_has_ht() {
+    local threads_per_core
+    threads_per_core=$(lscpu | grep "^Thread(s) per core:" | awk '{print $4;}')
+    [ "$threads_per_core" -gt 1 ]
+}
+
+_logical_cpu_count() {
+    lscpu | grep "^CPU(s):" | awk '{print $2;}'
+}
+
+_physical_cpu_count() {
+    local lscpu_output cores_per_socket sockets
+    lscpu_output="$(lscpu)"
+    cores_per_socket=$(echo "${lscpu_output}" | grep "^Core(s) per socket:" | awk '{print $4;}')
+    sockets=$(echo "${lscpu_output}" | grep "^Socket(s):" | awk '{print $2;}')
+    echo $((${sockets}*${cores_per_socket}))
+}
+
+_online_cpu_count() {
+    lscpu -b -e | tail -n+2 | wc -l
+}
+
+_is_ht_enabled() {
+    [ "$(_online_cpu_count)" -gt "$(_physical_cpu_count)" ]
+}
+
+_is_ht_disabled() {
+    ! _is_ht_enabled
+}
+
+_enable_ht() {
+    local i
+    for i in $(seq 0 $(($(_logical_cpu_count)-1))); do
+        echo 1 > /sys/devices/system/cpu/cpu$i/online
+    done
+}
+
+_disable_ht() {
+    local i
+    for i in $(seq 0 $(($(_physical_cpu_count)-1))); do
+        echo 1 > /sys/devices/system/cpu/cpu$i/online
+    done
+    for i in $(seq $(_physical_cpu_count) $(($(_logical_cpu_count)-1))); do
+        echo 0 > /sys/devices/system/cpu/cpu$i/online
+    done
+}
+
+main() {
+    local operation
+    operation="${1:-status}"
+    if ! _has_ht; then
+        action_die "hyperthreading not present on this machine" 0
+    fi
+    case $operation in
+        disable)
+            if _is_ht_enabled; then
+                _disable_ht
+                action_die "hyperthreading disabled" 0
+            else
+                action_die "hyperthreading already disabled" 0
+            fi
+        ;;
+        enable)
+            if _is_ht_disabled; then
+                _enable_ht
+                action_die "hyperthreading enabled" 0
+            else
+                action_die "hyperthreading already enabled" 0
+            fi
+        ;;
+        status)
+            if _is_ht_enabled; then
+                action_die "hyperthreading is enabled" 0
+            else
+                action_die "hyperthreading is disabled" 0
+            fi
+        ;;
+        *)
+            action_die "unrecognized operation: $operation"
+        ;;
+    esac
+}
+
+if [ -n "$1" -a "$1" != "status" ]; then
+    process_reexec_sudo "$@"
+fi
+
+main "$@"

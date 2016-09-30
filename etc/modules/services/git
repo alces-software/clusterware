@@ -79,7 +79,7 @@ package.
 set     app     git
 set     version 2.5.2
 set     appcaps GIT
-set     appdir  _cw_ROOT_/opt/git
+set     appdir  _ROOT_/opt/git
 
 module-whatis   "
 
@@ -92,8 +92,8 @@ module-whatis   "
              Name: git
           Version: 2.5.2
            Module: [alces pretty services/git]
-      Module path: _cw_ROOT_/etc/modules/services/git
-     Package path: _cw_ROOT_/opt/git
+      Module path: _ROOT_/etc/modules/services/git
+     Package path: _ROOT_/opt/git
 
 For further information, execute:
 

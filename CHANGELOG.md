@@ -3,6 +3,79 @@
 All notable changes to this project will be documented in this file.
 This project adheres to [Semantic Versioning](http://semver.org/).
 
+## [1.6.0] - 2016-09-21
+
+### Added
+- The Gridware package repositories are now automatically updated after a period of time (#121)
+- Added HTTP serviceware allowing HTTP-based services to plug in to a central web server (#74)
+- Gridware export/import can now patch binary files to handle hard-coded depot paths (#110)
+- Added `alces configure hyperthreading` action for modifying hyperthreading behaviour (#164)
+- Flight customization profiles can now be retrieved without S3 credentials (clusterware-handlers#34)
+- Storage backends and system-wide configurations enabled on the master node are now propogated to all slave nodes (clusterware-handlers#21)
+- New `alces sync` tool for synchronizing directories (for e.g. your home directory) to an S3 bucket, with file exclusion and encryption for sensitive files (#92)
+- Added Slurm scheduler support (clusterware-handlers#27, clusterware-services#17)
+- Added OpenLava scheduler support (clusterware-handlers#28, clusterware-services#20)
+- Added TORQUE scheduler support (clusterware-handlers#26, clusterware-services#18)
+- Added `--binary-only` option for `gridware install` and `gridware depot install` actions (clusterware#161)
+- Gridware depot repositories are now automatically updated after a period of time (#176)
+- A new `services/clusterware` modulefile is provided to facilitate access to core Clusterware utilities (clusterware-services#22)
+- Introduce `alces customizer` action to allow customizaton profiles to be manually triggered (#143)
+- Administrative users are now provided with access to the cluster access key even if they accidentally remove it (#118)
+- Gridware package parameters can now be provided with defaults which can be selected via configuration or command-line parameter (#123)
+- How-to guides and script templates can now be located in additional locations specified by the CW_DOCPATH environment variable (#127)
+- Interactive sessions can now be located in additional locations specified by the CW_SESSIONPATH environment variable (#127)
+- Allow configurator to be delayed until a flag file is written to allow more fine-grained control over Clusterware configuration files by cloud-init
+- Added PBS Pro scheduler support (clusterware-handlers#39, clusterware-services#26)
+- Added support for Ubuntu 16.04 LTS (Xenial Xerus) (clusterware#115)
+- Added LXDE session (Ubuntu only) (clusterware-sessions#5)
+- Added KDE session (clusterware-sessions#6)
+- Clusterware VPN configurations are now provided as handy archives for download (clusterware-handlers#19)
+- Added an attractive default web page for HTTP serviceware via new `cluster-www` handler (clusterware-services#27)
+- Added a VPN section for HTTP serviceware if `cluster-www` handler is enabled (clusterware-handlers#40)
+- The master node can now behave as a NAT gateway for slave nodes (clusterware-handlers#20)
+- Scheduler behaviour can be configured using `alces configure scheduler`
+- SSL certificates are allocated if `host_naming` strategy for `cluster` is set to `allocate` in `config.yml` (clusterware#184)
+- Gridware source packages may be retrieved from Amazon S3 using the `aws` tool (clusterware#198 -- thanks @lurcio)
+- Added `prepare` action to `alces template` to perform any necessary preparation before the template can be used, such as downloading input data
+
+### Changed
+- Environment modules warnings are now suppressed (#169)
+- If we don't have permission to set CloudWatch metrics, disable metric scans (#174)
+- The algorithm for determining the memory limit (`vmem`) for SGE execution hosts has been simplified to round down to nearest GiB of RAM (clusterware-handlers#31)
+- Binary gridware packages and upstream source fallbacks are now retrieved from region-specific buckets (#139)
+- Autoscaling has been refactored into a separate handler (clusterware-handlers#36)
+- Reported metrics for autoscaling have been updated to facilitate better scaling rules (#111)
+- `pdsh` is no longer placed on the `PATH` by default - access is now provided via the `services/pdsh` module (clusterware-services#22)
+- EC2-style metadata service address is now blocked for non-superuser accounts
+- Remote binary packages are checked to see if they are different from previously downloaded versions and, if so, are redownloaded (#134)
+- Apply user-selectible theme for dark/light terminals to all tools (#140)
+- Improve feedback from the `alces configure node` tool (#78)
+- Updated `alces about` tool to be more flexible
+- Updated `s3cmd` to latest development version (1.6.1-ba5196f1f6)
+- When using the S3 backend with `alces storage` output now appears during uploads so progress can be monitored (#187)
+- Display a message regarding VNC encryption when an interactive session is started
+
+### Fixed
+- `/sys/hypervisor/uuid` now only read if it exists (#148)
+- Fix a bug that was allowing Gridware depots to be added to global `modulespath` more than once
+- Prevent sessions from failing to start if they are started in quick succession (#84)
+- Stop the scheduler queues on the final instance in an autoscaling group from getting stuck in disabled state (clusterware-handlers#37)
+- Autocompletion for `gridware depot` actions now suggest depots rather than packages (#159)
+- Autocompletion for `service enable` action now suggests components (#177)
+- Autocompletion for `handler enable` action no longer includes auxilliary files (#179)
+- Added license and readme files to services, storage and sessions repositories (#114)
+- Looking up entries in `mappingstab` now strips whitespace from the end of lines (#75)
+- Prevent `No such file or directory` errors when using `member_each` function before any members are present (#151)
+- Prevent `unable to write 'random state'` error when configuring VPN certificates (#150)
+- Cluster name in prompt now matches the branding colour (#188)
+- Session screenshot data is now sent in the correct format
+- Narrow terminal widths no longer break `alces gridware` output
+- Correct name handling when cluster ring members are deregistereed
+
+#### Issues/PRs
+
+[Core 1.6.0], [Handlers 1.6.0], [Services 1.6.0], [Storage 1.6.0], [Sessions 1.6.0]
+
 ## [1.5.3] - 2016-06-16
 
 ### Added
@@ -183,15 +256,21 @@ This project adheres to [Semantic Versioning](http://semver.org/).
 
 - Initial release
 
+[1.6.0]: https://github.com/alces-software/clusterware/compare/1.5.3...release/1.6
+[Core 1.6.0]: https://github.com/alces-software/clusterware/issues?q=milestone%3A1.6-release
+[Handlers 1.6.0]: https://github.com/alces-software/clusterware/issues?q=milestone%3A1.6-release
+[Services 1.6.0]: https://github.com/alces-software/clusterware/issues?q=milestone%3A1.6-release
+[Storage 1.6.0]: https://github.com/alces-software/clusterware/issues?q=milestone%3A1.6-release
+[Sessions 1.6.0]: https://github.com/alces-software/clusterware/issues?q=milestone%3A1.6-release
 [1.5.3]: https://github.com/alces-software/clusterware/compare/1.5.2...1.5.3
 [1.5.2]: https://github.com/alces-software/clusterware/compare/1.5.1...1.5.2
 [1.5.1]: https://github.com/alces-software/clusterware/compare/1.5.0...1.5.1
 [1.5.0]: https://github.com/alces-software/clusterware/compare/1.4.1...1.5.0
-[Core 1.5.0]: https://github.com/alces-software/clusterware/issues?q=milestone%3A1.5.0
-[Handlers 1.5.0]: https://github.com/alces-software/clusterware-handlers/issues?q=milestone%3A1.5.0
-[Services 1.5.0]: https://github.com/alces-software/clusterware-services/issues?q=milestone%3A1.5.0
-[Storage 1.5.0]: https://github.com/alces-software/clusterware-storage/issues?q=milestone%3A1.5.0
-[Sessions 1.5.0]: https://github.com/alces-software/clusterware-sessions/issues?q=milestone%3A1.5.0
+[Core 1.5.0]: https://github.com/alces-software/clusterware/issues?q=milestone%3A1.5-release
+[Handlers 1.5.0]: https://github.com/alces-software/clusterware-handlers/issues?q=milestone%3A1.5-release
+[Services 1.5.0]: https://github.com/alces-software/clusterware-services/issues?q=milestone%3A1.5-release
+[Storage 1.5.0]: https://github.com/alces-software/clusterware-storage/issues?q=milestone%3A1.5-release
+[Sessions 1.5.0]: https://github.com/alces-software/clusterware-sessions/issues?q=milestone%3A1.5-release
 [1.4.1]: https://github.com/alces-software/clusterware/compare/1.4.0...1.4.1
 [1.4.0]: https://github.com/alces-software/clusterware/compare/1.3.0...1.4.0
 [Core 1.4.0]: https://github.com/alces-software/clusterware/issues?q=milestone%3A1.4.0

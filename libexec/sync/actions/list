@@ -1,0 +1,89 @@
+#!/bin/bash
+#==============================================================================
+# Copyright (C) 2016 Stephen F. Norledge and Alces Software Ltd.
+#
+# This file/package is part of Alces Clusterware.
+#
+# Alces Clusterware is free software: you can redistribute it and/or
+# modify it under the terms of the GNU Affero General Public License
+# as published by the Free Software Foundation, either version 3 of
+# the License, or (at your option) any later version.
+#
+# Alces Clusterware is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+# Affero General Public License for more details.
+#
+# You should have received a copy of the GNU Affero General Public License
+# along with this package.  If not, see <http://www.gnu.org/licenses/>.
+#
+# For more information on the Alces Clusterware, please visit:
+# https://github.com/alces-software/clusterware
+#==============================================================================
+setup() {
+    local a xdg_config
+    IFS=: read -a xdg_config <<< "${XDG_CONFIG_HOME:-$HOME/.config}:${XDG_CONFIG_DIRS:-/etc/xdg}"
+    for a in "${xdg_config[@]}"; do
+        if [ -e "${a}"/clusterware/config.rc ]; then
+            source "${a}"/clusterware/config.rc
+            break
+        fi
+    done
+    if [ -z "${cw_ROOT}" ]; then
+        echo "$0: unable to locate clusterware configuration"
+        exit 1
+    fi
+    kernel_load
+}
+
+_show() {
+    local config_file target bucket
+    config_file="$1"
+    target=$(basename "${config_file}" | cut -f2 -d'.')
+
+    bucket="${cw_SYNC_bucket}"
+    if [ -z "$bucket" ]; then
+        bucket="<not available>"
+        if network_is_ec2 && files_load_config --optional instance-aws config/cluster; then
+            bucket="s3://alces-flight-${cw_INSTANCE_aws_account_hash}/sync/$(whoami)/${target}"
+        fi
+    else
+        bucket="${bucket}/sync/$(whoami)/${target}"
+    fi
+
+    ruby_run <<RUBY
+require 'yaml'
+config = (YAML.load_file("${config_file}") rescue nil) || {}
+if config[:source] == :home
+  puts "$target: $HOME <-> ${bucket}"
+else
+  puts "$target: #{config[:source]} <-> ${bucket}"
+end
+RUBY
+}
+
+main() {
+    for a in "$(xdg_config_home)"/clusterware/sync.*.yml; do
+        if [ -f "$a" ]; then
+            _show "$a"
+        else
+            action_die "no sync targets found" 0
+        fi
+    done
+}
+
+setup
+
+require action
+require xdg
+require ruby
+require files
+require network
+
+files_load_config --optional sync
+
+if [ "$UID" == "0" ]; then
+    action_die "this command cannot be executed as the superuser" 1
+fi
+
+main "$@"

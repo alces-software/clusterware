@@ -45,6 +45,9 @@ case $action in
     i|in|inf|info)
         exec /bin/bash $cw_ROOT/libexec/template/actions/info "$@"
         ;;
+    p|pr|pre|prep|prepa|prepar|prepare)
+        exec /bin/bash $cw_ROOT/libexec/template/actions/prepare "$@"
+        ;;
     *)
         cat <<EOF
 Usage: $cw_BINNAME COMMAND [[OPTION]... [ARGS]]
@@ -57,6 +60,7 @@ printf "  %-22s  %s\n" "$cw_BINNAME list" "List available templates."
 printf "  %-22s  %s\n" "$cw_BINNAME info" "Display information about a template."
 printf "  %-22s  %s\n" "$cw_BINNAME show" "Display a template."
 printf "  %-22s  %s\n" "$cw_BINNAME copy" "Copy a template for your use."
+printf "  %-22s  %s\n" "$cw_BINNAME prepare" "Prepare the environment for use of the template."
 cat <<EOF
 
 Please report bugs to support@alces-software.com

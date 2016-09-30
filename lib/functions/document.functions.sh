@@ -21,7 +21,7 @@
 #==============================================================================
 require ruby
 
-cw_DOCUMENT_dir="${cw_ROOT}/var/lib/docs"
+cw_DOCUMENT_dir="${cw_ROOT}/var/lib/docs/base"
 
 document_show() {
     local roff doc psdoc ronn man_opts
@@ -49,19 +49,25 @@ document_show() {
 }
 
 document_list() {
-    local type glob docs
+    local type glob docs docdirs dir
     type="$1"
     glob="*${2}"
-    docs=("${cw_DOCUMENT_dir}"/${type}/${glob})
-    if [ ! -f "${docs[0]}" ]; then
-        return 1
-    else
+    docs=()
+    IFS=: read -a docdirs <<< "${cw_DOCUMENT_dir}:${CW_DOCPATH}"
+    for dir in "${docdirs[@]}"; do
+        shopt -s nullglob
+        docs+=(${dir}/${type}/${glob})
+        shopt -u nullglob
+    done
+    if [ "${#docs[@]}" -gt 0 ]; then
         echo "${docs[@]}"
+    else
+        return 1
     fi
 }
 
 document_get() {
-    local type idx docs glob doc
+    local type idx docs glob doc docdirs dir
     idx="$1"
     type="$2"
     glob="$3"
@@ -72,15 +78,21 @@ document_get() {
             ;;
         *[!0-9]*)
             # try getting a doc by name instead
-            doc=$(echo "${cw_DOCUMENT_dir}"/${type}/${idx}${default_ext})
-            if [ ! -f "${doc}" ]; then
-                doc=$(echo "${cw_DOCUMENT_dir}"/${type}/[0-9]-${idx}${default_ext})
+            IFS=: read -a docdirs <<< "${cw_DOCUMENT_dir}:${CW_DOCPATH}"
+            for dir in "${docdirs[@]}"; do
+                doc=$(echo "${dir}"/${type}/${idx}${default_ext})
                 if [ ! -f "${doc}" ]; then
-                    doc=$(echo "${cw_DOCUMENT_dir}"/${type}/[0-9][0-9]-${idx}${default_ext})
+                    doc=$(echo "${dir}"/${type}/[0-9]-${idx}${default_ext})
                     if [ ! -f "${doc}" ]; then
-                        return 2
+                        doc=$(echo "${dir}"/${type}/[0-9][0-9]-${idx}${default_ext})
                     fi
                 fi
+                if [ -f "${doc}" ]; then
+                    break
+                fi
+            done
+            if [ ! -f "${doc}" ]; then
+                return 2
             fi
             echo "${doc}"
             ;;

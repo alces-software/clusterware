@@ -152,7 +152,19 @@ main() {
 
     _configurator_running || distro_restart_service clusterware-configurator
 
-    action_die "configuration written to ${cw_ROOT}/etc/config.yml" 0
+    cat <<EOF
+$(echo -e "\e[1;33m")==========================
+  CONFIGURATION UNDERWAY
+==========================$(echo -e "\e[0m")
+Configuration of this node is now underway.  When configuration is
+complete you will receive a notice at the prompt.  Additionally, the
+prompt will be updated to include the name of your cluster.
+
+Once configured, you can access the information required to
+configure further nodes as part of your cluster by running the
+"$(echo -e "\e[1;37m")alces about identity$(echo -e "\e[0m")" command.
+
+EOF
 }
 
 process_reexec_sudo "$@"

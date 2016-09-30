@@ -526,8 +526,22 @@ EOF
             timeout = (Config.fetch_timeout rescue nil) || 10
             with_spinner do
               # XXX - replace this with something neater
-              run(['wget',u,'-T',timeout.to_s,'-t','1','-O',"#{target}.alcesdownload"]) do |r|
-                raise PackageError, "Unable to download source." unless r.success?
+              if /^s3/ =~ u
+                run(['aws', 's3', 'cp', u, "#{target}.alcesdownload"]) do |r|
+                  if r.fail?
+                    msg =
+                      if r.exc.is_a?(Errno::ENOENT)
+                        "S3 package URL was detected, but 'aws' tool could not be found."
+                      else
+                        "Unable to download source from S3."
+                      end
+                    raise PackageError, msg
+                  end
+                end
+              else
+                run(['wget',u,'-T',timeout.to_s,'-t','1','-O',"#{target}.alcesdownload"]) do |r|
+                  raise PackageError, "Unable to download source." unless r.success?
+                end
               end
               FileUtils.mv("#{target}.alcesdownload",target)
             end

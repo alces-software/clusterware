@@ -1,0 +1,64 @@
+#!/bin/bash
+#==============================================================================
+# Copyright (C) 2016 Stephen F. Norledge and Alces Software Ltd.
+#
+# This file/package is part of Alces Clusterware.
+#
+# Alces Clusterware is free software: you can redistribute it and/or
+# modify it under the terms of the GNU Affero General Public License
+# as published by the Free Software Foundation, either version 3 of
+# the License, or (at your option) any later version.
+#
+# Alces Clusterware is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+# Affero General Public License for more details.
+#
+# You should have received a copy of the GNU Affero General Public License
+# along with this package.  If not, see <http://www.gnu.org/licenses/>.
+#
+# For more information on the Alces Clusterware, please visit:
+# https://github.com/alces-software/clusterware
+#==============================================================================
+if (( UID != 0 )); then
+  echo "$0: must run as root"
+  exit 1
+fi
+
+# Script to help when developing Clusterware handlers - correctly set variables
+# below, add commits to given branches, and run this script to go through
+# motions of reconfiguring node (mostly) as if from scratch. You may still need
+# to remove handler-specific files, remove serviceware dir if modifying
+# serviceware, adapt this script sometimes etc.
+
+# TODO: Read these from environment variables rather than hard-coding, and
+# check they are set before proceeding.
+clusterware_services_branch='feature/add-slurm-serviceware'
+clusterware_handlers_branch='feature/cluster-slurm-handler'
+handler_name='cluster-slurm'
+
+cw_ROOT='/opt/clusterware'
+ALCES="${cw_ROOT}/bin/alces"
+
+# Rerun handler installation.
+"$ALCES" handler disable "${handler_name}"
+
+# Ensure services will be re-enabled when needed.
+rm "${cw_ROOT}/etc/services/"*
+
+# Make all handlers be reconfigured when configurator run.
+rm -rf "${cw_ROOT}/etc/config"
+
+# Make logs easier to read.
+rm /var/log/clusterware/*
+
+# Stop all Clusterware services so anything needed starts afresh.
+systemctl stop 'clusterware-*'
+
+# Update repos to latest versions.
+"$ALCES" service update --match-remote "${clusterware_services_branch}"
+"$ALCES" handler update --match-remote "${clusterware_handlers_branch}"
+
+# Re-install and configure handler.
+"$ALCES" handler enable "${handler_name}"
+systemctl start 'clusterware-configurator'

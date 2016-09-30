@@ -27,6 +27,7 @@ require service
 require vnc
 require handler
 require process
+require xdg
 
 action_cleanup() {
     if [ "$_CLEANED" ]; then return; fi
@@ -79,7 +80,8 @@ main() {
     if ! session_check_quota; then
         action_die "sorry, your session quota has been reached on this host (${cw_SESSION_quota})."
     fi
-    local sessionscript password vnc_vars host_address terse params sessionvars sessiontype runtime geometry
+    local sessionscript password vnc_vars host_address terse params
+    local sessionvars sessiontype runtime geometry sessiondirs dir
     local -A vnc
 
     #
@@ -133,17 +135,30 @@ main() {
     elif [ -f "$sessionscript" ]; then
         cp "$sessionscript" "${_SESSIONDIR}/session.sh"
         sessiontype="custom ($sessionscript)"
-    elif [ -f "${cw_ROOT}/etc/sessions/${sessionscript}/session.sh" ]; then
-        cp "${cw_ROOT}/etc/sessions/${sessionscript}/session.sh" "${_SESSIONDIR}/session.sh"
-        sessiontype="${sessionscript}"
-    elif [ "$sessionscript" ]; then
-        action_die "unable to locate session script: $sessionscript"
     else
-        for a in "${cw_ROOT}/etc/sessions"/*; do
-            sessionscripts="$sessionscripts, $(basename $a)"
+        IFS=: read -a sessiondirs <<< "${cw_SESSION_dir}:${CW_SESSIONPATH}"
+        for dir in "${sessiondirs[@]}"; do
+            if [ -f "${dir}/${sessionscript}/session.sh" ]; then
+                cp "${dir}/${sessionscript}/session.sh" "${_SESSIONDIR}/session.sh"
+                sessiontype="${sessionscript}"
+                break
+            fi
         done
-        sessionscripts="${sessionscripts:2}"
-        action_die "no session script provided - specify path or specify one of: $sessionscripts"
+        if [ -z "${sessiontype}" ]; then
+            if [ "$sessionscript" ]; then
+                action_die "unable to locate session script: $sessionscript"
+            else
+                for dir in "${sessiondirs[@]}"; do
+                    shopt -s nullglob
+                    for a in "${dir}"/*; do
+                        sessionscripts="$sessionscripts, $(basename $a)"
+                    done
+                    shopt -u nullglob
+                done
+                sessionscripts="${sessionscripts:2}"
+                action_die "no session script provided - specify path or specify one of: $sessionscripts"
+            fi
+        fi
     fi
     files_mark_tempfile "${_SESSIONDIR}/session.sh"
 
@@ -217,6 +232,36 @@ EOF
         handler_run_hook session-end "$_SESSIONID"
         action_cleanup
     } &>/dev/null &
+
+    if [ -t 1 ]; then
+        seen_file="$(xdg_config_home)/clusterware/session-warning-seen"
+        if [ ! -f "${seen_file}" ]; then
+           cat <<EOF
+$(echo -e "\e[1;33m")========
+ NOTICE
+========$(echo -e "\e[0m")
+Please note that the VNC protocol does not provide encryption by default.
+
+You should consider securing your session by:
+
+ * connecting via an Alces Flight Access service
+ * connecting via the Clusterware VPN
+ * using an SSH port forward (either manually, or via a tool like "ssvnc")
+
+Please run the "alces howto secure-vnc-sessions" command for further details or
+refer to the Alces Flight Compute documentation <http://docs.alces-flight.com>.
+
+EOF
+           while [ "$confirm" != "y" -a "${confirm}" != "n" ]; do
+               read -N1 -p "Show this message next time you start a session (Y/N)? " confirm
+               echo ""
+               confirm=$(echo "$confirm" | tr 'A-Z' 'a-z')
+           done
+           if [ "$confirm" == "n" ]; then
+               touch "${seen_file}"
+           fi
+        fi
+    fi
 }
 
 _GRABBER="${cw_ROOT}/libexec/session/share/grabber"

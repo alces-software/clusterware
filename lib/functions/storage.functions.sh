@@ -22,6 +22,7 @@
 #==============================================================================
 require repo
 require xdg
+require files
 
 cw_STORAGE_REPODIR="${cw_ROOT}/var/lib/storage/repos"
 cw_STORAGE_PLUGINDIR="${cw_ROOT}/etc/storage"
@@ -46,6 +47,7 @@ storage_install() {
 
 storage_enable() {
     repo_plugin_enable "${cw_STORAGE_REPODIR}" "${cw_STORAGE_PLUGINDIR}" "$@"
+    storage_broadcast_enabled
 }
 
 storage_type_for() {
@@ -86,6 +88,8 @@ storage_configure() {
         if ${type}_storage_configure ${system} "$@"; then
             if [ -z "${system}" -a -z "$(storage_default_configuration)" ]; then
                 storage_set_default_configuration "${name}"
+            elif [ "${system}" ]; then
+                storage_sync_to_slaves --all
             fi
         fi
     else
@@ -202,8 +206,24 @@ storage_configuration_exists() {
 }
 
 storage_forget_configuration() {
-    local name path paths
+    local name sys_path path paths system
+    if [ "$1" == "--system" ]; then
+        system="$1"
+        shift
+    fi
     name="$1"
+
+    if [ "$system" ]; then
+        sys_path="$(xdg_search "$(xdg_config_dirs)" "clusterware/storage")"
+        if [ "${sys_path}" ]; then
+            paths=("${sys_path}"/"${name}".*.rc)
+            if [ "${paths}" != "${sys_path}/${name}.*.rc" ]; then
+                rm -f "${sys_path}"/"${name}".*
+                return 0
+            fi
+        fi
+    fi
+
     path="$(xdg_config_home)"/clusterware/storage/"${name}"
     paths=("${path}".*)
     if [ "${paths}" != "${path}.*" ]; then
@@ -236,4 +256,56 @@ storage_set_default_configuration() {
     fi
     mkdir -p "${dir}"
     echo "cw_STORAGE_default=\"${name}\"" > "${dir}"/storage.rc
+    if [ "${system}" ]; then
+        storage_sync_to_slaves --all --default
+    fi
+}
+
+storage_broadcast_enabled() {
+    files_load_config --optional instance config/cluster
+    if [ "${cw_INSTANCE_role}" == "master" ]; then
+        require handler
+        handler_broadcast --quiet storage-enabled $(ls -1 "${cw_STORAGE_PLUGINDIR}")
+    fi
+}
+
+storage_sync_to_slaves() {
+    local dir default all host
+    files_load_config --optional instance config/cluster
+    if [ "${cw_INSTANCE_role}" == "master" ]; then
+        if [ "$1" == "--all" ]; then
+            if [ -z "$("${cw_ROOT}"/opt/genders/bin/nodeattr -f "${cw_ROOT}"/etc/genders -q slave)" ]; then
+                return 0
+            fi
+            shift
+        fi
+        if [ "$1" == "--default" ]; then
+            default=true
+            shift
+        fi
+        dir="$(xdg_config_dirs | cut -f1 -d:)"/clusterware
+        if [ "$default" ]; then
+            if [ -f "${dir}/storage.rc" ]; then
+                if [ "$all" ]; then
+                    "${cw_ROOT}"/opt/pdsh/bin/pdcp -F "${cw_ROOT}"/etc/genders \
+                                -g slave -p "${dir}/storage.rc" "${dir}/storage.rc"
+                else
+                    for host in "$@"; do
+                        scp -p "${dir}/storage.rc" $host:"${dir}/storage.rc"
+                    done
+                fi
+            fi
+        else
+            if [ -d "${dir}/storage" ]; then
+                if [ "$all" ]; then
+                    "${cw_ROOT}"/opt/pdsh/bin/pdcp -F "${cw_ROOT}"/etc/genders \
+                                -g slave -p -r "${dir}/storage" "${dir}"
+                else
+                    for host in "$@"; do
+                        scp -pr "${dir}/storage" $host:"${dir}"
+                    done
+                fi
+            fi
+        fi
+    fi
 }

@@ -1,4 +1,3 @@
-#!/bin/bash
 #==============================================================================
 # Copyright (C) 2016 Stephen F. Norledge and Alces Software Ltd.
 #
@@ -20,29 +19,38 @@
 # For more information on the Alces Clusterware, please visit:
 # https://github.com/alces-software/clusterware
 #==============================================================================
-require action
-require files
-require process
-
-_show() {
-    local name val
-    name="$1"
-    val="$2"
-    printf "%25s: %s\n" "${name}" "${val}"
+detect_xxd() {
+    [ -d "${target}/opt/xxd" ]
 }
 
-main() {
-    local a
-    files_load_config config config/cluster
-    _show "Cluster UUID" "${cw_CLUSTER_uuid}"
-    if [ -r "${cw_ROOT}"/etc/config/cluster/auth.rc ]; then
-        files_load_config auth config/cluster
-        _show "Cluster security token" "${cw_CLUSTER_auth_token}"
+fetch_xxd() {
+    title "Fetching xxd"
+    if fetch_handling_is_source; then
+        fetch_source https://github.com/ThatOtherPerson/xxd/archive/master.tar.gz "xxd-source.tar.gz"
+    else
+        fetch_dist xxd
     fi
 }
 
-if sudo -l | grep -q ' ALL$'; then
-    process_reexec_sudo
-fi
+install_xxd() {
+    title "Installing xxd"
+    if fetch_handling_is_source; then
+        doing 'Extract'
+        tar -C "${dep_build}" -xzf "${dep_src}/xxd-source.tar.gz"
+        say_done $?
 
-main "$@"
+        cd "${dep_build}"/xxd-*
+
+        doing 'Compile'
+        make &> "${dep_logs}/xxd-make.log"
+        say_done $?
+
+        doing 'Install'
+        mkdir -p "${target}"/opt/xxd/{bin,man/man1}
+        cp xxd "${target}"/opt/xxd/bin
+        cp xxd.1 "${target}"/opt/xxd/man/man1
+        say_done $?
+    else
+        install_dist xxd
+    fi
+}

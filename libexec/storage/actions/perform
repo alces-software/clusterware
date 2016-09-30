@@ -47,8 +47,8 @@ main() {
     elif storage_configuration_exists "${name}"; then
         type=$(storage_type_for "${name}")
         if storage_load_functions "${type}"; then
-            result="$(${type}_storage_${cmd} "${name}" "$@")"
-            action_die "${result}" $?
+            ${type}_storage_${cmd} "${name}" "$@" | stdbuf -oL sed -e "s/^/$cw_BINNAME: /g"
+            action_exit $?
         else
             action_die "storage type not available or not enabled: ${type}"
         fi

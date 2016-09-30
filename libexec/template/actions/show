@@ -27,7 +27,7 @@ main() {
     local idx template
     idx="$1"
     if template="$(document_get "$idx" templates .tpl .sh.tpl)"; then
-        grep -v '^#@ ' "${template}" | less -F
+        _template_render "${template}" | less -F
     else
         errlvl=$?
         if [ $errlvl == 1 ]; then
@@ -40,5 +40,7 @@ main() {
     fi
     action_cleanup
 }
+
+. "${cw_ROOT}/libexec/template/share/functions.sh"
 
 main "$@"

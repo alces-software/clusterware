@@ -22,45 +22,34 @@
 #==============================================================================
 require action
 require files
-require network
 
 _show() {
     local name val
     name="$1"
     val="$2"
+    _SHOWN=true
     printf "%25s: %s\n" "${name}" "${val}"
 }
 
 main() {
-    local a
-    files_load_config meta
-    files_load_config clusterware
-    _show "Clusterware release" "${cw_RELEASE}"
-    for a in $(cat "${cw_ROOT}"/etc/meta.rc | grep ^cw_META | cut -f1 -d=); do
+    local name a
+    name="$1"
+    files_load_config meta.d/"${name}"
+    for a in $(cat "${cw_ROOT}"/etc/meta.d/"${name}.rc" | grep '^\s*cw_META' | cut -f1 -d=); do
         case $a in
             *_desc)
                 :
                 ;;
             *)
                 desc="${a}_desc"
-                if [ "${!desc}" ]; then
+                if [ "${!a}" -a "${!desc}" ]; then
                     _show "${!desc}" "${!a}"
                 fi
                 ;;
         esac
     done
-    if network_has_metadata_service 1; then
-        _show "Platform host name" "$(network_get_public_hostname)"
-        _show "Public IP address" "$(network_get_public_address)"
-        if network_is_ec2; then
-            _show "Account hash" "$(network_ec2_hashed_account)"
-        fi
-    else
-        hn="$(network_get_public_hostname 0)"
-        if [ "${hn}" ]; then
-            _show "Platform host name" "${hn}"
-        fi
-        _show "Public IP address" "$(network_get_public_address 0)"
+    if [ -z "${_SHOWN}" ]; then
+        action_die "no data currently available: ${name}"
     fi
 }
 

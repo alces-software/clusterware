@@ -25,7 +25,7 @@ repo_plugin_is_enabled() {
     local plugin plugindir
     plugindir="$1"
     plugin="$2"
-    [ -e "${plugindir}/${plugin}" ]
+    [ -e "${plugindir}/${plugin}" -o -e "${plugindir}"/*-"${plugin}" ]
 }
 
 repo_exists() {
@@ -67,7 +67,7 @@ repo_plugin_enable() {
     repodir="$1"
     plugindir="$2"
     plugin="$3"
-    ln -s "${repodir}/${plugin}" "${plugindir}/$(basename ${plugin})"
+    ln -s "${repodir}/${plugin}" "${plugindir}/$(repo_order_prefix "${repodir}/${plugin}")$(basename ${plugin})"
 }
 
 repo_plugin_disable() {
@@ -120,4 +120,16 @@ require 'yaml'
 config = YAML.load_file('${metadata_path}/metadata.yml')
 puts config.keys.join(' ')
 RUBY
+}
+
+repo_order_prefix() {
+    local metadata_path
+    metadata_path="$1"
+    if [ -f "${metadata_path}/metadata.yml" ]; then
+        ruby_run <<EOF
+require 'yaml'
+config = YAML.load_file('${metadata_path}/metadata.yml')
+puts "#{config['order']}-" if config['order']
+EOF
+    fi
 }

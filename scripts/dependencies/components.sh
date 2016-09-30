@@ -34,12 +34,17 @@ install_components() {
     title "Installing Ruby components"
     if fetch_handling_is_source; then
         cd "${target}/lib/ruby"
+        rm -rf vendor/ruby
         doing 'Configure'
 	# XXX - path into opt/clusterware-bundle or something to allow
 	# for easier dev separation...? .bundle file probably still
 	# awkward tho... perhaps dev operation copies .bundle and
 	# vendor/ruby into dev tree...
-        "${cw_RUBYHOME}/bin/bundle" install --local --path=vendor &> "${dep_logs}/components-install.log"
+        "${cw_RUBYHOME}/bin/bundle" install \
+            --local \
+            --without test \
+            --path=vendor \
+            &> "${dep_logs}/components-install.log"
         say_done $?
     else
         install_dist 'components'

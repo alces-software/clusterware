@@ -1,4 +1,3 @@
-#!/bin/bash
 #==============================================================================
 # Copyright (C) 2016 Stephen F. Norledge and Alces Software Ltd.
 #
@@ -20,35 +19,19 @@
 # For more information on the Alces Clusterware, please visit:
 # https://github.com/alces-software/clusterware
 #==============================================================================
-setup() {
-    local a xdg_config
-    IFS=: read -a xdg_config <<< "${XDG_CONFIG_HOME:-$HOME/.config}:${XDG_CONFIG_DIRS:-/etc/xdg}"
-    for a in "${xdg_config[@]}"; do
-        if [ -e "${a}"/clusterware/config.rc ]; then
-            source "${a}"/clusterware/config.rc
-            break
-        elif [ -e "${a}"/clusterware/config.vars.sh ]; then
-            source "${a}"/clusterware/config.vars.sh
-            break
-        fi
-    done
-    if [ -z "${cw_ROOT}" ]; then
-        echo "$0: unable to locate clusterware configuration"
-        exit 1
+require files
+
+_template_render() {
+    local vars template
+    template="$1"
+    vars=$(grep '^#@ ' "${template}" | cut -c4-)
+    if [ "$vars" ]; then
+        declare -A cw_TEMPLATE
+        eval "$vars"
     fi
-    kernel_load
+    files_load_config --optional gridware
+    grep -v '^#@ ' "${template}" |
+        sed -e "s,_GRIDWARE_,${cw_GRIDWARE_root:-/opt/gridware},g" \
+            -e "s/_DATADIR_/${cw_TEMPLATE[datadir]:-$(basename "${template}" .sh.tpl)}/g" \
+            -e "s/_TEMPLATE_/$(basename "${template}" .sh.tpl)/g"
 }
-
-main() {
-    . "${cw_ROOT}"/etc/ruby.rc
-    export HOME=/root
-    export ALCES_RUBY_VERSION=$(ruby -se "puts RUBY_VERSION")
-    cd "${cw_ROOT}"/opt/alces-access-manager-daemon
-    bin/alces-access-manager-daemon start \
-       --pidfile /var/run/alces-access-manager-daemon.pid \
-       -l /var/log/alces-access-manager-daemon/runtime.log \
-       -e production
-}
-
-setup
-main "$@"

@@ -22,9 +22,9 @@
 module Alces
   module Packager
     class OptionSet
-      attr_accessor :compiler, :variant, :depot, :args, :tag, :modules, :binary, :binary_depends
+      attr_accessor :compiler, :variant, :depot, :args, :tag, :modules, :binary, :binary_depends, :binary_only, :defaults
       attr_accessor :global, :latest, :yes, :non_interactive, :verbose
-      attr_accessor :ignore_bad, :accept_elf, :accept_bad, :output, :packages, :notify
+      attr_accessor :ignore_bad, :accept_elf, :accept_bad, :patch_binary, :output, :packages, :notify
       attr_accessor :tree, :ignore_satisfied
       attr_accessor :full, :oneline, :groups, :descriptions, :names
       attr_accessor :disabled, :compile, :explicit_depot
@@ -39,6 +39,8 @@ module Alces
           self.modules = options.modules
           self.binary = options.binary
           self.binary_depends = options.binary_depends
+          self.binary_only = options.binary_only
+          self.defaults = options.defaults
 
           self.global = options.global
           self.latest = options.latest
@@ -52,6 +54,7 @@ module Alces
           self.ignore_bad = options.ignore_bad
           self.accept_elf = options.accept_elf
           self.accept_bad = options.accept_bad
+          self.patch_binary = options.patch_binary
           self.output = options.output
           self.packages = options.packages.nil? ? true : options.packages
           self.notify = options.notify.nil? ? true : options.notify

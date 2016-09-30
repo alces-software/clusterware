@@ -38,7 +38,7 @@ main() {
             action_die "file already exists at target location '${target}'"
         fi
         source_name="$(basename "${template}" .tpl)"
-        if grep -v '^#@ ' "${template}" > "${target}"; then
+        if _template_render "${template}" > "${target}"; then
             chmod 755 "${target}"
             action_die "template '$(basename "${source_name}" .sh)' copied to '${target}'" 0
         else
@@ -56,5 +56,7 @@ main() {
     fi
     action_cleanup
 }
+
+. "${cw_ROOT}/libexec/template/share/functions.sh"
 
 main "$@"

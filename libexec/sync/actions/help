@@ -1,0 +1,177 @@
+#!/bin/bash
+#==============================================================================
+# Copyright (C) 2016 Stephen F. Norledge and Alces Software Ltd.
+#
+# This file/package is part of Alces Clusterware.
+#
+# Alces Clusterware is free software: you can redistribute it and/or
+# modify it under the terms of the GNU Affero General Public License
+# as published by the Free Software Foundation, either version 3 of
+# the License, or (at your option) any later version.
+#
+# Alces Clusterware is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+# Affero General Public License for more details.
+#
+# You should have received a copy of the GNU Affero General Public License
+# along with this package.  If not, see <http://www.gnu.org/licenses/>.
+#
+# For more information on the Alces Clusterware, please visit:
+# https://github.com/alces-software/clusterware
+#==============================================================================
+require action
+
+main() {
+    action=$1
+    shift
+
+    case $action in
+        help|list|push|pull|add|remove|purge)
+            help_for_${action}
+            ;;
+        ?*)
+            echo "${cw_BINNAME}: no such topic: ${action}"
+            echo ""
+            general_help
+            ;;
+        *)
+            general_help
+            ;;
+    esac
+}
+
+help_for_add() {
+    cat <<EOF
+  SYNOPSIS:
+
+    alces sync add <name> <directory>
+
+  DESCRIPTION:
+
+    Add a synchronization configuration called <name> that handles
+    synchronization from/to <directory>.
+
+EOF
+}
+
+help_for_help() {
+    cat <<EOF
+  SYNOPSIS:
+
+    alces sync help [<command>]
+
+  DESCRIPTION:
+
+    Get help with sync commands.  If no <command> is specified, show
+    some general help.
+
+EOF
+}
+
+help_for_list() {
+    cat <<EOF
+  SYNOPSIS:
+
+    alces sync list
+
+  DESCRIPTION:
+
+    List current synchronization configurations.
+
+EOF
+}
+
+help_for_pull() {
+    cat <<EOF
+  SYNOPSIS:
+
+    alces sync pull [OPTIONS] [<name>]
+
+  DESCRIPTION:
+
+    Pull files from remote storage using the synchronization
+    configuration with the given <name>.  If no <name> is given use
+    the synchronization configuration named 'default'.
+
+  OPTIONS:
+
+    --ignore-missing
+      Don't emit an error if nothing is held in remote storage.
+
+EOF
+}
+
+help_for_purge() {
+    cat <<EOF
+  SYNOPSIS:
+
+    alces sync purge <name>
+
+  DESCRIPTION:
+
+    Remove all files currently held within remote storage for the
+    synchronization configuration with the given <name>.  You will be
+    asked to confirm this action before it is performed.
+
+EOF
+}
+
+help_for_push() {
+    cat <<EOF
+  SYNOPSIS:
+
+    alces sync push [<name>]
+
+  DESCRIPTION:
+
+    Push files to remote storage using the synchronization
+    configuration with the given <name>.  If no <name> is given use
+    the synchronization configuration named 'default'.
+
+EOF
+}
+
+help_for_remove() {
+    cat <<EOF
+  SYNOPSIS:
+
+    alces sync remove <name>
+
+  DESCRIPTION:
+
+    Remove the synchronization configuration with the given <name>.
+
+EOF
+}
+
+general_help() {
+    local binname
+    binname="${cw_BINNAME% *}"
+    cat <<EOF
+  NAME:
+
+    ${binname}
+
+  DESCRIPTION:
+
+    Manage the storage and retrieval of synchronized directories.
+
+  COMMANDS:
+
+EOF
+printf "    %-22s  %s\n" "$cw_BINNAME help" "More help about this command."
+printf "    %-22s  %s\n" "$cw_BINNAME list" "List remote sync configurations."
+printf "    %-22s  %s\n" "$cw_BINNAME push" "Push a directory to remote storage."
+printf "    %-22s  %s\n" "$cw_BINNAME pull" "Pull a directory from remote storage."
+printf "    %-22s  %s\n" "$cw_BINNAME add" "Configure a remote sync target."
+printf "    %-22s  %s\n" "$cw_BINNAME remove" "Remove configuration for a remote sync target."
+printf "    %-22s  %s\n" "$cw_BINNAME purge" "Purge files held within remote storage."
+cat <<EOF
+
+Please report bugs to support@alces-software.com
+Alces Software home page: <http://alces-software.com>
+EOF
+}
+
+main "$@"

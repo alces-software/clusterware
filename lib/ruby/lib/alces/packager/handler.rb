@@ -19,6 +19,8 @@
 # For more information on the Alces Clusterware, please visit:
 # https://github.com/alces-software/clusterware
 #==============================================================================
+require 'date'
+
 require 'alces/tools/logging'
 require 'alces/tools/execution'
 require 'alces/packager/config'
@@ -44,11 +46,18 @@ Alces::Tools::Logging.default = Alces::Tools::Logger.new(File::expand_path(File.
 module Alces
   module Packager
     class HandlerProxy
+      ACTIONS_REQUIRING_PACKAGE_REPO_UPDATE = [
+        :import,
+        :info,
+        :install,
+        :list,
+        :requires,
+        :search
+      ]
+
       def method_missing(s,*a,&b)
         if Handler.instance_methods.include?(s)
-          Bundler.with_clean_env do
-            Handler.new(*a).send(s)
-          end
+          handle_action(s, a)
         else
           super
         end
@@ -58,6 +67,38 @@ module Alces
       rescue Interrupt
         say "\n#{'WARNING'.underline.color(:yellow)}: Cancelled by user"
         exit(130)
+      end
+
+      private
+
+      def handle_action(action, args)
+        Bundler.with_clean_env do
+          @handler = Handler.new(*args)
+          if action_requires_package_repo_update?(action)
+            update_package_repositories
+          end
+          @handler.send(action)
+        end
+      end
+
+      def action_requires_package_repo_update?(action)
+        ACTIONS_REQUIRING_PACKAGE_REPO_UPDATE.include? action
+      end
+
+      def update_package_repositories
+        repos_requiring_update = Repository.requiring_update
+        say_repos_requiring_update_message(repos_requiring_update)
+        repos_requiring_update.map do |repo|
+          @handler.update_repository(repo)
+        end
+      end
+
+      def say_repos_requiring_update_message(repos_requiring_update)
+        if repos_requiring_update.any?
+          num_repos = repos_requiring_update.length
+          repo_needs_str = num_repos  > 1 ? 'repositories need' : 'repository needs'
+          say "#{repos_requiring_update.length} #{repo_needs_str} to update ..."
+        end
       end
     end
 
@@ -143,7 +184,11 @@ module Alces
         repo_name = options.args.first || 'main'
         repo = Repository.find { |r| r.name == repo_name }
         raise NotFoundError, "Repository #{repo_name} not found" if repo.nil?
-        say "Updating repository: #{repo_name}"
+        update_repository(repo)
+      end
+
+      def update_repository(repo)
+        say "Updating repository: #{repo.name}"
         doing 'Update'
         begin
           status, rev = repo.update!

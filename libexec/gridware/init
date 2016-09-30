@@ -75,7 +75,7 @@ _create_gridware_configuration() {
 ##
 ################################################################################
 ---
-:log_root: /var/log/gridware
+:log_root: ${cw_GRIDWARE_var}/log/gridware
 :repo_paths:
  - ${cw_ROOT}/var/lib/gridware/repos/main
 # - ${cw_ROOT}/var/lib/gridware/repos/volatile
@@ -85,19 +85,28 @@ _create_gridware_configuration() {
 # - ${cw_GRIDWARE_root}/etc/depots/local
 :depotroot: ${cw_GRIDWARE_root}
 :default_depot: ${cw_GRIDWARE_default_depot:-local}
-:archives_dir: /var/cache/gridware/archives
-:buildroot: /var/cache/gridware/src
-:fallback_package_url: https://s3-eu-west-1.amazonaws.com/packages.alces-software.com/gridware
-:default_binary_url: https://s3-eu-west-1.amazonaws.com/packages.alces-software.com/gridware/%24dist
+:archives_dir: ${cw_GRIDWARE_var}/cache/gridware/archives
+:buildroot: ${cw_GRIDWARE_var}/cache/gridware/src
+:fallback_package_url: https://${cw_GRIDWARE_s3_host:-s3-eu-west-1.amazonaws.com}/${cw_GRIDWARE_s3_bucket:-alces-gridware-eu-west-1}/${cw_GRIDWARE_s3_package_prefix:-upstream}
+:default_binary_url: https://${cw_GRIDWARE_s3_host:-s3-eu-west-1.amazonaws.com}/${cw_GRIDWARE_s3_bucket:-alces-gridware-eu-west-1}/${cw_GRIDWARE_s3_binary_prefix:-dist}
 :fetch_timeout: 10
 :prefer_binary: ${cw_GRIDWARE_prefer_binary:-false}
+:use_default_params: ${cw_GRIDWARE_use_default_params:-false}
+:update_period: 3
+:last_update_filename: .last_update
+EOF
+    cat <<EOF > "${cw_GRIDWARE_root}"/etc/params.yml
+'apps/example':
+  :optimize: true
+'apps/example/1.0.1':
+  :optimize: false
 EOF
 }
 
 _update_modulespath() {
     local name
     name="$1"
-    if ! grep -q '${cw_GRIDWARE_root}/${name}/\$cw_DIST/etc/modules' "${cw_ROOT}"/etc/gridware/global/modulespath; then
+    if ! grep -q "${cw_GRIDWARE_root}/${name}/\$cw_DIST/etc/modules" "${cw_ROOT}"/etc/gridware/global/modulespath; then
         sed -e "/^#=Alces Gridware Depots/a ${cw_GRIDWARE_root}/${name}/\$cw_DIST/etc/modules" \
             -i "${cw_ROOT}"/etc/gridware/global/modulespath
     fi
@@ -141,24 +150,30 @@ RUBY
 }
 
 main() {
-    local depot name
+    local depot name update_config
+
+    if [ "$1" == "--update-config" ]; then
+        update_config=true
+        shift
+    fi
+
     cw_GRIDWARE_root="${1:-${cw_GRIDWARE_root}}"
     shift
-    
+
     while [ "$1" ]; do
-        cw_GRIDWARE_depots="${cw_GRIDWARE_depots} $1"
+        cw_GRIDWARE_init_depots="${cw_GRIDWARE_init_depots} $1"
         shift
     done
-    
+
     mkdir -p "${cw_GRIDWARE_root}"
     _create_default_depot
 
-    if [ ! -f "${cw_GRIDWARE_root}"/etc/gridware.yml ]; then
+    if [ "${update_config}" -o ! -f "${cw_GRIDWARE_root}"/etc/gridware.yml ]; then
         mkdir -p "${cw_GRIDWARE_root}"/etc
         _create_gridware_configuration
     fi
 
-    for name in ${cw_GRIDWARE_default_depot:-local} ${cw_GRIDWARE_depots}; do
+    for name in ${cw_GRIDWARE_default_depot:-local} ${cw_GRIDWARE_init_depots}; do
         depot="$(_detect_depot "${name}")"
 
         title "Performing initial configuration for '${name}' depot"
@@ -218,5 +233,6 @@ require files
 require ruby
 
 files_load_config gridware
+files_load_config --optional gridware config/gridware
 
 main "$@"

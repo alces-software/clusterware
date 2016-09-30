@@ -22,6 +22,7 @@
 require 'alces/tools/execution'
 require 'alces/packager/package'
 require 'alces/packager/errors'
+require 'alces/packager/import_export_utils'
 require 'find'
 
 module Alces
@@ -34,6 +35,7 @@ module Alces
       end
 
       include Alces::Tools::Execution
+      include Alces::Packager::ImportExportUtils
 
       attr_accessor :archive_path, :options
       delegate :say, :with_spinner, :doing, :title, :colored_path, :to => IoHandler
@@ -52,7 +54,7 @@ module Alces
           doing 'Download'
           target = File.expand_path(File.join(Config.archives_dir,'dist',File.basename(archive_path)))
           FileUtils.mkdir_p(File.dirname(target))
-          if File.exists?(target)
+          if File.exists?(target) && up_to_date?(target, archive_path)
             say "#{'SKIP'.color(:yellow)} (Existing source file detected)"
           else
             with_spinner do
@@ -180,8 +182,12 @@ module Alces
               File.write(module_file,s)
               (tagging[:rewritten] || []).each do |f|
                 fname = File.join(dir, ENV['cw_DIST'], 'pkg', package_path, tagging[:tag], f)
-                s = File.read(fname).gsub('_DEPOT_',depot_path)
-                File.write(fname,s)
+                if text_file?(fname)
+                  s = File.read(fname).gsub('_DEPOT_',depot_path)
+                  File.write(fname,s)
+                else
+                  patch_binary(fname, depot_path.split('/').tap {|x| a = x.pop; x << '_^DEPOT_'}.join('/'), depot_path)
+                end
               end
 
               Package.first_or_create(type: type,
@@ -264,8 +270,12 @@ module Alces
             File.write(lib_module_file,s)
             (@metadata[:rewritten] || []).each do |f|
               fname = File.join(dir, ENV['cw_DIST'], 'pkg', 'compilers', name, version, f)
-              s = File.read(fname).gsub('_DEPOT_',depot_path)
-              File.write(fname,s)
+              if text_file?(fname)
+                s = File.read(fname).gsub('_DEPOT_',depot_path)
+                File.write(fname,s)
+              else
+                patch_binary(fname, depot_path.split('/').tap {|x| a = x.pop; x << '_^DEPOT_'}.join('/'), depot_path)
+              end
             end
 
             Package.first_or_create(type: type,
@@ -347,6 +357,29 @@ module Alces
         s.gsub!('if ! sudo /usr/bin/yum install -y --quiet "${a}"',
                 %(if ! sudo /usr/bin/yum install -y "${a}" >>#{Config.log_root}/depends.log 2>&1))
         File.write(depends_file,s)
+      end
+
+      def text_file?(file)
+        run(['file',file]) do |r|
+          r.success? && r.stdout.include?("text")
+        end
+      end
+
+      def up_to_date?(target, archive_path)
+        # get md5sum of archive_path
+        remote_md5sum = run(['curl','-f','-s','-I',archive_path]) do |r|
+          if r.success?
+            r.stdout.split("\n").find { |l| l =~ /^ETag: "(.*)"/ }
+            $1
+          end
+        end
+        # get md5sum of target
+        local_md5sum = run(['md5sum',target]) do |r|
+          if r.success?
+            r.stdout.split(' ').first
+          end
+        end
+        remote_md5sum && local_md5sum && remote_md5sum == local_md5sum
       end
     end
   end

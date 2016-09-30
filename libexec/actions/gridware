@@ -48,11 +48,11 @@ if ARGV[0] == 'init'
   Kernel.exec "#{ENV['cw_ROOT']}/libexec/gridware/init", *ARGV
 else
   unless ENV['cw_GRIDWARE_root']
-    v = `source #{ENV['cw_ROOT']}/etc/gridware.rc 2> /dev/null && echo ${cw_GRIDWARE_root}`.chomp
+    v = `bash -c 'source #{ENV['cw_ROOT']}/etc/gridware.rc 2> /dev/null && echo ${cw_GRIDWARE_root}'`.chomp
     ENV['cw_GRIDWARE_root'] = v unless v.empty?
   end
   unless ENV['cw_GRIDWARE_notify']
-    v = `source #{ENV['cw_ROOT']}/etc/gridware.rc 2> /dev/null && echo ${cw_GRIDWARE_notify}`.chomp
+    v = `bash -c 'source #{ENV['cw_ROOT']}/etc/gridware.rc 2> /dev/null && echo ${cw_GRIDWARE_notify}'`.chomp
     ENV['cw_GRIDWARE_notify'] = v unless v.empty?
   end
 

@@ -28,8 +28,22 @@ distro_enable_service() {
     service="$1"
     if [ "${cw_DIST}" == "el7" ]; then
         systemctl enable ${service}
+    elif [ "${cw_DIST}" == "ubuntu1604" ]; then
+        systemctl enable ${service}
     elif [ "${cw_DIST}" == "el6" ]; then
         chkconfig ${service} on
+    fi
+}
+
+distro_disable_service() {
+    local service
+    service="$1"
+    if [ "${cw_DIST}" == "el7" ]; then
+        systemctl disable ${service}
+    elif [ "${cw_DIST}" == "ubuntu1604" ]; then
+        systemctl disable ${service}
+    elif [ "${cw_DIST}" == "el6" ]; then
+        chkconfig ${service} off
     fi
 }
 
@@ -37,6 +51,8 @@ distro_start_service() {
     local service
     service="$1"
     if [ "${cw_DIST}" == "el7" ]; then
+        systemctl --no-block start ${service}
+    elif [ "${cw_DIST}" == "ubuntu1604" ]; then
         systemctl --no-block start ${service}
     elif [ "${cw_DIST}" == "el6" ]; then
         service ${service} start
@@ -47,6 +63,8 @@ distro_restart_service() {
     local service
     service="$1"
     if [ "${cw_DIST}" == "el7" ]; then
+        systemctl --no-block restart ${service}
+    elif [ "${cw_DIST}" == "ubuntu1604" ]; then
         systemctl --no-block restart ${service}
     elif [ "${cw_DIST}" == "el6" ]; then
         service ${service} restart

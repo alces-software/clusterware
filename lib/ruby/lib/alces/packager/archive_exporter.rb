@@ -22,6 +22,7 @@
 require 'alces/tools/execution'
 require 'alces/packager/package'
 require 'alces/packager/errors'
+require 'alces/packager/import_export_utils'
 
 module Alces
   module Packager
@@ -33,6 +34,7 @@ module Alces
       end
 
       include Alces::Tools::Execution
+      include Alces::Packager::ImportExportUtils
 
       attr_accessor :package_path, :depot, :options
       delegate :say, :with_spinner, :doing, :title, :colored_path, :to => IoHandler
@@ -141,6 +143,7 @@ module Alces
             p.type == @type && p.name == basename && p.version == version
           end
         end.flatten.first
+        variant = 'default' if variant.nil? && (md.metadata[:variants]||{}).include?('default')
 
         @tags.each do |tag|
           title "Export (#{tag})"
@@ -166,9 +169,14 @@ module Alces
           with_spinner do
             # modify depot in modulefiles
             p = Package.first(name: @name, type: @type, version: version, tag: tag)
-            reqs = md.base_requirements(:runtime) + \
-                   md.compiler_requirements(p.compiler_tag,:runtime) + \
-                   md.variant_requirements(variant, :runtime)
+            compiler_tag = p.compiler_tag || md.compilers.keys.first
+            dh = DependencyHandler.new(md, compiler_tag.split('-').first, variant, false, false)
+            reqs = dh.resolve_requirements_tree.map do |req, pkg, installed, build_arg_hash|
+              [pkg.type, pkg.name, pkg.version].join('/')
+            end.tap {|o| o.pop}
+            specifiers = md.base_requirements(:runtime) + \
+                         md.compiler_requirements(compiler_tag,:runtime) + \
+                         md.variant_requirements(variant, :runtime)
 
             s = File.read(dest_module).gsub(depot_path,'_DEPOT_')
             File.write(dest_module,s)
@@ -176,8 +184,9 @@ module Alces
 
             h[:taggings] << {
               tag: tag,
-              compiler_tag: p.compiler_tag,
+              compiler_tag: compiler_tag,
               requirements: reqs,
+              specifiers: specifiers,
               rewritten: rewritten_files
             }
           end
@@ -203,18 +212,6 @@ module Alces
         archive(dir)
       end
 
-      def text_file?(file)
-        run(['file',file]) do |r|
-          r.success? && r.stdout.include?("text")
-        end
-      end
-
-      def elf_file?(file)
-        run(['file',file]) do |r|
-          r.success? && r.stdout.include?("ELF")
-        end
-      end
-
       def detect_bad_paths(dir, depot_path)
         # warn about depot specifics in package code
         run(['grep','-lr',depot_path,dir]) do |r|
@@ -226,6 +223,9 @@ module Alces
               if text_file?(f)
                 s = File.read(f).gsub(depot_path,'_DEPOT_')
                 File.write(f,s)
+                rewritten_files << f.gsub(File.join(dir,''),'')
+              elsif patch_pattern_matches?(f.gsub(File.join(dir,''),''))
+                patch_binary(f, depot_path, depot_path.split('/').tap {|x| a = x.pop; x << '_^DEPOT_'}.join('/'))
                 rewritten_files << f.gsub(File.join(dir,''),'')
               elsif options.accept_elf && elf_file?(f)
                 # accept ELF binaries which don't have hardcoded lib paths
@@ -326,6 +326,11 @@ module Alces
         lambda do |f|
           options.accept_bad.split(',').any? {|glob| File.fnmatch?(glob, f)}
         end
+      end
+
+      def patch_pattern_matches?(f)
+        return nil unless options.patch_binary
+        options.patch_binary.split(',').any? {|glob| f == glob || File.fnmatch?(glob, f)}
       end
     end
   end

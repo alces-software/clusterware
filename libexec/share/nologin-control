@@ -51,10 +51,10 @@ main() {
 	fi
         _emit '+++++++++++++++++++++++++++++++++++++++++++++' >> /etc/nologin
         echo >> /etc/nologin
-	_emit 'This cluster is being prepared.' >> /etc/nologin
+	_emit 'This node is being prepared.' >> /etc/nologin
 	cat <<EOF >> /etc/nologin
 
-This cluster is currently being configured and is not yet operational.  Please
+This node is currently being configured and is not yet operational.  Please
 try again in a few minutes.  If you continue to see this message, please
 contact the cluster administrator.
 EOF

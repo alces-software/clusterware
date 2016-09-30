@@ -52,6 +52,7 @@ EOF
 source "${source}/scripts/os/${os}.sh"
 
 cw_BUILD_tmp="${cw_BUILD_tmp:-tmp}"
+cw_BUILD_var="${cw_BUILD_var:-/var}"
 export cw_UI_disable_spinner="${cw_BUILD_noninteractive}"
 mkdir -p ${source}/${cw_BUILD_tmp}/log ${source}/${cw_BUILD_tmp}/src ${source}/${cw_BUILD_tmp}/build
 dep_logs="${source}/${cw_BUILD_tmp}/log"
@@ -76,6 +77,8 @@ title "Creating clusterware directory structure"
 doing 'Create'
 [[ -d "${target}" ]] || mkdir -p "${target}"
 mkdir -p "${target}"/var/lock
+touch "${target}"/var/lock/clusterware.session.lock
+chmod 0644 "${target}"/var/lock/clusterware.session.lock
 cp -R "${source}/bin" "${source}/lib" "${source}/libexec" "${target}"
 if [ ! -d "${target}/etc" ]; then
     cp -R "${source}/etc" "${target}"
@@ -83,7 +86,8 @@ if [ ! -d "${target}/etc" ]; then
     sed -i -e "s,_ROOT_,${target},g" "${target}/etc/ruby.rc" \
         "${target}/etc/gridware/global/modulespath" \
         "${target}/etc/profile.d/05-packager.csh" \
-        "${target}"/etc/sudoers.d/*
+        "${target}"/etc/sudoers.d/* \
+        "${target}"/etc/modules/services/*
     if [ "$cw_BUILD_dist_url" ]; then
         sed -e "s,^cw_SERVICE_url=.*,cw_SERVICE_url=${cw_BUILD_dist_url}/,g" -i "${target}/etc"/serviceware.rc
     else
@@ -113,8 +117,8 @@ if [ ! -d "${target}/etc" ]; then
     fi
     cp -R "${source}/dist/distro/${os}" "${target}"/etc/distro
 fi
-mkdir -p /var/log/clusterware
-mkdir -p /var/cache/gridware/{archives,archives/depots,src} /var/log/gridware
+mkdir -p ${cw_BUILD_var}/log/clusterware
+mkdir -p ${cw_BUILD_var}/cache/gridware/{archives,archives/depots,src} ${cw_BUILD_var}/log/gridware
 say_done $?
 
 title "Installing Clusterware base configuration"
@@ -155,7 +159,7 @@ say_done $?
 
 title "Updating gridware permissions"
 doing 'Configure'
-access_targets=(/var/cache/gridware /var/log/gridware "${target}"/etc/gridware/global)
+access_targets=(${cw_BUILD_var}/cache/gridware ${cw_BUILD_var}/log/gridware "${target}"/etc/gridware/global)
 chmod -R g+rw "${access_targets[@]}"
 find "${access_targets[@]}" -type d -exec chmod 2775 {} \;
 chgrp -R gridware "${access_targets[@]}"
@@ -182,7 +186,7 @@ else
         tar -C "${target}"/var/lib/gridware/repos/volatile/pkg -xvzf "${source}"/gridware-packages-volatile.tar.gz &> "${dep_logs}/gridware-init.log"
     else
         cat <<EOF > "${target}"/etc/gridware.yml
-:dbroot: ${dep_build}
+:last_update_filename: .last_update
 :log_root: ${dep_build}
 :repo_paths:
  - ${target}/var/lib/gridware/repos/main
@@ -214,7 +218,7 @@ else
         tar -C "${target}"/var/lib/gridware/depots/official/data -xvzf "${source}"/gridware-depots.tar.gz &> "${dep_logs}/gridware-depots-init.log"
     else
         cat <<EOF > "${target}"/etc/gridware.yml
-:dbroot: ${dep_build}
+:last_update_filename: .last_update
 :log_root: ${dep_build}
 :depot_repo_paths:
  - ${target}/var/lib/gridware/depots/official
@@ -291,12 +295,12 @@ fi
 say_done $?
 
 title "Setting up documents area"
-if [ -d "${target}/var/lib/docs" ]; then
+if [ -d "${target}/var/lib/docs/base" ]; then
     doing 'Detect'
 else
     doing "Initialize"
-    mkdir -p "${target}/var/lib/docs/guides" "${target}/var/lib/docs/templates"
-    cp "${source}/dist/guides"/* "${target}/var/lib/docs/guides"
+    mkdir -p "${target}/var/lib/docs/base/guides" "${target}/var/lib/docs/base/templates"
+    cp "${source}/dist/guides"/* "${target}/var/lib/docs/base/guides"
 fi
 say_done $?
 
@@ -330,6 +334,11 @@ say_done $?
 title "Installing startup scripts"
 doing 'Install'
 install_startup_hooks &> "${dep_logs}/install-startup-hooks.log"
+say_done $?
+
+title "Performing distro-specific customizations"
+doing 'Install'
+install_distro_specific &> "${dep_logs}/distro-specific.log"
 say_done $?
 
 if [ "$(type -t lsof)" ]; then

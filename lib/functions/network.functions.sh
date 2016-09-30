@@ -22,6 +22,16 @@
 network_get_public_address() {
     local public_ipv4 tmout
     tmout=${1:-5}
+
+    # Try and read from metadata
+    if [ -f "${cw_ROOT}"/etc/network.rc ]; then
+        eval $(grep '^cw_NETWORK_public_ip=' "${cw_ROOT}"/etc/network.rc)
+        if [ "${cw_NETWORK_public_ip}" ]; then
+            echo "${cw_NETWORK_public_ip}"
+            return 0
+        fi
+    fi
+
     if [ "${tmout}" -gt 0 ]; then
         # Attempt to determine our public IP address using the standard EC2
         # API.
@@ -41,6 +51,16 @@ network_get_public_address() {
 network_get_public_hostname() {
     local public_hostname tmout dig_tmout
     tmout=${1:-5}
+
+    # Try and read from metadata
+    if [ -f "${cw_ROOT}"/etc/network.rc ]; then
+        eval $(grep '^cw_NETWORK_public_hostname=' "${cw_ROOT}"/etc/network.rc)
+        if [ "${cw_NETWORK_public_hostname}" ]; then
+            echo "${cw_NETWORK_public_hostname}"
+            return 0
+        fi
+    fi
+
     if [ "${tmout}" -gt 0 ]; then
         # Attempt to determine our public DNS name using the standard EC2
         # API.
@@ -67,7 +87,7 @@ network_get_mapped_address() {
         table)
             lookup_param=${3:-access}
             if [ -f "${cw_ROOT}"/etc/mappingstab ]; then
-                mapping=$(sed -rn "s/^${lookup}\s+${lookup_param}\s+(.*)/\1/gp" "${cw_ROOT}"/etc/mappingstab | head -n1)
+                mapping=$(sed -rn -e "s/\s*$//g" -e "s/^${lookup}\s+${lookup_param}\s+(.*)/\1/gp" "${cw_ROOT}"/etc/mappingstab | head -n1)
             fi
             ;;
     esac
@@ -103,6 +123,15 @@ network_get_first_iface() {
         | sed 's/^.: \(\S*\):.*/\1/g'
 }
 
+network_get_iface_mac() {
+    local target_iface
+    target_iface="$1"
+
+    ip -o -4 link show dev ${target_iface} \
+        | head -n 1 \
+        | sed 's/.*link\/ether\s*\(\S*\)\s*.*/\1/g'
+}
+
 network_get_iface_address() {
     local target_iface
     target_iface="$1"
@@ -124,7 +153,7 @@ network_get_free_port() {
 network_has_metadata_service() {
     local tmout
     tmout="${1:-5}"
-    [ "$cw_TEST_metadata_service" == "true" ] ||
+    [ "$cw_TEST_metadata_service" == "true" -a "$(id -un)" == "root" ] ||
         curl -f --connect-timeout $tmout http://169.254.169.254/ &>/dev/null
 }
 
@@ -132,9 +161,10 @@ network_get_iface_network() {
     local target_iface
     target_iface="$1"
 
-    ip -o -4 route show dev ${target_iface} \
+    ip -o -4 address show dev ${target_iface} \
         | head -n 1 \
-        | sed 's/\(\S*\).*/\1/g'
+        | grep ' brd ' \
+        | sed 's/.*inet \(\S*\) brd.*/\1/g'
 }
 
 # Adapted from https://forums.gentoo.org/viewtopic-t-888736-start-0.html
@@ -145,13 +175,28 @@ network_cidr_to_mask() {
 }
 
 network_is_ec2() {
-    [ "${cw_TEST_ec2}" == "true" ] ||
-        [ -f /sys/hypervisor/uuid -a "$(head -c3 /sys/hypervisor/uuid)" == "ec2" ]
+    [ -f /sys/hypervisor/uuid ] && [ "$(head -c3 /sys/hypervisor/uuid)" == "ec2" ] ||
+        [ "${cw_TEST_ec2}" == "true" ]
+}
+
+network_get_ec2_vpc_cidr_block() {
+    local mac
+    if [ "$cw_TEST_metadata_service" == "true" ]; then
+        echo "${cw_TEST_mock_ec2_vpc_cidr_block}"
+    else
+        if [ -z "$1" ]; then
+            mac=$(network_get_iface_mac "$(network_get_first_iface)")
+        else
+            mac=$(network_get_iface_mac "$1")
+        fi
+        network_fetch_ec2_metadata network/interfaces/macs/$mac/vpc-ipv4-cidr-block
+    fi
 }
 
 network_fetch_ec2_document() {
     if [ "$cw_TEST_mock_ec2_document" ]; then
-        cat <<EOF
+        if [ "$(id -un)" == "root" ]; then
+            cat <<EOF
 {
   "region": "${cw_TEST_mock_ec2_region:-eu-west-1}",
   "pendingTime": "$(date -u +%Y-%m-%dT%H:%M:%SZ)",
@@ -159,6 +204,9 @@ network_fetch_ec2_document() {
   "accountId": "1234567890"
 }
 EOF
+        else
+            return 1
+        fi
     else
         curl -s http://169.254.169.254/latest/dynamic/instance-identity/document
     fi
@@ -169,8 +217,8 @@ network_fetch_ec2_metadata() {
     item="$1"
     tmout="${2:-5}"
     if [ "$cw_TEST_metadata_service" == "true" ]; then
-        itemvar=cw_TEST_mock_ec2_$(echo "${item}" | tr '-' '_')
-        if [ "${!itemvar}" ]; then
+        itemvar=cw_TEST_mock_ec2_$(echo "${item}" | tr '/-' '_')
+        if [ "$(id -un)" == "root" -a "${!itemvar}" ]; then
             echo "${!itemvar}"
         else
             return 1
@@ -215,7 +263,24 @@ write_files:
   permissions: '0640'
 EOF
         else
-            curl -f --connect-timeout ${tmout} http://169.254.169.254/latest/user-data
+            curl -sS -f --connect-timeout ${tmout} http://169.254.169.254/latest/user-data
         fi
+    fi
+}
+
+network_get_edition() {
+    local user_id
+    if network_is_ec2; then
+        user_id=$(network_ec2_hashed_account)
+    elif [ -f /root/.ssh/account.pub ]; then
+        user_id=$(ssh-keygen -lf /root/.ssh/account.pub | cut -f2 -d' ' | tr -d ':')
+    else
+        user_id=$(uuid)
+    fi
+    result=$(dig _license.${user_id}.cloud.alces.network +short TXT | cut -f2 -d'"')
+    if [[ " $result " == *' edition=professional '* ]]; then
+        echo "professional"
+    else
+        echo "community"
     fi
 }

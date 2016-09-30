@@ -1,5 +1,5 @@
 #==============================================================================
-# Copyright (C) 2015 Stephen F. Norledge and Alces Software Ltd.
+# Copyright (C) 2015-2016 Stephen F. Norledge and Alces Software Ltd.
 #
 # This file/package is part of Alces Clusterware.
 #
@@ -21,13 +21,14 @@
 #==============================================================================
 require xdg
 require repo
+require files
 
 cw_VNC_SESSIONSDIR="$(xdg_cache_home)"/clusterware/sessions
 # XXX
 cw_VNC_VNCSERVER="${cw_ROOT}/libexec/session/share/vncserver"
 cw_VNC_BINDIR="${cw_ROOT}/opt/tigervnc/bin"
 cw_VNC_VNCPASSWD="${cw_VNC_BINDIR}/vncpasswd"
-cw_SESSION_PLUGINDIR="${cw_ROOT}/etc/sessions"
+cw_SESSION_dir="${cw_ROOT}/etc/sessions"
 cw_SESSION_DEFAULT_REPO="base"
 cw_SESSION_DEFAULT_REPO_URL="${cw_SESSION_DEFAULT_REPO_URL:-https://:@github.com/alces-software/clusterware-sessions}"
 cw_SESSION_REPODIR="${cw_ROOT}/var/lib/sessions/repos"
@@ -70,16 +71,20 @@ vnc_start_server() {
     # Set session geometry variable for VNC server process so the session
     # scripts for session types which do not obey the VNC server's geometry
     # parameter can be forced to resize to the given geometry.
-    cw_SESSION_geometry="${geometry}" $cw_VNC_VNCSERVER -autokill \
-        -sessiondir "${sessiondir}" \
-        -sessionscript "${sessiondir}/session.sh" \
-        -vncpasswd "${sessiondir}/password.dat" \
-        -exedir "${cw_VNC_BINDIR}" \
-        -geometry "${geometry}" \
-        "$@" 2>"${sessiondir}/vncserver.err" > "${sessiondir}/vncserver.out"
-
-    files_mark_tempfile "${sessiondir}/vncserver.out"
-    files_mark_tempfile "${sessiondir}/vncserver.err"
+    if files_lock clusterware.session 5r 60; then
+        cw_SESSION_geometry="${geometry}" $cw_VNC_VNCSERVER -autokill \
+                           -sessiondir "${sessiondir}" \
+                           -sessionscript "${sessiondir}/session.sh" \
+                           -vncpasswd "${sessiondir}/password.dat" \
+                           -exedir "${cw_VNC_BINDIR}" \
+                           -geometry "${geometry}" \
+                           "$@" 2>"${sessiondir}/vncserver.err" > "${sessiondir}/vncserver.out" 5<&-
+        files_unlock 5r
+        files_mark_tempfile "${sessiondir}/vncserver.out"
+        files_mark_tempfile "${sessiondir}/vncserver.err"
+    else
+        return 1
+    fi
 }
 
 vnc_read_vars() {
@@ -320,7 +325,7 @@ vnc_sessions_dir() {
 }
 
 session_is_enabled() {
-    repo_plugin_is_enabled "${cw_SESSION_PLUGINDIR}" "$@"
+    repo_plugin_is_enabled "${cw_SESSION_dir}" "$@"
 }
 
 session_repo_exists() {
@@ -336,11 +341,11 @@ session_install() {
 }
 
 session_enable() {
-    repo_plugin_enable "${cw_SESSION_REPODIR}" "${cw_SESSION_PLUGINDIR}" "$@"
+    repo_plugin_enable "${cw_SESSION_REPODIR}" "${cw_SESSION_dir}" "$@"
 }
 
 session_disable() {
-    repo_plugin_disable "${cw_SESSION_PLUGINDIR}" "$@"
+    repo_plugin_disable "${cw_SESSION_dir}" "$@"
 }
 
 session_check_quota() {

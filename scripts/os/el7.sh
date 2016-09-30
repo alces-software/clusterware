@@ -80,3 +80,7 @@ install_startup_hooks() {
         fi
     done
 }
+
+install_distro_specific() {
+    :
+}

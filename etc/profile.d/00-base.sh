@@ -74,9 +74,9 @@ alces() {
     return $errlvl
 }
 if [ "$ZSH_VERSION" ]; then
-  export alces
+  export alces _cw_root
 else
-  export -f alces
+  export -f alces _cw_root
 fi
 alias al=alces
 
@@ -100,11 +100,20 @@ if [ "$BASH_VERSION" ]; then
         ls -1 "${_cw_ROOT}"/var/lib/${repo}/repos/*
     }
 
+    _alces_repo_list_dirs() {
+       local repo="$1" a
+       for a in "${_cw_ROOT}"/var/lib/${repo}/repos/*/*; do
+         if [ -d "$a" ]; then
+           basename $a
+         fi
+       done
+    }
+
     _alces_repo_list_disabled() {
         local repo="$1" state="$2"
         state="${state:-${repo}}"
-        echo -e "$(ls -1 "${_cw_ROOT}"/var/lib/${repo}/repos/*)\n$(ls -1 "${_cw_ROOT}"/etc/${state})" \
-            | sort | uniq -u
+        echo -e "$(_alces_repo_list_dirs "${repo}")\n$(ls -1 "${_cw_ROOT}"/etc/${state})" \
+            | sed -r 's/^[0-9]+-//g' | sort | uniq -u
     }
 
     _alces_handler_action() {
@@ -124,20 +133,7 @@ if [ "$BASH_VERSION" ]; then
         local cur="$1" prev="$2" values
         case $prev in
             e|en|ena|enab|enabl|enable)
-                values="$(alces service avail --components | sed -r "s:\x1B\[[0-9;]*[mK]::g" | grep -v '\[\*\]' | cut -f2 -d'/')"
-                ;;
-            i|in|ins|inst|insta|instal|install|b|bu|bui|buil|build)
-                values="$(alces service avail | sed -r "s:\x1B\[[0-9;]*[mK]::g" |grep -v '\[\*\]' | cut -f2 -d'/')"
-                ;;
-        esac
-        echo "$values"
-    }
-
-    _alces_service_action() {
-        local cur="$1" prev="$2" values
-        case $prev in
-            e|en|ena|enab|enabl|enable)
-                values="$(alces service avail --components | sed -r "s:\x1B\[[0-9;]*[mK]::g" | grep -v '\[\*\]' | cut -f2 -d'/')"
+                values="$(alces service avail --components | sed -r "s:\x1B\[[0-9;]*[mK]::g" | grep -v '\[\*\]' | cut -f2- -d'/')"
                 ;;
             i|in|ins|inst|insta|instal|install|b|bu|bui|buil|build)
                 values="$(alces service avail | sed -r "s:\x1B\[[0-9;]*[mK]::g" |grep -v '\[\*\]' | cut -f2 -d'/')"
@@ -159,7 +155,7 @@ if [ "$BASH_VERSION" ]; then
     _alces_template_action() {
         local cur="$1" prev="$2" values
         case $prev in
-            s|sh|sho|show|i|in|inf|info|c|co|cop|copy)
+            s|sh|sho|show|i|in|inf|info|c|co|cop|copy|p|pr|pre|prep|prepa|prepar|prepare)
                 values="$(alces template list | sed -r "s:\x1B\[[0-9;]*[mK]::g" | cut -c7- | awk '{print $1;}')"
                 ;;
         esac
@@ -237,6 +233,11 @@ if [ "$BASH_VERSION" ]; then
                         st|sto|stor|stora|storag|storage)
                             values=$(_alces_storage_action "$cur" "$prev")
                             ;;
+                        c|co|con|conf|confi|config|configu|configur|configure)
+                            if ((COMP_CWORD == 3)); then
+                                values="status allocation packing"
+                            fi
+                            ;;
                     esac
                     if [ "$values" ]; then
                         COMPREPLY=( $(compgen -W "$values" -- "$cur") )
@@ -249,6 +250,16 @@ if [ "$BASH_VERSION" ]; then
     _alces_storage() {
         _alces_complete "$@" "storage" \
                         "help enable configure forget use avail put get rm list mkbucket rmbucket addbucket"
+    }
+
+    _alces_about() {
+        local actions
+        shopt -s nullglob
+        for a in "${_cw_ROOT}"/etc/meta.d/*.rc; do
+            actions="${actions} $(basename "$a" .rc)"
+        done
+        shopt -u nullglob
+        COMPREPLY=( $(compgen -W "help ${actions}" -- "$cur") )
     }
 
     _alces() {
@@ -281,7 +292,7 @@ if [ "$BASH_VERSION" ]; then
                     _alces_action "$cur" "$prev" "configure"
                     ;;
                 a|ab|abo|abou|about)
-                    _alces_action "$cur" "$prev" "about"
+                    _alces_about "$cur" "$prev" "about"
                     ;;
                 ho|how|howt|howto)
                     _alces_action "$cur" "$prev" "howto"

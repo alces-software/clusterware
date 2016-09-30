@@ -33,25 +33,41 @@ case $action in
     h|he|hel|help)
         exec /bin/bash $cw_ROOT/libexec/about/actions/help "$@"
         ;;
-    n|no|nod|node)
-        exec /bin/bash $cw_ROOT/libexec/about/actions/node "$@"
-        ;;
-    i|id|ide|iden|ident|identi|identit|identity)
-        exec /bin/bash $cw_ROOT/libexec/about/actions/identity "$@"
+    ?*)
+        x=("$cw_ROOT/etc/meta.d/$action"*.rc)
+        if [ $x == "$cw_ROOT/etc/meta.d/$action"'*.rc' ]; then
+            echo "${cw_BINNAME}: no data for $action"
+            exit 1
+        elif [ ${#x[*]} = 1 ]; then
+            # matched one
+            exec /bin/bash $cw_ROOT/libexec/about/actions/show "$(basename "${x[0]}" .rc)" "$@"
+        elif [ ${#x[*]} -gt 1 ]; then
+            # matched > 1
+            echo "$cw_BINNAME: ambiguous selection: $action"
+            echo "Did you mean one of these?"
+            for a in ${x[*]}; do
+                echo "        `basename $a .rc`"
+            done
+            echo ""
+            exit 1
+        fi
         ;;
     *)
-        cat <<EOF
+      cat <<EOF
 Usage: $cw_BINNAME COMMAND [[OPTION]... [ARGS]]
 Information about your compute environment.
 
 Commands:
 EOF
-printf "  %-22s  %s\n" "$cw_BINNAME help" "More help about this command."
-printf "  %-22s  %s\n" "$cw_BINNAME node" "Display information about this node/instance."
-printf "  %-22s  %s\n" "$cw_BINNAME identity" "Display identity information for this cluster."
-cat <<EOF
+      printf "  %-22s  %s\n" "$cw_BINNAME help" "More help about this command."
+      for a in "$cw_ROOT"/etc/meta.d/*.rc; do
+          extract_info "$a"
+          printf "  %-22s  %s\n" "$cw_BINNAME $(basename "$a" .rc)" "${cmd_SYNOPSIS}."
+      done
+      cat <<EOF
 
 Please report bugs to support@alces-software.com
 Alces Software home page: <http://alces-software.com/>
 EOF
+      ;;
 esac
