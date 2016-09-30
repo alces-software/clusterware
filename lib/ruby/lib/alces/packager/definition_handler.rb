@@ -113,8 +113,8 @@ module Alces
       end
 
       def install_defn(variant = nil)
-        binary_viable = ((Config.prefer_binary && options.binary.nil?) || options.binary) &&
-          archive_path = binary_path(defn, variant)
+        binary_viable = ((!options.compile && Config.prefer_binary && options.binary.nil?) ||
+                         options.binary) && archive_path = binary_path(defn, variant)
         # trigger an early check for any missing parameters for the target package
         params unless binary_viable
         install_dependencies(variant, binary_viable)
@@ -159,7 +159,8 @@ EOF
         if options.yes || (!options.non_interactive && confirm(msg))
           missing_params = {}
           missing.each do |_, pkg, _, build_arg_hash|
-            unless ((Config.prefer_binary && options.binary.nil?) || options.binary || options.binary_depends) &&
+            unless ((!options.compile && Config.prefer_binary && options.binary.nil?) ||
+                    options.binary || options.binary_depends) &&
                    binary_available?(pkg, build_arg_hash[:variant])
               (build_arg_hash[:params] || '').split(',').each do |p|
                 if !params(false,pkg)[p.to_sym]

@@ -64,4 +64,8 @@ setup
 require action
 require xdg
 
+if [ "$UID" == "0" ]; then
+    action_die "this command cannot be executed as the superuser" 1
+fi
+
 main "$@"

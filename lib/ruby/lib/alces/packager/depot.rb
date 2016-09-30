@@ -118,6 +118,7 @@ module Alces
           disable
         else
           puts "module use #{depot_path(name)}/$cw_DIST/etc/modules"
+          ENV['MODULEPATH'] = "#{depot_path(name)}/#{ENV['cw_DIST']}/etc/modules:#{ENV['MODULEPATH']}"
           notify_depot(name,'enabled')
         end
       end

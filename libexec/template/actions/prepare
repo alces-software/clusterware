@@ -51,6 +51,14 @@ main() {
                             if ! ${type}_storage_get gridware-data "$f" "${datadir}" | stdbuf -oL sed -e "s/^/$cw_BINNAME: /g"; then
                                 rm -rf "${datadir}"
                                 action_die "unable to download '$f' from 'gridware-data' storage backend - please consult the template documentation ('alces template info $1') for details regarding data acquisition" 1
+                            else
+                                if [[ "$f" == *.al.gr.tar.gz ]]; then
+                                    action_warn "extracting Gridware data archive"
+                                    (
+                                        cd "${datadir}"
+                                        action_warn "$(tar xvzf "$(basename "$f")" | sed 's/^/  /g')"
+                                    )
+                                fi
                             fi
                             set +o pipefail
                         done
