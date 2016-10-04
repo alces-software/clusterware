@@ -18,6 +18,11 @@ This project adheres to [Semantic Versioning](http://semver.org/).
 
 [Core 1.7.0], [Handlers 1.7.0], [Services 1.7.0], [Storage 1.7.0], [Sessions 1.7.0]
 
+## [1.6.1] - 2016-10-04
+
+### Fixed
+- Correct an issue where region-specific feature buckets were not being addressed correctly (#216)
+
 ## [1.6.0] - 2016-09-21
 
 ### Added
@@ -277,6 +282,7 @@ This project adheres to [Semantic Versioning](http://semver.org/).
 [Services 1.7.0]: https://github.com/alces-software/clusterware/issues?q=milestone%3A1.7-release
 [Storage 1.7.0]: https://github.com/alces-software/clusterware/issues?q=milestone%3A1.7-release
 [Sessions 1.7.0]: https://github.com/alces-software/clusterware/issues?q=milestone%3A1.7-release
+[1.6.1]: https://github.com/alces-software/clusterware/compare/1.6.0...1.6.1
 [1.6.0]: https://github.com/alces-software/clusterware/compare/1.5.3...1.6.0
 [Core 1.6.0]: https://github.com/alces-software/clusterware/issues?q=milestone%3A1.6-release
 [Handlers 1.6.0]: https://github.com/alces-software/clusterware/issues?q=milestone%3A1.6-release
