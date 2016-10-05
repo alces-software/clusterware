@@ -42,8 +42,8 @@ main() {
             service="$(basename "$servicepath")"
             if [ "${with_components}" ]; then
                 if serviceware_is_installed "${service}"; then
-                    installed='*'
                     for component in $(serviceware_list_components "${reponame}/${service}"); do
+                        installed='*'
                         if ! serviceware_is_enabled "${service}-${component}"; then
                             installed=' '
                         fi

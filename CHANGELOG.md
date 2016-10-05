@@ -12,7 +12,7 @@ This project adheres to [Semantic Versioning](http://semver.org/).
 - Nothing yet
 
 ### Fixed
-- Nothing yet
+- Correctly display enabled serviceware components when they are
 
 #### Issues/PRs
 
