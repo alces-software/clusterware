@@ -11,6 +11,5 @@ ENV cw_DIST=el6
 RUN yum install -y -e0 openssh-server tar && yum clean all
 RUN echo 1.6.0
 RUN curl -sL http://git.io/clusterware-installer | /bin/bash && yum clean all
-RUN /opt/clusterware/bin/alces gridware init
 
 CMD ["/bin/bash"]
