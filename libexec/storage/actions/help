@@ -60,18 +60,11 @@ help_for_avail() {
     cat <<EOF
   SYNOPSIS:
 
-    alces storage avail [OPTIONS]
+    alces storage avail
 
   DESCRIPTION:
 
-    Display a list of storage configurations that are configured.  The
-    default storage configuration (used when no storage configuration
-    is explicitly specified) is marked with a '*'.
-
-  OPTIONS:
-
-    --backends
-      Output storage backend types that are available or currently enabled.
+    Output storage backend types that are available or currently enabled.
 
 EOF
 }
@@ -369,7 +362,7 @@ printf "    %-24s  %s\n" "$binname configure" "Configure a storage backend."
 printf "    %-24s  %s\n" "$binname forget" "Forget (remove) a storage backend configuration."
 printf "    %-24s  %s\n" "$binname use" "Select a default storage backend configuration."
 printf "    %-24s  %s\n" "$binname show" "Show configured storage backends."
-printf "    %-24s  %s\n" "$binname avail" "Show configured storage backends."
+printf "    %-24s  %s\n" "$binname avail" "Show available storage backend types."
 printf "    %-24s  %s\n" "$binname put" "Put a file in storage."
 printf "    %-24s  %s\n" "$binname get" "Get a file from storage."
 printf "    %-24s  %s\n" "$binname rm" "Delete a file from storage."
