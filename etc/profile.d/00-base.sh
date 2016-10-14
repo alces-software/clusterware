@@ -169,7 +169,7 @@ if [ "$BASH_VERSION" ]; then
                 values="$(alces storage avail --backends | sed -r "s:\x1B\[[0-9;]*[mK]::g" | grep -v '\[\*\]' | cut -f2 -d'/')"
                 ;;
             u|us|use)
-                values="$(alces storage avail | sed -r "s:\x1B\[[0-9;]*[mK]::g" | grep -v '\[\*\]' | awk '{print $1;}')"
+                values="$(alces storage avail | sed -r "s:\x1B\[[0-9;]*[mK]::g" | grep -v '\[\*\]' | awk '{print $3;}')"
                 ;;
             f|fo|'for'|forg|forge|forget)
                 values="$(alces storage avail | sed -r "s:\x1B\[[0-9;]*[mK]::g" | cut -c5- | awk '{print $1;}')"
