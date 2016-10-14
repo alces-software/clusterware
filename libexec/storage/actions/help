@@ -27,7 +27,7 @@ main() {
     shift
 
     case $action in
-        help|enable|configure|forget|use|avail|put|get|rm|list|mkbucket|rmbucket|addbucket)
+        help|enable|configure|forget|use|show|avail|put|get|rm|list|mkbucket|rmbucket|addbucket)
             help_for_${action}
             ;;
         ?*)
@@ -39,6 +39,21 @@ main() {
             general_help
             ;;
     esac
+}
+
+help_for_show() {
+    cat <<EOF
+  SYNOPSIS:
+
+    alces storage show
+
+  DESCRIPTION:
+
+    Display a list of storage configurations that are configured.  The
+    default storage configuration (used when no storage configuration
+    is explicitly specified) is marked with a '*'.
+
+EOF
 }
 
 help_for_avail() {
@@ -353,6 +368,7 @@ printf "    %-24s  %s\n" "$binname enable" "Enable a storage backend."
 printf "    %-24s  %s\n" "$binname configure" "Configure a storage backend."
 printf "    %-24s  %s\n" "$binname forget" "Forget (remove) a storage backend configuration."
 printf "    %-24s  %s\n" "$binname use" "Select a default storage backend configuration."
+printf "    %-24s  %s\n" "$binname show" "Show configured storage backends."
 printf "    %-24s  %s\n" "$binname avail" "Show configured storage backends."
 printf "    %-24s  %s\n" "$binname put" "Put a file in storage."
 printf "    %-24s  %s\n" "$binname get" "Get a file from storage."

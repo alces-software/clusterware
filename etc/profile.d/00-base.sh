@@ -249,7 +249,7 @@ if [ "$BASH_VERSION" ]; then
 
     _alces_storage() {
         _alces_complete "$@" "storage" \
-                        "help enable configure forget use avail put get rm list mkbucket rmbucket addbucket"
+                        "help enable configure forget use show avail put get rm list mkbucket rmbucket addbucket"
     }
 
     _alces_about() {
