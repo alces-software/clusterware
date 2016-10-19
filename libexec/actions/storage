@@ -67,6 +67,9 @@ case $action in
     ls|l|li|lis|list)
         exec /bin/bash $cw_ROOT/libexec/storage/actions/list "${args[@]}"
         ;;
+    s|sh|sho|show)
+        exec /bin/bash $cw_ROOT/libexec/storage/actions/show "${args[@]}"
+        ;;
     a|av|ava|avai|avail)
         exec /bin/bash $cw_ROOT/libexec/storage/actions/avail "${args[@]}"
         ;;
@@ -91,7 +94,8 @@ printf "  %-24s  %s\n" "$cw_BINNAME enable" "Enable a storage backend."
 printf "  %-24s  %s\n" "$cw_BINNAME configure" "Configure a storage backend."
 printf "  %-24s  %s\n" "$cw_BINNAME forget" "Forget (remove) a storage backend configuration."
 printf "  %-24s  %s\n" "$cw_BINNAME use" "Select a default storage backend configuration."
-printf "  %-24s  %s\n" "$cw_BINNAME avail" "Show configured storage backends."
+printf "  %-24s  %s\n" "$cw_BINNAME show" "Show configured storage backends."
+printf "  %-24s  %s\n" "$cw_BINNAME avail" "Show available storage backend types."
 printf "  %-24s  %s\n" "$cw_BINNAME put" "Put a file in storage."
 printf "  %-24s  %s\n" "$cw_BINNAME get" "Get a file from storage."
 printf "  %-24s  %s\n" "$cw_BINNAME rm" "Delete a file from storage."

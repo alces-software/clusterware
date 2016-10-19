@@ -1,6 +1,6 @@
 #!/bin/bash
 #==============================================================================
-# Copyright (C) 2015 Stephen F. Norledge and Alces Software Ltd.
+# Copyright (C) 2016 Stephen F. Norledge and Alces Software Ltd.
 #
 # This file/package is part of Alces Clusterware.
 #
@@ -22,32 +22,24 @@
 #==============================================================================
 require action
 require storage
-require ui
+
+_show_config() {
+    local path name type default
+    path="$1"
+    name="$(basename "${path}" | cut -f1 -d'.')"
+    type="$(basename "${path}" | cut -f2 -d'.')"
+    if [ "$(storage_default_configuration)" == "${name}" ]; then
+        default="*"
+    else
+        default=" "
+    fi
+    echo -e "[$default] \e[38;5;${cw_THEME_mid}m${name}\e[0m (\e[38;5;${cw_THEME_sec2}m${type}\e[0m)"
+}
 
 main() {
-    local repopath reponame storagepath storage enabled
-    for repopath in "${cw_STORAGE_REPODIR}"/*; do
-        if [ "$repopath" == "${cw_STORAGE_REPODIR}/*" ]; then
-            action_die "no storage backends found"
-        else
-            reponame=$(basename "$repopath")
-            for storagepath in "${repopath}"/*; do
-                if [[ ! -d "$storagepath" ]]; then
-                    # We consider any directory within the repo to be for a
-                    # storage backend, and skip any other files.
-                    continue
-                fi
-
-                storage="$(basename "$storagepath")"
-                if storage_is_enabled "${storage}"; then
-                    enabled='*'
-                else
-                    enabled=' '
-                fi
-                ui_print_enabled_status_line "${enabled}" "${reponame}" "${storage}"
-            done
-        fi
-    done
+    if ! storage_each_configuration "_show_config"; then
+        action_die "no storage configurations found"
+    fi
     action_cleanup
 }
 
