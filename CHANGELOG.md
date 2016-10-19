@@ -9,7 +9,8 @@ This project adheres to [Semantic Versioning](http://semver.org/).
 - Nothing yet
 
 ### Changed
-- Nothing yet
+- `alces storage avail` now gives previous `alces storage avail --backends`
+  output; `alces storage show` gives previous output of `alces storage avail`
 
 ### Fixed
 - Correctly display enabled serviceware components when they are
