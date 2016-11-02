@@ -1,5 +1,6 @@
+#!/bin/bash
 #==============================================================================
-# Copyright (C) 2015 Stephen F. Norledge and Alces Software Ltd.
+# Copyright (C) 2016 Stephen F. Norledge and Alces Software Ltd.
 #
 # This file/package is part of Alces Clusterware.
 #
@@ -19,38 +20,27 @@
 # For more information on the Alces Clusterware, please visit:
 # https://github.com/alces-software/clusterware
 #==============================================================================
-detect_xwd() {
-    [ -d "${target}/opt/xwd" ]
+if [ "$1" == "--short" ]; then
+    short=true
+    shift
+fi
+
+cluster="$1"
+version="$2"
+distro="$3"
+
+w=79
+
+emit() {
+  printf "%*s\n" $(((${#1}+${w})/2)) "$1"
 }
 
-fetch_xwd() {
-    title "Fetching xwd"
-    if fetch_handling_is_source; then
-        fetch_source http://xorg.freedesktop.org/archive/individual/app/xwd-1.0.6.tar.bz2 xwd-source.tar.bz2
-    else
-        fetch_dist xwd
-    fi
-}
-
-install_xwd() {
-    title "Installing xwd"
-    if fetch_handling_is_source; then
-        doing 'Extract'
-        tar -C "${dep_build}" -xjf "${dep_src}/xwd-source.tar.bz2"
-        say_done $?
-
-        cd "${dep_build}"/xwd-*
-        doing 'Compile'
-        ./configure --prefix="${target}/opt/xwd" &> "${dep_logs}/xwd-configure.log"
-        make &> "${dep_logs}/xwd-make.log"
-        say_done $?
-
-        doing 'Install'
-        make install &> "${dep_logs}/xwd-install.log"
-        mkdir "${target}/opt/xwd/doc"
-        cp COPYING "${target}/opt/xwd/doc"
-        say_done $?
-    else
-        install_dist xwd
-    fi
-}
+if [ "$short" ]; then
+    echo "<<< Alces Clusterware (v${version}) >>>"
+else
+    emit '+++++++++++++++++++++++++++++++++++++++++++++'
+    emit "Welcome to $cluster"
+    emit "Alces Clusterware (v$version)"
+    emit "Based on $distro"
+    emit '+++++++++++++++++++++++++++++++++++++++++++++'
+fi

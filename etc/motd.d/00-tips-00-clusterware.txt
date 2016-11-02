@@ -6,11 +6,6 @@
 ################################################################################
 TIPS:
 
-'module avail'            - show available application environments
-'module add <modulename>' - add a module to your current environment
-
-'alces gridware'          - manage software for your environment
+'alces help'              - get help on available commands
 'alces howto'             - guides on how to use your research environment
-'alces session'           - start and manage interactive sessions
-'alces storage'           - configure and address storage facilities
 'alces template'          - tailored job script templates

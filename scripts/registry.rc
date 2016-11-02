@@ -20,9 +20,13 @@
 # https://github.com/alces-software/clusterware
 #==============================================================================
 cw_HANDLER_rev="HEAD"
+cw_HANDLER_track="develop"
 cw_SESSION_rev="HEAD"
+cw_SESSION_track="develop"
 cw_SERVICE_rev="HEAD"
+cw_SERVICE_track="develop"
 cw_STORAGE_rev="HEAD"
+cw_STORAGE_track="develop"
 cw_SERVICE_registry_galaxy="galaxy-20160301-cw1_3"
 cw_SERVICE_registry_s3cmd="s3cmd-20160810-cw1_6"
 cw_SERVICE_registry_aws="aws-20160411-cw1_5"
@@ -30,3 +34,4 @@ cw_SERVICE_registry_git="git-20160615-cw1_5"
 cw_SERVICE_registry_components="components-20160623-cw1_6"
 cw_SERVICE_registry_alces_access_manager_daemon="alces-access-manager-daemon-20161021-cw1_7"
 cw_SERVICE_registry_alces_storage_manager_daemon="alces-storage-manager-daemon-v1.2-cw1_7"
+cw_SERVICE_registry_modules="modules-20161031-cw1_7"
