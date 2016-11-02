@@ -95,7 +95,6 @@ if [ ! -d "${target}/etc" ]; then
     rm -f "${target}"/etc/services/.gitkeep
     rm -f "${target}"/etc/skel/.gitkeep
     chmod 0600 "${target}"/etc/naming.rc
-    chmod 0400 "${target}"/etc/sudoers.d/*
     chmod 0750 "${target}"/etc/sudoers.d
     cp -R "${source}/dist/distro/${os}" "${target}"/etc/distro
 fi
@@ -138,7 +137,7 @@ else
         mkdir -p "${target}"/var/lib/handler/repos/base
         tar -C "${target}"/var/lib/handler/repos/base -xvzf "${source}"/clusterware-handlers.tar.gz &> "${dep_logs}/handler-init.log"
     else
-        export cw_HANDLER_rev
+        export cw_HANDLER_rev cw_HANDLER_track
         "${target}/bin/alces" handler update &>> "${dep_logs}/handler-init.log"
     fi
 fi
@@ -153,7 +152,7 @@ else
         mkdir -p "${target}"/var/lib/services/repos/base
         tar -C "${target}"/var/lib/services/repos/base -xvzf "${source}"/clusterware-services.tar.gz &> "${dep_logs}/services-init.log"
     else
-        export cw_SERVICE_rev
+        export cw_SERVICE_rev cw_SERVICE_track
         "${target}/bin/alces" service update &> "${dep_logs}/services-init.log"
     fi
 fi
