@@ -22,7 +22,7 @@
 #==============================================================================
 require action
 require document
-require storage
+require storage >/dev/null
 
 main() {
     local idx template source_name vars license f datadir
@@ -42,7 +42,7 @@ main() {
                 if [ -d "${datadir}" ]; then
                     action_die "data directory already exists: ${datadir}" 1
                 fi
-                if storage_configuration_exists gridware-data; then
+                if type storage_configuration_exists &>/dev/null && storage_configuration_exists gridware-data; then
                     type=$(storage_type_for gridware-data)
                     if storage_load_functions "${type}"; then
                         mkdir -p "${datadir}"

@@ -1,6 +1,6 @@
 #!/bin/bash
 #==============================================================================
-# Copyright (C) 2015 Stephen F. Norledge and Alces Software Ltd.
+# Copyright (C) 2016 Stephen F. Norledge and Alces Software Ltd.
 #
 # This file/package is part of Alces Clusterware.
 #
@@ -20,43 +20,27 @@
 # For more information on the Alces Clusterware, please visit:
 # https://github.com/alces-software/clusterware
 #==============================================================================
-require action
-require git
-require storage
-require ui
-require process
+if [ "$1" == "--short" ]; then
+    short=true
+    shift
+fi
 
-main() {
-    local repo url rev
-    if [ "$1" ]; then
-        repo="$1"
-        url="$2"
-    else
-        repo="${cw_STORAGE_DEFAULT_REPO}"
-        url="${cw_STORAGE_DEFAULT_REPO_URL}"
-    fi
-    rev="${cw_STORAGE_rev}"
+cluster="$1"
+version="$2"
+distro="$3"
 
-    if [ ! -d "${cw_STORAGE_REPODIR}/${repo}" ]; then
-        if [ -z "$url" ]; then
-            action_die "no repository URL was specified for repo: $1" 1
-        fi
-        echo "Initializing storage backends: ${repo}"
-        doing 'Clone'
-	if [ "${rev}" ]; then
-            git_clone_rev "${url}" "${cw_STORAGE_REPODIR}/${repo}" "${rev}"
-	else
-            git_clone "${url}" "${cw_STORAGE_REPODIR}/${repo}"
-	fi
-        say_done $?
-    else
-        echo "Updating storage backends: ${repo}"
-        doing 'Update'
-        git_update "${cw_STORAGE_REPODIR}/${repo}"
-        say_done $?
-    fi
-    action_cleanup
+w=79
+
+emit() {
+  printf "%*s\n" $(((${#1}+${w})/2)) "$1"
 }
 
-process_reexec_sudo "$@"
-main "$@"
+if [ "$short" ]; then
+    echo "<<< Alces Clusterware (v${version}) >>>"
+else
+    emit '+++++++++++++++++++++++++++++++++++++++++++++'
+    emit "Welcome to $cluster"
+    emit "Alces Clusterware (v$version)"
+    emit "Based on $distro"
+    emit '+++++++++++++++++++++++++++++++++++++++++++++'
+fi
