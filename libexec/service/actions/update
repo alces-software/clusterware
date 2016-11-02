@@ -48,6 +48,7 @@ main() {
         url="${cw_SERVICEWARE_DEFAULT_REPO_URL}"
     fi
     rev="${cw_SERVICE_rev}"
+    track="${cw_SERVICE_track:-master}"
 
     if [ ! -d "${cw_SERVICEWARE_REPODIR}/${repo}" ]; then
         if [ -z "$url" ]; then
@@ -56,7 +57,7 @@ main() {
         echo "Initializing serviceware: ${repo}"
         doing 'Clone'
 	if [ "${rev}" ]; then
-            git_clone_rev "${url}" "${cw_SERVICEWARE_REPODIR}/${repo}" "${rev}"
+            git_clone_rev "${url}" "${cw_SERVICEWARE_REPODIR}/${repo}" "${rev}" "${track}"
 	else
             git_clone "${url}" "${cw_SERVICEWARE_REPODIR}/${repo}"
 	fi

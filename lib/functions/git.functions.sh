@@ -42,25 +42,27 @@ git_match_remote() {
 }
 
 git_clone() {
-    local repourl clonedir
+    local repourl clonedir track
     repourl="$1"
     clonedir="$2"
+    track="${3:-master}"
     mkdir -p "$(dirname ${clonedir})" && \
-      "$GIT" clone "${repourl}" "${clonedir}" &>/dev/null
+      "$GIT" clone -b "${track}" "${repourl}" "${clonedir}" &>/dev/null
 }
 
 git_clone_rev() {
-    local repourl clonedir rev
+    local repourl clonedir rev track
     repourl="$1"
     clonedir="$2"
     rev="$3"
-    git_clone "$repourl" "$clonedir"
+    track="${4:-master}"
+    git_clone "$repourl" "$clonedir" "$track"
     (
 	cd "$clonedir"
 	if "$GIT" checkout "$rev"; then
-	    "$GIT" branch -d master
-	    "$GIT" checkout -b master
-	    "$GIT" branch --set-upstream-to=origin/master master
+	    "$GIT" branch -d "${track}"
+	    "$GIT" checkout -b "${track}"
+	    "$GIT" branch --set-upstream-to=origin/"${track}" "${track}"
 	fi
     ) &>/dev/null
 }
