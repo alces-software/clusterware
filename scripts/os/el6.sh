@@ -23,9 +23,11 @@ install_runtime_prerequisites() {
     # ruby
     # alces template/howto
     # dns functions (dig)
+    # uuid binary
     yum -e0 -y install openssl readline zlib libffi gmp && \
-        yum -e0 -y install man \
-        yum -e0 -y install bind-utils
+        yum -e0 -y install man && \
+        yum -e0 -y install bind-utils && \
+        yum -e0 -y install uuid
 }
 
 install_base_prerequisites() {

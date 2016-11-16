@@ -23,9 +23,11 @@ install_runtime_prerequisites() {
     # ruby
     # alces template/howto
     # dns functions (dig)
+    # uuid binary
     apt-get install -y openssl libssl1.0.0 libreadline6 zlib1g libffi6 libgmp10 && \
         apt-get install -y man-db && \
-        apt-get install -y dnsutils
+        apt-get install -y dnsutils && \
+        apt-get install -y uuid
 }
 
 install_base_prerequisites() {
