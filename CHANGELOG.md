@@ -11,6 +11,8 @@ This project adheres to [Semantic Versioning](http://semver.org/).
 ### Changed
 - `alces storage avail` now gives previous `alces storage avail --backends`
   output; `alces storage show` gives previous output of `alces storage avail`
+- The `gridware`, `storage` and `sync` features have been extracted to optional serviceware components.
+- Template data directories can now be subdirectories (i.e. contain the `/` character).
 
 ### Fixed
 - Correctly display enabled serviceware components when they are

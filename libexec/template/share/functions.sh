@@ -32,6 +32,6 @@ _template_render() {
     files_load_config --optional gridware
     grep -v '^#@ ' "${template}" |
         sed -e "s,_GRIDWARE_,${cw_GRIDWARE_root:-/opt/gridware},g" \
-            -e "s/_DATADIR_/${cw_TEMPLATE[datadir]:-$(basename "${template}" .sh.tpl)}/g" \
+            -e "s,_DATADIR_,${cw_TEMPLATE[datadir]:-$(basename "${template}" .sh.tpl)},g" \
             -e "s/_TEMPLATE_/$(basename "${template}" .sh.tpl)/g"
 }
