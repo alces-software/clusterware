@@ -3,10 +3,22 @@
 All notable changes to this project will be documented in this file.
 This project adheres to [Semantic Versioning](http://semver.org/).
 
-## [Unreleased] - 1.7.0
+## [Unreleased] - 1.8.0
 
 ### Added
 - Nothing yet
+
+### Changed
+- Nothing yet
+
+### Fixed
+- Nothing yet
+
+#### Issues/PRs
+
+[Core 1.8], [Handlers 1.8], [Services 1.8], [Storage 1.8], [Sessions 1.8]
+
+## [1.7.0] - 2017-01-03
 
 ### Changed
 - `alces storage avail` now gives previous `alces storage avail --backends` output
@@ -281,7 +293,13 @@ This project adheres to [Semantic Versioning](http://semver.org/).
 
 - Initial release
 
-[Unreleased]: https://github.com/alces-software/clusterware/compare/1.6.0...develop
+[Unreleased]: https://github.com/alces-software/clusterware/compare/1.7.0...develop
+[Core 1.8]: https://github.com/alces-software/clusterware/issues?q=milestone%3A1.8-release
+[Handlers 1.8]: https://github.com/alces-software/clusterware/issues?q=milestone%3A1.8-release
+[Services 1.8]: https://github.com/alces-software/clusterware/issues?q=milestone%3A1.8-release
+[Storage 1.8]: https://github.com/alces-software/clusterware/issues?q=milestone%3A1.8-release
+[Sessions 1.8]: https://github.com/alces-software/clusterware/issues?q=milestone%3A1.8-release
+[1.7.0]: https://github.com/alces-software/clusterware/compare/1.6.1...1.7.0
 [Core 1.7.0]: https://github.com/alces-software/clusterware/issues?q=milestone%3A1.7-release
 [Handlers 1.7.0]: https://github.com/alces-software/clusterware/issues?q=milestone%3A1.7-release
 [Services 1.7.0]: https://github.com/alces-software/clusterware/issues?q=milestone%3A1.7-release
