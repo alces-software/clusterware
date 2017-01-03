@@ -3,10 +3,7 @@
 All notable changes to this project will be documented in this file.
 This project adheres to [Semantic Versioning](http://semver.org/).
 
-## [Unreleased] - 1.7.0
-
-### Added
-- Nothing yet
+## [1.7.0] - 2017-01-03
 
 ### Changed
 - `alces storage avail` now gives previous `alces storage avail --backends` output
@@ -281,7 +278,7 @@ This project adheres to [Semantic Versioning](http://semver.org/).
 
 - Initial release
 
-[Unreleased]: https://github.com/alces-software/clusterware/compare/1.6.0...develop
+[1.7.0]: https://github.com/alces-software/clusterware/compare/1.6.1...1.7.0
 [Core 1.7.0]: https://github.com/alces-software/clusterware/issues?q=milestone%3A1.7-release
 [Handlers 1.7.0]: https://github.com/alces-software/clusterware/issues?q=milestone%3A1.7-release
 [Services 1.7.0]: https://github.com/alces-software/clusterware/issues?q=milestone%3A1.7-release
