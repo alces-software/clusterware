@@ -6,11 +6,12 @@ This project adheres to [Semantic Versioning](http://semver.org/).
 ## [1.7.0] - 2017-01-03
 
 ### Changed
-- `alces storage avail` now gives previous `alces storage avail --backends` output
-- `alces storage show` gives previous output of `alces storage avail`
+- `alces storage avail` now gives previous `alces storage avail --backends` output (#203)
+- `alces storage show` gives previous output of `alces storage avail` (#203)
 - The `gridware`, `storage` and `sync` features have been extracted to optional serviceware components
 - Template data directories can now be subdirectories (i.e. contain the `/` character)
 - Alces Access Manager Damemon and Alces Storage Manager Daemon versions have been updated
+- The `sync` command defaults now include all of `~/.ssh` as encrypted data rather than just keys to ensure partial sync doesn't break key-based login (#225)
 
 ### Fixed
 - Correctly display enabled serviceware components when they are
