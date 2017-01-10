@@ -1,5 +1,5 @@
 #==============================================================================
-# Copyright (C) 2016 Stephen F. Norledge and Alces Software Ltd.
+# Copyright (C) 2016-2017 Stephen F. Norledge and Alces Software Ltd.
 #
 # This file/package is part of Alces Clusterware.
 #
@@ -19,12 +19,19 @@
 # For more information on the Alces Clusterware, please visit:
 # https://github.com/alces-software/clusterware
 #==============================================================================
-cw_HANDLER_rev="b313dfa6afca192731f77d1294eabb054e42a7c8"
-cw_SESSION_rev="c4a2674dca4d05604f4fd885dcdf08526bb4f2d3"
-cw_SERVICE_rev="64348e13f245384f690fc8a7efe38e898a5f1dac"
+cw_HANDLER_rev="68700d4cba82c8d94b8d1bd6803756e6fa064e88"
+cw_HANDLER_track="master"
+cw_SESSION_rev="2a771f815bac878214e7afb477a76a10e9dffd63"
+cw_SESSION_track="master"
+cw_SERVICE_rev="a06a104ce8bd5e594a552def36d5bb3fbf604964"
+cw_SERVICE_track="master"
 cw_STORAGE_rev="9f33d913282fae2cbc6021f800a6645b9c6b66d5"
+cw_STORAGE_track="master"
 cw_SERVICE_registry_galaxy="galaxy-20160301-cw1_3"
 cw_SERVICE_registry_s3cmd="s3cmd-20160810-cw1_6"
 cw_SERVICE_registry_aws="aws-20160411-cw1_5"
 cw_SERVICE_registry_git="git-20160615-cw1_5"
 cw_SERVICE_registry_components="components-20160623-cw1_6"
+cw_SERVICE_registry_alces_access_manager_daemon="alces-access-manager-daemon-20161021-cw1_7"
+cw_SERVICE_registry_alces_storage_manager_daemon="alces-storage-manager-daemon-v1.2-cw1_7"
+cw_SERVICE_registry_modules="modules-20161031-cw1_7"

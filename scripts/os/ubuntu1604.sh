@@ -20,60 +20,28 @@
 # https://github.com/alces-software/clusterware
 #==============================================================================
 install_runtime_prerequisites() {
-    # alces gridware
-    # modules
     # ruby
-    # tigervnc
-    # alces session
-    # s3cmd
     # alces template/howto
     # dns functions (dig)
-    apt-get install -y gawk wget sqlite3 patch xz-utils debianutils sudo libcurl3 && \
-        apt-get install -y tcl && \
-        apt-get install -y openssl libssl1.0.0 libreadline6 zlib1g libffi6 libgmp10 && \
-        apt-get install -y libgl1-mesa-glx libglapi-mesa libxdmcp6 libpixman-1-0 xfonts-base x11-xserver-utils libjpeg8 && \
-        apt-get install -y uuid netpbm iproute xauth \
-                xkb-data x11-xkb-utils x11-apps x11-utils xterm software-properties-common && \
-        apt-get install -y python-dateutil && \
+    # uuid binary
+    apt-get install -y openssl libssl1.0.0 libreadline6 zlib1g libffi6 libgmp10 && \
         apt-get install -y man-db && \
-        apt-get install -y dnsutils
+        apt-get install -y dnsutils && \
+        apt-get install -y uuid
 }
 
 install_base_prerequisites() {
-    apt-get install -y lsof gcc unzip curl
+    apt-get install -y lsof gcc unzip curl sudo
 }
 
 install_build_prerequisites() {
     # git (and possibly others)
     # ruby
-    # modules
-    # genders
-    # gridware
-    # tigervnc: libSM-devel required only for building vncpasswd and vncconfig
-    # xwd
     # pluginhook
-    # pdsh
     apt-get install -y build-essential && \
         apt-get install -y libcurl4-openssl-dev libexpat1-dev tcl gettext && \
         apt-get install -y libreadline-dev zlib1g-dev libssl-dev libffi-dev && \
-        apt-get install -y tcl8.6-dev && \
-        apt-get install -y bison flex && \
-        apt-get install -y libsqlite3-dev && \
-        apt-get install -y cmake automake autoconf libtool \
-                gettext zlib1g-dev \
-                xorg-server-source xutils-dev\
-                xfonts-utils xtrans-dev \
-                libx11-dev libxext-dev libxfont-dev libxdmcp-dev \
-                libxkbfile-dev libdrm-dev libjpeg8-dev \
-                libgl1-mesa-dev libpixman-1-dev libfreetype6-dev \
-                libssl-dev libgnutls-dev libpam0g-dev \
-                libsm-dev \
-                x11proto-xcmisc-dev x11proto-bigreqs-dev x11proto-randr-dev \
-                x11proto-render-dev x11proto-video-dev x11proto-composite-dev \
-                x11proto-record-dev x11proto-scrnsaver-dev x11proto-resource-dev && \
-        apt-get install -y libxkbfile-dev && \
-        apt-get install -y git golang && \
-        apt-get install -y libreadline-dev libncurses5-dev
+        apt-get install -y git golang
 }
 
 install_startup_hooks() {

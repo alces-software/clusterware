@@ -75,12 +75,8 @@ prepend-path PATH ${appdir}/jq/bin
 prepend-path PATH ${appdir}/pluginhook/bin
 prepend-path PATH ${appdir}/ruby/bin
 prepend-path PATH ${appdir}/serf/bin
-prepend-path PATH ${appdir}/tigervnc/bin
-prepend-path PATH ${appdir}/xxd/bin
 
 prepend-path LD_LIBRARY_PATH ${appdir}/ruby/lib
 
 prepend-path MANPATH ${appdir}/jo/share/man
 prepend-path MANPATH ${appdir}/ruby/share/man
-prepend-path MANPATH ${appdir}/tigervnc/share/man
-prepend-path MANPATH ${appdir}/xxd/man

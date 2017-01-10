@@ -1,5 +1,0 @@
----
-:source: :home
-:encrypt:
-- ".ssh/id_*"
-- ".config/clusterware/storage*"

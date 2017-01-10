@@ -40,6 +40,7 @@ function require() {
         done
         if [ -z ${cw_LOADED_LIBS[$name]} ]; then
             echo "Library not found: ${name}"
+            return 1
         fi
     fi
 }

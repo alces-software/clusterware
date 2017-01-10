@@ -84,41 +84,21 @@ if [ ! -d "${target}/etc" ]; then
     cp -R "${source}/etc" "${target}"
     sed -i -e "s/_OS_/${os}/g" "${target}/etc"/distro.*
     sed -i -e "s,_ROOT_,${target},g" "${target}/etc/ruby.rc" \
-        "${target}/etc/gridware/global/modulespath" \
-        "${target}/etc/profile.d/05-packager.csh" \
-        "${target}"/etc/sudoers.d/* \
         "${target}"/etc/modules/services/*
     if [ "$cw_BUILD_dist_url" ]; then
         sed -e "s,^cw_SERVICE_url=.*,cw_SERVICE_url=${cw_BUILD_dist_url}/,g" -i "${target}/etc"/serviceware.rc
     else
-        grep "^cw_SERVICE_registry" ${source}/scripts/registry.rc >> "${target}/etc"/serviceware.rc
+        grep "^cw_" ${source}/scripts/registry.rc >> "${target}/etc"/serviceware.rc
     fi
+    rm -f "${target}"/etc/sudoers.d/.gitkeep
     rm -f "${target}"/etc/handlers/.gitkeep
-    rm -f "${target}"/etc/session/.gitkeep
     rm -f "${target}"/etc/services/.gitkeep
-    rm -f "${target}"/etc/storage/.gitkeep
+    rm -f "${target}"/etc/skel/.gitkeep
     chmod 0600 "${target}"/etc/naming.rc
-    chmod 0400 "${target}"/etc/sudoers.d/*
     chmod 0750 "${target}"/etc/sudoers.d
-    sed -e "s,_SECRET_,${cw_BUILD_naming_auth},g" \
-        -i "${target}"/etc/naming.rc
-    if [ -n "${cw_BUILD_recorder_generator}" -a -n "${cw_BUILD_recorder_url}" ]; then
-        sed -e "s,_URL_,${cw_BUILD_recorder_url},g" \
-            -e "s,_GENERATOR_,${target}/libexec/share/flight-recorder-data-generator,g" \
-            -e "s,^cw_FLIGHT_RECORDER_enabled=false,cw_FLIGHT_RECORDER_enabled=true,g" \
-            -e "s,^#cw_FLIGHT_RECORDER_,cw_FLIGHT_RECORDER_,g" \
-            -i "${target}"/etc/flight-recorder.rc
-        cp "${cw_BUILD_recorder_generator}" "${target}"/libexec/share/flight-recorder-data-generator
-        chmod 755 "${target}"/libexec/share/flight-recorder-data-generator
-    fi
-    if [ -n "${cw_BUILD_release}" ]; then
-        sed -e "s,^cw_RELEASE=.*,cw_RELEASE=${cw_BUILD_release},g" \
-            -i "${target}"/etc/clusterware.rc
-    fi
     cp -R "${source}/dist/distro/${os}" "${target}"/etc/distro
 fi
 mkdir -p ${cw_BUILD_var}/log/clusterware
-mkdir -p ${cw_BUILD_var}/cache/gridware/{archives,archives/depots,src} ${cw_BUILD_var}/log/gridware
 say_done $?
 
 title "Installing Clusterware base configuration"
@@ -148,91 +128,6 @@ for dep in ${deps}; do
     fi
 done
 
-title "Configuring gridware group"
-if /usr/bin/getent group gridware >/dev/null; then
-    doing 'Detect'
-else
-    doing 'Configure'
-    /usr/bin/getent group gridware >/dev/null || /usr/sbin/groupadd -g 341 gridware
-fi
-say_done $?
-
-title "Updating gridware permissions"
-doing 'Configure'
-access_targets=(${cw_BUILD_var}/cache/gridware ${cw_BUILD_var}/log/gridware "${target}"/etc/gridware/global)
-chmod -R g+rw "${access_targets[@]}"
-find "${access_targets[@]}" -type d -exec chmod 2775 {} \;
-chgrp -R gridware "${access_targets[@]}"
-say_done $?
-
-title "Setting up default gridware package repositories"
-if [ -d "${target}/var/lib/gridware/repos" ]; then
-    doing 'Detect'
-else
-    doing 'Initialize'
-    if [ ! -f "${target}"/var/lib/gridware/repos/main/repo.yml ]; then
-        mkdir -p "${target}"/var/lib/gridware/repos/main
-        cp "${source}"/dist/repos/main/repo.yml "${target}"/var/lib/gridware/repos/main/repo.yml
-    fi
-    if [ ! -f "${target}"/var/lib/gridware/repos/volatile/repo.yml ]; then
-        mkdir -p "${target}"/var/lib/gridware/repos/volatile
-        cp "${source}"/dist/repos/volatile/repo.yml "${target}"/var/lib/gridware/repos/volatile/repo.yml
-    fi
-
-    if [ "$cw_BUILD_repos_url" ]; then
-        mkdir -p "${target}"/var/lib/gridware/repos/main
-        tar -C "${target}"/var/lib/gridware/repos/main -xvzf "${source}"/gridware-packages-main.tar.gz &> "${dep_logs}/gridware-init.log"
-        mkdir -p "${target}"/var/lib/gridware/repos/volatile/pkg
-        tar -C "${target}"/var/lib/gridware/repos/volatile/pkg -xvzf "${source}"/gridware-packages-volatile.tar.gz &> "${dep_logs}/gridware-init.log"
-    else
-        cat <<EOF > "${target}"/etc/gridware.yml
-:last_update_filename: .last_update
-:log_root: ${dep_build}
-:repo_paths:
- - ${target}/var/lib/gridware/repos/main
- - ${target}/var/lib/gridware/repos/volatile
-EOF
-        "${target}/bin/alces" gridware update main 2>&1 > "${dep_logs}/gridware-init.log"
-        "${target}/bin/alces" gridware update volatile 2>&1 >> "${dep_logs}/gridware-init.log"
-        rm -f "${target}"/etc/gridware.yml
-    fi
-
-    chmod -R g+rw "${target}"/var/lib/gridware/repos/*
-    find "${target}"/var/lib/gridware/repos/* -type d -exec chmod 2775 {} \;
-    chgrp -R gridware "${target}"/var/lib/gridware/repos/*
-fi
-say_done $?
-
-title "Setting up default gridware depot repository"
-if [ -d "${target}/var/lib/gridware/depots" ]; then
-    doing 'Detect'
-else
-    doing 'Initialize'
-    if [ ! -f "${target}"/var/lib/gridware/depots/official/repo.yml ]; then
-        mkdir -p "${target}"/var/lib/gridware/depots/official
-        cp "${source}"/dist/depots/official/repo.yml "${target}"/var/lib/gridware/depots/official/repo.yml
-    fi
-
-    if [ "$cw_BUILD_depots_url" ]; then
-        mkdir -p "${target}"/var/lib/gridware/depots/official/data
-        tar -C "${target}"/var/lib/gridware/depots/official/data -xvzf "${source}"/gridware-depots.tar.gz &> "${dep_logs}/gridware-depots-init.log"
-    else
-        cat <<EOF > "${target}"/etc/gridware.yml
-:last_update_filename: .last_update
-:log_root: ${dep_build}
-:depot_repo_paths:
- - ${target}/var/lib/gridware/depots/official
-EOF
-        "${target}/bin/alces" gridware depot update official &> "${dep_logs}/gridware-depots-init.log"
-        rm -f "${target}"/etc/gridware.yml
-    fi
-
-    chmod -R g+rw "${target}"/var/lib/gridware/depots/official/data
-    find "${target}"/var/lib/gridware/depots/official/data -type d -exec chmod 2775 {} \;
-    chgrp -R gridware "${target}"/var/lib/gridware/depots/official/data
-fi
-say_done $?
-
 title "Setting up handler base repository"
 if [ -d "${target}/var/lib/handler/repos" ]; then
     doing 'Detect'
@@ -242,25 +137,9 @@ else
         mkdir -p "${target}"/var/lib/handler/repos/base
         tar -C "${target}"/var/lib/handler/repos/base -xvzf "${source}"/clusterware-handlers.tar.gz &> "${dep_logs}/handler-init.log"
     else
-        export cw_HANDLER_rev
+        export cw_HANDLER_rev cw_HANDLER_track
         "${target}/bin/alces" handler update &>> "${dep_logs}/handler-init.log"
     fi
-fi
-say_done $?
-
-title "Setting up session base repository"
-if [ -d "${target}/var/lib/sessions/repos" ]; then
-    doing 'Detect'
-else
-    doing 'Initialize'
-    if [ "$cw_BUILD_repos_url" ]; then
-        mkdir -p "${target}"/var/lib/sessions/repos/base
-        tar -C "${target}"/var/lib/sessions/repos/base -xvzf "${source}"/clusterware-sessions.tar.gz &> "${dep_logs}/session-init.log"
-    else
-        export cw_SESSION_rev
-        "${target}/bin/alces" session update &> "${dep_logs}/session-init.log"
-    fi
-    "${target}/bin/alces" session enable default &>> "${dep_logs}/session-init.log"
 fi
 say_done $?
 
@@ -273,23 +152,8 @@ else
         mkdir -p "${target}"/var/lib/services/repos/base
         tar -C "${target}"/var/lib/services/repos/base -xvzf "${source}"/clusterware-services.tar.gz &> "${dep_logs}/services-init.log"
     else
-        export cw_SERVICE_rev
+        export cw_SERVICE_rev cw_SERVICE_track
         "${target}/bin/alces" service update &> "${dep_logs}/services-init.log"
-    fi
-fi
-say_done $?
-
-title "Setting up storage backend base repository"
-if [ -d "${target}/var/lib/storage/repos" ]; then
-    doing 'Detect'
-else
-    doing 'Initialize'
-    if [ "$cw_BUILD_repos_url" ]; then
-        mkdir -p "${target}"/var/lib/storage/repos/base
-        tar -C "${target}"/var/lib/storage/repos/base -xvzf "${source}"/clusterware-storage.tar.gz &> "${dep_logs}/services-init.log"
-    else
-        export cw_STORAGE_rev
-        "${target}/bin/alces" storage update &> "${dep_logs}/storage-init.log"
     fi
 fi
 say_done $?
@@ -300,7 +164,6 @@ if [ -d "${target}/var/lib/docs/base" ]; then
 else
     doing "Initialize"
     mkdir -p "${target}/var/lib/docs/base/guides" "${target}/var/lib/docs/base/templates"
-    cp "${source}/dist/guides"/* "${target}/var/lib/docs/base/guides"
 fi
 say_done $?
 

@@ -20,54 +20,28 @@
 # https://github.com/alces-software/clusterware
 #==============================================================================
 install_runtime_prerequisites() {
-    # alces gridware
-    # modules
     # ruby
-    # tigervnc
-    # alces session
-    # s3cmd
     # alces template/howto
     # dns functions (dig)
-    yum -e0 -y install wget sqlite3 patch bzip2 xz-utils file which sudo && \
-        yum -e0 -y install tcl && \
-        yum -e0 -y install openssl readline zlib libffi gmp && \
-        yum -e0 -y install mesa-libGL libXdmcp pixman xorg-x11-fonts-misc && \
-        yum -e0 -y install uuid netpbm-progs iproute xauth \
-          xkeyboard-config xorg-x11-xkb-utils xorg-x11-apps xorg-x11-server-utils xterm && \
-        yum -e0 -y install python-dateutil && \
-        yum -e0 -y install man \
-        yum -e0 -y install bind-utils
+    # uuid binary
+    yum -e0 -y install openssl readline zlib libffi gmp && \
+        yum -e0 -y install man && \
+        yum -e0 -y install bind-utils && \
+        yum -e0 -y install uuid
 }
 
 install_base_prerequisites() {
-    yum -e0 -y install lsof gcc unzip
+    yum -e0 -y install lsof gcc unzip sudo
 }
 
 install_build_prerequisites() {
     # git (and possibly others)
     # ruby
-    # modules
-    # gridware
-    # tigervnc: libSM-devel required only for building vncpasswd and vncconfig
-    # xwd
     # pluginhook
     yum -e0 -y groupinstall "Development Tools" && \
         yum -e0 -y install openssl-devel curl-devel expat-devel perl-ExtUtils-MakeMaker && \
         yum -e0 -y install openssl-devel readline-devel zlib-devel libffi-devel && \
-        yum -e0 -y install tcl-devel && \
-        yum -e0 -y install sqlite-devel && \
-        yum -e0 -y install cmake automake autoconf libtool \
-        gettext gettext-devel zlib-devel \
-        xorg-x11-server-source xorg-x11-util-macros \
-        xorg-x11-font-utils xorg-x11-xtrans-devel \
-        libX11-devel libXext-devel libXfont-devel libXdmcp-devel \
-        libxkbfile-devel libdrm-devel libjpeg-turbo-devel \
-        mesa-libGL-devel pixman-devel freetype-devel \
-        openssl-devel gnutls-devel pam-devel \
-        libSM-devel && \
-        yum -e0 -y install libxkbfile-devel && \
-        yum -e0 -y install epel-release && \
-        yum -e0 -y install git golang
+        yum -e0 -y install epel-release && yum -e0 -y install git golang
 }
 
 install_startup_hooks() {

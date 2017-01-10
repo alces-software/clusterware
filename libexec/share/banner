@@ -1,3 +1,4 @@
+#!/bin/bash
 #==============================================================================
 # Copyright (C) 2016 Stephen F. Norledge and Alces Software Ltd.
 #
@@ -19,19 +20,27 @@
 # For more information on the Alces Clusterware, please visit:
 # https://github.com/alces-software/clusterware
 #==============================================================================
-require files
+if [ "$1" == "--short" ]; then
+    short=true
+    shift
+fi
 
-_template_render() {
-    local vars template
-    template="$1"
-    vars=$(grep '^#@ ' "${template}" | cut -c4-)
-    if [ "$vars" ]; then
-        declare -A cw_TEMPLATE
-        eval "$vars"
-    fi
-    files_load_config --optional gridware
-    grep -v '^#@ ' "${template}" |
-        sed -e "s,_GRIDWARE_,${cw_GRIDWARE_root:-/opt/gridware},g" \
-            -e "s,_DATADIR_,${cw_TEMPLATE[datadir]:-$(basename "${template}" .sh.tpl)},g" \
-            -e "s/_TEMPLATE_/$(basename "${template}" .sh.tpl)/g"
+cluster="$1"
+version="$2"
+distro="$3"
+
+w=79
+
+emit() {
+  printf "%*s\n" $(((${#1}+${w})/2)) "$1"
 }
+
+if [ "$short" ]; then
+    echo "<<< Alces Clusterware (v${version}) >>>"
+else
+    emit '+++++++++++++++++++++++++++++++++++++++++++++'
+    emit "Welcome to $cluster"
+    emit "Alces Clusterware (v$version)"
+    emit "Based on $distro"
+    emit '+++++++++++++++++++++++++++++++++++++++++++++'
+fi

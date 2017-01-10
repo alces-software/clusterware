@@ -1,9 +1,0 @@
-################################################################################
-##
-## Alces Clusterware - Shell configuration
-## Copyright (c) 2016 Alces Software Ltd
-##
-################################################################################
-#cw_SYNC_aws_access_key_id=""
-#cw_SYNC_aws_secret_access_key=""
-cw_SYNC_default=true

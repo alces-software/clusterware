@@ -166,13 +166,13 @@ if [ "$BASH_VERSION" ]; then
         local cur="$1" prev="$2" values
         case $prev in
             e|en|ena|enab|enabl|enable)
-                values="$(alces storage avail --backends | sed -r "s:\x1B\[[0-9;]*[mK]::g" | grep -v '\[\*\]' | cut -f2 -d'/')"
+                values="$(alces storage avail | sed -r "s:\x1B\[[0-9;]*[mK]::g" | grep -v '\[\*\]' | cut -f2 -d'/')"
                 ;;
             u|us|use)
-                values="$(alces storage avail | sed -r "s:\x1B\[[0-9;]*[mK]::g" | grep -v '\[\*\]' | awk '{print $1;}')"
+                values="$(alces storage show | sed -r "s:\x1B\[[0-9;]*[mK]::g" | grep -v '\[\*\]' | awk '{print $3;}')"
                 ;;
             f|fo|'for'|forg|forge|forget)
-                values="$(alces storage avail | sed -r "s:\x1B\[[0-9;]*[mK]::g" | cut -c5- | awk '{print $1;}')"
+                values="$(alces storage show | sed -r "s:\x1B\[[0-9;]*[mK]::g" | cut -c5- | awk '{print $1;}')"
                 ;;
             *)
                 values="$(compgen -f -- "$cur")"
@@ -249,7 +249,7 @@ if [ "$BASH_VERSION" ]; then
 
     _alces_storage() {
         _alces_complete "$@" "storage" \
-                        "help enable configure forget use avail put get rm list mkbucket rmbucket addbucket"
+                        "help enable configure forget use show avail put get rm list mkbucket rmbucket addbucket"
     }
 
     _alces_about() {
