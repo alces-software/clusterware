@@ -29,7 +29,10 @@ ruby_bundle_exec() {
     . "${cw_ROOT}"/etc/ruby.rc
     export PATH LD_LIBRARY_PATH
     (
-        cd "${cw_ROOT}"/lib/ruby
+        # TODO - this is a temporary fix to ensure that `alces howto`
+        # works in Flight Compute 2016.4r1.  It should be fixed
+        # properly in Clusterware 1.8.0.
+        cd "${cw_ROOT}"/opt/gridware
         ${cw_ROOT}/opt/ruby/bin/bundle exec "$@"
     )
 }
