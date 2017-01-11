@@ -116,8 +116,12 @@ def process_files(files)
   .flatten
   .reject {|f| File.directory? f}
   .each do |file|
-    metadata = extract_file_metadata(file)
-    files_metadata[file] = metadata
+    begin
+      metadata = extract_file_metadata(file)
+      files_metadata[file] = metadata
+    rescue => ex
+      STDERR.puts "Skipping '#{file}' due to (possibly expected) exception '#{ex}'"
+    end
   end
   STDERR.puts
 
