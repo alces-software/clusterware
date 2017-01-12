@@ -9,7 +9,7 @@ This project adheres to [Semantic Versioning](http://semver.org/).
 - Nothing yet
 
 ### Changed
-- Nothing yet
+- EPEL installation is now direct from the EPEL URL rather than the CentOS-specific `epel-release` package
 
 ### Fixed
 - Nothing yet
