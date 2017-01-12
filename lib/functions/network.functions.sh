@@ -138,7 +138,7 @@ network_get_iface_address() {
 
     ip -o -4 address show dev ${target_iface} \
         | head -n 1 \
-        | sed 's/.*inet \(\S*\)\/.*/\1/g'
+        | sed 's/.*inet \([^\/ ]\+\).*/\1/g'
 }
 
 network_get_free_port() {
