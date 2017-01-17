@@ -10,6 +10,7 @@ This project adheres to [Semantic Versioning](http://semver.org/).
 
 ### Changed
 - EPEL installation is now direct from the EPEL URL rather than the CentOS-specific `epel-release` package
+- Gridware now cowardly refuses to disable a depot from which modules are currently loaded (gridware#5)
 
 ### Fixed
 - `alces howto` tool no longer relies on `gridware` serviceware being installed
