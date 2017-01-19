@@ -14,6 +14,7 @@ This project adheres to [Semantic Versioning](http://semver.org/).
 
 ### Fixed
 - `alces howto` tool no longer relies on `gridware` serviceware being installed
+- `alces customize` tool requests superuser access when necessary rather than failing (clusterware-handlers#59)
 
 #### Issues/PRs
 
