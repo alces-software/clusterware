@@ -6,11 +6,12 @@ This project adheres to [Semantic Versioning](http://semver.org/).
 ## [Unreleased] - 1.8.0
 
 ### Added
-- Nothing yet
+- Autoscaling has been refactored to introduce an API that allows multiple autoscaling groups to be active simultaneously as well as providing abstraction of the autoscaling platform
 
 ### Changed
 - EPEL installation is now direct from the EPEL URL rather than the CentOS-specific `epel-release` package
 - Gridware now cowardly refuses to disable a depot from which modules are currently loaded (gridware#5)
+- `alces session` will show the VPN connection address for the master node when available (clusterware-services#29)
 
 ### Fixed
 - `alces howto` tool no longer relies on `gridware` serviceware being installed
