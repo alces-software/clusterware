@@ -48,7 +48,7 @@ utilities provided by Alces Clusterware.
 For further details regarding this module, including the environment
 modifications it will apply, execute:
 
-\tmodule show services/util
+\tmodule show services/clusterware
 
 "
 }
