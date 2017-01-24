@@ -178,6 +178,7 @@ def propagate_file(file, metadata, remote_ip)
   # not have write permissions to the remote directory otherwise.
   remote_temp_file = (log_command "ssh #{ssh_arg} mktemp").strip
   log_command "scp #{file} #{ssh_arg}:#{remote_temp_file}"
+  log_command "ssh #{ssh_arg} sudo mkdir -p $(dirname #{remote_path})"
   log_command "ssh #{ssh_arg} sudo mv #{remote_temp_file} #{remote_path}"
   log_command "ssh #{ssh_arg} sudo chmod #{local_permissions} #{remote_path}"
 
