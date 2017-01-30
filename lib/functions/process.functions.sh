@@ -64,9 +64,14 @@ process_reexec_sg() {
 
 process_reexec_with_sudo() {
     local cmd
-    cmd="$(declare -f require); export -f require; exec /bin/bash \"\$0\" \"\$@\""
+    if [ "$1" == "--plain" ]; then
+        shift
+        cmd_args=("$0" "$@")
+    else
+        cmd_args=(-E /bin/bash -c "$(declare -f require); export -f require; exec /bin/bash \"\$0\" \"\$@\"" "$0" "$@")
+    fi
     cw_BINNAME="${cw_BINNAME% *}"
-    exec sudo "${sudo_args[@]}" -E /bin/bash -c "${cmd}" "$0" "$@"
+    exec sudo "${sudo_args[@]}" "${cmd_args[@]}"
 }
 
 process_run() {
