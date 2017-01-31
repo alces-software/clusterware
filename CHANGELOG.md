@@ -7,6 +7,7 @@ This project adheres to [Semantic Versioning](http://semver.org/).
 
 ### Added
 - Autoscaling has been refactored to introduce an API that allows multiple autoscaling groups to be active simultaneously as well as providing abstraction of the autoscaling platform
+- `alces gridware` has support for Docker containers when a Docker installation is present via the `alces gridware docker` command
 
 ### Changed
 - EPEL installation is now direct from the EPEL URL rather than the CentOS-specific `epel-release` package
