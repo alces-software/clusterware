@@ -17,6 +17,7 @@ This project adheres to [Semantic Versioning](http://semver.org/).
 ### Fixed
 - `alces howto` tool no longer relies on `gridware` serviceware being installed
 - `alces customize` tool requests superuser access when necessary rather than failing (clusterware-handlers#59)
+- When exporting `compiler` type packages with the `alces gridware` tool, rewritten paths are now correctly handled (gridware#13)
 
 #### Issues/PRs
 
