@@ -1,4 +1,9 @@
 #!/usr/bin/env ruby
+#ALCES_META
+# Include metadata in propagate itself so can propagate files from one host to
+# another that is not directly accessible.
+#path=/usr/local/bin/propagate
+#ALCES_META_END
 
 
 # This is a script to help when developing Flight Compute projects locally and
