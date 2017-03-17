@@ -8,6 +8,9 @@ This project adheres to [Semantic Versioning](http://semver.org/).
 ### Added
 - Autoscaling has been refactored to introduce an API that allows multiple autoscaling groups to be active simultaneously as well as providing abstraction of the autoscaling platform
 - `alces gridware` has support for Docker containers when a Docker installation is present via the `alces gridware docker` command
+- The new `alces customize push` command can upload shell scripts as customization profiles to a repository
+- The master node can now specify a set of repositories and a list of customization profiles to install, and compute nodes will apply this configuration on boot
+- Customization profiles may now have textual "tags" to store additional metadata
 
 ### Changed
 - EPEL installation is now direct from the EPEL URL rather than the CentOS-specific `epel-release` package
