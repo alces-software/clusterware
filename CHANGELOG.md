@@ -13,6 +13,7 @@ This project adheres to [Semantic Versioning](http://semver.org/).
 - Customization profiles may now have textual "tags" to store additional metadata
 - The `cluster-customizer` handler gained support for executing scripts periodically
 - The `cluster-customizer` handler gained support for processing job queues
+- The `gnome` session now comes with the Firefox web browser installed by default
 
 ### Changed
 - EPEL installation is now direct from the EPEL URL rather than the CentOS-specific `epel-release` package
@@ -23,6 +24,7 @@ This project adheres to [Semantic Versioning](http://semver.org/).
 - `alces howto` tool no longer relies on `gridware` serviceware being installed
 - `alces customize` tool requests superuser access when necessary rather than failing (clusterware-handlers#59)
 - When exporting `compiler` type packages with the `alces gridware` tool, rewritten paths are now correctly handled (gridware#13)
+- Correct enable/disable behviour when the EPEL repo is already installed/uninstalled
 
 #### Issues/PRs
 
