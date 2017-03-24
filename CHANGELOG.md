@@ -19,6 +19,7 @@ This project adheres to [Semantic Versioning](http://semver.org/).
 - EPEL installation is now direct from the EPEL URL rather than the CentOS-specific `epel-release` package
 - Gridware now cowardly refuses to disable a depot from which modules are currently loaded (gridware#5)
 - `alces session` will show the VPN connection address for the master node when available (clusterware-services#29)
+- The Internet connectivity detection routine in the `cluster-customizer` handler has been improved to cope with the case where ICMP is blocked
 
 ### Fixed
 - `alces howto` tool no longer relies on `gridware` serviceware being installed
