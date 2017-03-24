@@ -26,6 +26,7 @@ This project adheres to [Semantic Versioning](http://semver.org/).
 - `alces customize` tool requests superuser access when necessary rather than failing (clusterware-handlers#59)
 - When exporting `compiler` type packages with the `alces gridware` tool, rewritten paths are now correctly handled (gridware#13)
 - Correct enable/disable behviour when the EPEL repo is already installed/uninstalled
+- Correct detection of hyperthreading when it had been disabled with `alces configure hyperthreading` (clusterware#228)
 
 #### Issues/PRs
 
