@@ -20,11 +20,11 @@
 # https://github.com/alces-software/clusterware
 #==============================================================================
 cw_HANDLER_rev="HEAD"
-cw_HANDLER_track="develop"
+cw_HANDLER_track="feature/customizer-preinitializers"
 cw_SESSION_rev="HEAD"
 cw_SESSION_track="develop"
 cw_SERVICE_rev="HEAD"
-cw_SERVICE_track="develop"
+cw_SERVICE_track="feature/customizer-preinitializers"
 cw_STORAGE_rev="HEAD"
 cw_STORAGE_track="develop"
 cw_SERVICE_registry_galaxy="galaxy-20160301-cw1_3"
