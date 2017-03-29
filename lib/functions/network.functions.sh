@@ -163,8 +163,8 @@ network_get_iface_network() {
 
     ip -o -4 address show dev ${target_iface} \
         | head -n 1 \
-        | grep ' brd ' \
-        | sed 's/.*inet \(\S*\) brd.*/\1/g'
+        | grep ' scope ' \
+        | sed 's/.*inet \(\S*\) \(scope\|brd\).*/\1/g'
 }
 
 # Adapted from https://forums.gentoo.org/viewtopic-t-888736-start-0.html
