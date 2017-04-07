@@ -42,12 +42,19 @@ git_match_remote() {
 }
 
 git_clone() {
-    local repourl clonedir track
+    local repourl clonedir track depth_arg
     repourl="$1"
     clonedir="$2"
     track="${3:-master}"
+    if [ "$4" ]; then
+        depth_arg=(--depth $4)
+    fi
     mkdir -p "$(dirname ${clonedir})" && \
-      "$GIT" clone -b "${track}" "${repourl}" "${clonedir}" &>/dev/null
+      "$GIT" clone "${depth_arg[@]}" -b "${track}" "${repourl}" "${clonedir}" &>/dev/null
+}
+
+git_shallow_clone() {
+    git_clone "$@" 1
 }
 
 git_clone_rev() {
@@ -56,13 +63,17 @@ git_clone_rev() {
     clonedir="$2"
     rev="$3"
     track="${4:-master}"
-    git_clone "$repourl" "$clonedir" "$track"
-    (
-	cd "$clonedir"
-	if "$GIT" checkout "$rev"; then
-	    "$GIT" branch -d "${track}"
-	    "$GIT" checkout -b "${track}"
-	    "$GIT" branch --set-upstream-to=origin/"${track}" "${track}"
-	fi
-    ) &>/dev/null
+    if [ "${rev}" == "HEAD" ]; then
+        git_shallow_clone "$repourl" "$clonedir" "$track"
+    else
+        git_clone "$repourl" "$clonedir" "$track"
+        (
+	    cd "$clonedir"
+	    if "$GIT" checkout "$rev"; then
+	        "$GIT" branch -d "${track}"
+	        "$GIT" checkout -b "${track}"
+	        "$GIT" branch --set-upstream-to=origin/"${track}" "${track}"
+	    fi
+        ) &>/dev/null
+    fi
 }
