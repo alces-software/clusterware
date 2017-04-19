@@ -14,6 +14,7 @@ This project adheres to [Semantic Versioning](http://semver.org/).
 - The `cluster-customizer` handler gained support for executing scripts periodically
 - The `cluster-customizer` handler gained support for processing job queues
 - The `gnome` session now comes with the Firefox web browser installed by default
+- The new `alces customize slave` command manages profiles to be ran on booting slave nodes. Has the options to `add`, `remove` and `list` the profiles to be booted.
 
 ### Changed
 - EPEL installation is now direct from the EPEL URL rather than the CentOS-specific `epel-release` package
@@ -27,6 +28,8 @@ This project adheres to [Semantic Versioning](http://semver.org/).
 - When exporting `compiler` type packages with the `alces gridware` tool, rewritten paths are now correctly handled (gridware#13)
 - Correct enable/disable behviour when the EPEL repo is already installed/uninstalled
 - Correct detection of hyperthreading when it had been disabled with `alces configure hyperthreading` (clusterware#228)
+- The `profile` input into `alces customize trigger` now delimited by both `/` and `-`
+- Booting slave nodes no longer run the `member-join` and `configure` events when retrieving profiles
 
 #### Issues/PRs
 
