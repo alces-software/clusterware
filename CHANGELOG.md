@@ -30,6 +30,7 @@ This project adheres to [Semantic Versioning](http://semver.org/).
 - Correct detection of hyperthreading when it had been disabled with `alces configure hyperthreading` (clusterware#228)
 - The `profile` input into `alces customize trigger` now delimited by both `/` and `-`
 - Booting slave nodes no longer run the `member-join` and `configure` events when retrieving profiles
+- `customize apply` runs node-started and start as well as configure and member-join
 
 #### Issues/PRs
 
