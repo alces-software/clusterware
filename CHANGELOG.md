@@ -21,6 +21,8 @@ This project adheres to [Semantic Versioning](http://semver.org/).
 - Gridware now cowardly refuses to disable a depot from which modules are currently loaded (gridware#5)
 - `alces session` will show the VPN connection address for the master node when available (clusterware-services#29)
 - The Internet connectivity detection routine in the `cluster-customizer` handler has been improved to cope with the case where ICMP is blocked
+- Improved the default target configuration for the `alces sync` tool
+- The `alces sync` tool has been enhanced to allow more fine-grained control over file exclusions and inclusions
 
 ### Fixed
 - `alces howto` tool no longer relies on `gridware` serviceware being installed
