@@ -15,6 +15,7 @@ This project adheres to [Semantic Versioning](http://semver.org/).
 - The `cluster-customizer` handler gained support for processing job queues
 - The `gnome` session now comes with the Firefox web browser installed by default
 - The new `alces customize slave` command manages profiles to be ran on booting slave nodes. Has the options to `add`, `remove` and `list` the profiles to be booted.
+- Added initial support for Clusterware operation within bare metal environments.
 
 ### Changed
 - EPEL installation is now direct from the EPEL URL rather than the CentOS-specific `epel-release` package
@@ -33,6 +34,7 @@ This project adheres to [Semantic Versioning](http://semver.org/).
 - The `profile` input into `alces customize trigger` now delimited by both `/` and `-`
 - Booting slave nodes no longer run the `member-join` and `configure` events when retrieving profiles
 - `customize apply` runs node-started and start as well as configure and member-join
+- Slurm serviceware creates `tmpfiles.d` configuration to ensure directory `/run` directory structure is appropriately recreated after a reboot.
 
 #### Issues/PRs
 
