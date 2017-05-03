@@ -16,6 +16,7 @@ This project adheres to [Semantic Versioning](http://semver.org/).
 - The `gnome` session now comes with the Firefox web browser installed by default
 - The new `alces customize slave` command manages profiles to be ran on booting slave nodes. Has the options to `add`, `remove` and `list` the profiles to be booted.
 - Added initial support for Clusterware operation within bare metal environments.
+- Completion for `alces customize` and `alces sync`
 
 ### Changed
 - EPEL installation is now direct from the EPEL URL rather than the CentOS-specific `epel-release` package
