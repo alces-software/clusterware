@@ -35,7 +35,7 @@ if [ "$ip" ]; then
         echo "OK"
     else
         port="$2"
-        if [ "$port" ] && "${cw_ROOT}"/opt/tcping/bin/tcping -q -t1 8.8.8.8 53 &>/dev/null; then
+        if [ "$port" ] && "${cw_ROOT}"/opt/tcping/bin/tcping -q -t1 "${ip}" "${port}" &>/dev/null; then
             echo "OK"
         else
             echo "FAIL"
