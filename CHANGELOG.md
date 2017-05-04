@@ -25,6 +25,12 @@ This project adheres to [Semantic Versioning](http://semver.org/).
 - The Internet connectivity detection routine in the `cluster-customizer` handler has been improved to cope with the case where ICMP is blocked
 - Improved the default target configuration for the `alces sync` tool
 - The `alces sync` tool has been enhanced to allow more fine-grained control over file exclusions and inclusions
+- Changed clusterware-dropbox-cli to use a new `dropbox sdk gem` compatible with v2 of the `dropbox api`, major changes to `alces storage`:
+  - Various error messages have changed
+  - `configure` now uses OAuth2, procedure requires the user to enter a token supplied by dropbox
+  - `put` now displays a progress bar, improved file conflict dectection
+  - `get` downloads empty files and folders
+  - `list` directories no longer have a modified date
 
 ### Fixed
 - `alces howto` tool no longer relies on `gridware` serviceware being installed
