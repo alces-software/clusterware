@@ -92,6 +92,14 @@ if naming_ping_cert "$name" "$s" "$k" "$meta"; then
 else
   echo "Ping for ${name} failed."
 fi
+for alt in ${cw_ACCESS_alts}; do
+  k="$(echo -n "${alt}:${s}:${cw_NAMING_auth}" | md5sum | cut -f1 -d' ')"
+  if naming_ping_cert "${alt}" "$s" "$k" "$meta"; then
+    echo "Ping for ${alt} succeeded."
+  else
+    echo "Ping for ${alt} failed."
+  fi
+done
 EOF
     chmod 755 "${cw_ROOT}"/var/lib/event-periodic/scripts/certificate-pinger
 }
@@ -107,6 +115,8 @@ main() {
 	shift
     fi
     basename="${1:-flight}"
+    shift
+
     sane_name="$(echo "${basename}" | tr "[A-Z]" "[a-z]" | sed -e 's/[^a-z0-9_]/-/g' -e 's/-[-]*/-/g' -e 's/-$//g')"
     shift
     if ! files_load_config --optional access; then
@@ -172,14 +182,23 @@ EOF
         else
             meta="$(network_get_iface_mac $(network_get_first_iface))"
         fi
-	naming_fetch_cert "${name}" "${ip}" "${s}" "${k}" "${meta}"
+        alts=()
+        alt_names=()
+        for a in "$@"; do
+            alts+=("${name}.${a}")
+            alt_names+=("${name}.${a%:*}")
+        done
+        if [ "${#alts}" -gt 0 ]; then
+            echo "cw_ACCESS_alts=\"${alt_names[@]}\"\"" >> "${cw_ROOT}"/etc/access.rc
+        fi
+	naming_fetch_cert "${name}" "${ip}" "${s}" "${k}" "${meta}" "${alts[@]}"
 	errlvl=$?
         if [ "$errlvl" == 0 ]; then
             _write_periodic_scripts
 	    return
         elif [ "$errlvl" == 147 ]; then
 	    # retry
-	    if naming_fetch_cert "${name}" "${ip}" "${s}" "${k}" "${meta}"; then
+	    if naming_fetch_cert "${name}" "${ip}" "${s}" "${k}" "${meta}" "${alts[@]}"; then
                 _write_periodic_scripts
 		return
 	    fi
