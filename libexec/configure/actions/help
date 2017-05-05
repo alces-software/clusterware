@@ -27,7 +27,7 @@ main() {
     shift
 
     case $action in
-        help|node|autoscaling|hyperthreading|scheduler)
+        help|node|autoscaling|hyperthreading|scheduler|thp)
             help_for_${action}
             ;;
         ?*)
@@ -56,10 +56,10 @@ general_help() {
   COMMANDS:
 
 EOF
-printf "    %-28s  %s\n" "$binname help" "More help about this command."
-printf "    %-28s  %s\n" "$binname node" "Perform initial node setup."
-printf "    %-28s  %s\n" "$binname autoscaling" "Control autoscaling behaviour."
-printf "    %-28s  %s\n" "$binname hyperthreading" "Control hyperthreading behaviour."
+printf "    %-30s  %s\n" "$binname help" "More help about this command."
+printf "    %-30s  %s\n" "$binname node" "Perform initial node setup."
+printf "    %-30s  %s\n" "$binname autoscaling" "Control autoscaling behaviour."
+printf "    %-30s  %s\n" "$binname hyperthreading" "Control hyperthreading behaviour."
 cat <<EOF
 
 Please report bugs to support@alces-software.com
@@ -142,6 +142,20 @@ help_for_help() {
 
     Get help with configure commands.  If no <command> is specified,
     show some general help.
+
+EOF
+}
+
+help_for_thp() {
+  cat <<EOF
+  SYNOPSIS:
+
+    alces configure thp [enable|disable|status]
+
+  DESCRIPTION:
+
+    Change transparent huge pages behaviour. If no <action> is specified,
+    shows the status
 
 EOF
 }
