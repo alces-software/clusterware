@@ -129,7 +129,7 @@ JSON
 }
 
 naming_fetch_cert() {
-    local name names ip secret a k s
+    local name names ip secret a k s meta alts
     name="$1"
     ip="$2"
     s="$3"

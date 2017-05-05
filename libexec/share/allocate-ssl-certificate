@@ -115,8 +115,6 @@ main() {
 	shift
     fi
     basename="${1:-flight}"
-    shift
-
     sane_name="$(echo "${basename}" | tr "[A-Z]" "[a-z]" | sed -e 's/[^a-z0-9_]/-/g' -e 's/-[-]*/-/g' -e 's/-$//g')"
     shift
     if ! files_load_config --optional access; then
@@ -189,7 +187,7 @@ EOF
             alt_names+=("${name}.${a%:*}")
         done
         if [ "${#alts}" -gt 0 ]; then
-            echo "cw_ACCESS_alts=\"${alt_names[@]}\"\"" >> "${cw_ROOT}"/etc/access.rc
+            echo "cw_ACCESS_alts=\"${alt_names[@]}\"" >> "${cw_ROOT}"/etc/access.rc
         fi
 	naming_fetch_cert "${name}" "${ip}" "${s}" "${k}" "${meta}" "${alts[@]}"
 	errlvl=$?
