@@ -14,6 +14,7 @@ This project adheres to [Semantic Versioning](http://semver.org/).
 - The `cluster-customizer` handler gained support for executing scripts periodically
 - The `cluster-customizer` handler gained support for processing job queues
 - The `gnome` session now comes with the Firefox web browser installed by default
+- The `cluster-configure` option to enable/ disable thp and corresponding flight profile
 
 ### Changed
 - EPEL installation is now direct from the EPEL URL rather than the CentOS-specific `epel-release` package
