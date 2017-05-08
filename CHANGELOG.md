@@ -14,7 +14,7 @@ This project adheres to [Semantic Versioning](http://semver.org/).
 - The `cluster-customizer` handler gained support for executing scripts periodically
 - The `cluster-customizer` handler gained support for processing job queues
 - The `gnome` session now comes with the Firefox web browser installed by default
-- Added `thp` operation to `alces configure`. Controls the transparent huge page behaviour
+- Added `thp` operation to `alces configure` to controls transparent hugepages behaviour
 
 ### Changed
 - EPEL installation is now direct from the EPEL URL rather than the CentOS-specific `epel-release` package

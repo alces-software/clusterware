@@ -155,8 +155,8 @@ help_for_thp() {
 
   DESCRIPTION:
 
-    Change or retrieve transparent hugepage behaviour.  If no action is
-    specified, display transparent hugepage status.
+    Change or retrieve transparent hugepages behaviour.  If no action is
+    specified, display transparent hugepages status.
 
 EOF
 }
