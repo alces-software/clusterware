@@ -3,7 +3,7 @@
 All notable changes to this project will be documented in this file.
 This project adheres to [Semantic Versioning](http://semver.org/).
 
-## [Unreleased] - 1.8.0
+## [1.8.0] - TBC
 
 ### Added
 - Autoscaling has been refactored to introduce an API that allows multiple autoscaling groups to be active simultaneously as well as providing abstraction of the autoscaling platform
@@ -323,7 +323,7 @@ This project adheres to [Semantic Versioning](http://semver.org/).
 
 - Initial release
 
-[Unreleased]: https://github.com/alces-software/clusterware/compare/1.7.0...develop
+[1.8.0]: https://github.com/alces-software/clusterware/compare/1.7.0...release/1.8
 [Core 1.8]: https://github.com/alces-software/clusterware/issues?q=milestone%3A1.8-release
 [Handlers 1.8]: https://github.com/alces-software/clusterware/issues?q=milestone%3A1.8-release
 [Services 1.8]: https://github.com/alces-software/clusterware/issues?q=milestone%3A1.8-release
