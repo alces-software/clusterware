@@ -13,7 +13,7 @@ This project adheres to [Semantic Versioning](http://semver.org/).
 - Nothing yet
 
 ### Fixed
-- Nothing yet
+- Correct autocompletion for `alces configure`
 
 #### Issues/PRs
 
