@@ -3,7 +3,22 @@
 All notable changes to this project will be documented in this file.
 This project adheres to [Semantic Versioning](http://semver.org/).
 
-## [Unreleased] - 1.8.0
+## [Unreleased] - 1.9.0
+
+### Added
+- Added `thp` operation to `alces configure` to controls transparent hugepages behaviour
+
+### Changed
+- Nothing yet
+
+### Fixed
+- Nothing yet
+
+#### Issues/PRs
+
+[Core 1.9], [Handlers 1.9], [Services 1.9], [Storage 1.9], [Sessions 1.9]
+
+## [1.8.0] - TBC
 
 ### Added
 - Autoscaling has been refactored to introduce an API that allows multiple autoscaling groups to be active simultaneously as well as providing abstraction of the autoscaling platform
@@ -14,7 +29,6 @@ This project adheres to [Semantic Versioning](http://semver.org/).
 - The `cluster-customizer` handler gained support for executing scripts periodically
 - The `cluster-customizer` handler gained support for processing job queues
 - The `gnome` session now comes with the Firefox web browser installed by default
-- Added `thp` operation to `alces configure` to controls transparent hugepages behaviour
 
 ### Changed
 - EPEL installation is now direct from the EPEL URL rather than the CentOS-specific `epel-release` package
@@ -309,7 +323,13 @@ This project adheres to [Semantic Versioning](http://semver.org/).
 
 - Initial release
 
-[Unreleased]: https://github.com/alces-software/clusterware/compare/1.7.0...develop
+[Unreleased]: https://github.com/alces-software/clusterware/compare/release/1.8...develop
+[Core 1.9]: https://github.com/alces-software/clusterware/issues?q=milestone%3A1.9-release
+[Handlers 1.9]: https://github.com/alces-software/clusterware/issues?q=milestone%3A1.9-release
+[Services 1.9]: https://github.com/alces-software/clusterware/issues?q=milestone%3A1.9-release
+[Storage 1.9]: https://github.com/alces-software/clusterware/issues?q=milestone%3A1.9-release
+[Sessions 1.9]: https://github.com/alces-software/clusterware/issues?q=milestone%3A1.9-release
+[1.8.0]: https://github.com/alces-software/clusterware/compare/1.7.0...release/1.8
 [Core 1.8]: https://github.com/alces-software/clusterware/issues?q=milestone%3A1.8-release
 [Handlers 1.8]: https://github.com/alces-software/clusterware/issues?q=milestone%3A1.8-release
 [Services 1.8]: https://github.com/alces-software/clusterware/issues?q=milestone%3A1.8-release
