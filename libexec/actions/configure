@@ -30,7 +30,7 @@ shift
 cw_BINNAME="${cw_BINNAME} $(basename "$0")"
 
 case $action in
-    h|he|hel|help)
+    he|hel|help)
         exec /bin/bash "${cw_ROOT}"/libexec/configure/actions/help "$@"
         ;;
     n|no|nod|node)
@@ -39,11 +39,14 @@ case $action in
     a|au|aut|auto|autos|autosc|autosca|autoscal|autoscali|autoscalin|autoscaling)
         exec /bin/bash "${cw_ROOT}"/libexec/configure/actions/autoscaling "$@"
         ;;
-    h|hy|hyp|hype|hyper|hypert|hyperth|hyperthr|hyperthre|hyperthrea|hyperthread|hyperthreadi|hyperthreadin|hyperthreading)
+    hy|hyp|hype|hyper|hypert|hyperth|hyperthr|hyperthre|hyperthrea|hyperthread|hyperthreadi|hyperthreadin|hyperthreading)
         exec /bin/bash "${cw_ROOT}"/libexec/configure/actions/hyperthreading "$@"
         ;;
     s|sc|sch|sche|sched|schedu|schedul|schedule|scheduler)
         exec /bin/bash "${cw_ROOT}"/libexec/configure/actions/scheduler "$@"
+        ;;
+    t|th|thp)
+        exec /bin/bash "${cw_ROOT}"/libexec/configure/actions/thp "$@"
         ;;
     *)
         cat <<EOF
@@ -57,6 +60,7 @@ printf "    %-30s  %s\n" "$cw_BINNAME node" "Perform initial node setup."
 printf "    %-30s  %s\n" "$cw_BINNAME autoscaling" "Control autoscaling behaviour."
 printf "    %-30s  %s\n" "$cw_BINNAME hyperthreading" "Control hyperthreading behaviour."
 printf "    %-30s  %s\n" "$cw_BINNAME scheduler" "Control scheduler behaviour."
+printf "    %-30s  %s\n" "$cw_BINNAME thp" "Control transparent hugepages behaviour."
 cat <<EOF
 
 Please report bugs to support@alces-software.com
