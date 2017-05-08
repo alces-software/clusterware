@@ -60,6 +60,7 @@ printf "    %-30s  %s\n" "$binname help" "More help about this command."
 printf "    %-30s  %s\n" "$binname node" "Perform initial node setup."
 printf "    %-30s  %s\n" "$binname autoscaling" "Control autoscaling behaviour."
 printf "    %-30s  %s\n" "$binname hyperthreading" "Control hyperthreading behaviour."
+printf "    %-30s  %s\n" "$binname thp" "Control transparent hugepages behaviour."
 cat <<EOF
 
 Please report bugs to support@alces-software.com
@@ -154,8 +155,8 @@ help_for_thp() {
 
   DESCRIPTION:
 
-    Change transparent huge pages behaviour. If no <action> is specified,
-    shows the status
+    Change or retrieve transparent hugepage behaviour.  If no action is
+    specified, display transparent hugepage status.
 
 EOF
 }

@@ -60,7 +60,7 @@ printf "    %-30s  %s\n" "$cw_BINNAME node" "Perform initial node setup."
 printf "    %-30s  %s\n" "$cw_BINNAME autoscaling" "Control autoscaling behaviour."
 printf "    %-30s  %s\n" "$cw_BINNAME hyperthreading" "Control hyperthreading behaviour."
 printf "    %-30s  %s\n" "$cw_BINNAME scheduler" "Control scheduler behaviour."
-printf "    %-30s  %s\n" "$cw_BINNAME thp" "Enable/ disable thp."
+printf "    %-30s  %s\n" "$cw_BINNAME thp" "Control transparent hugepages behaviour."
 cat <<EOF
 
 Please report bugs to support@alces-software.com

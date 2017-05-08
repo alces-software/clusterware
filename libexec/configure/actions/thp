@@ -1,6 +1,6 @@
 #!/bin/bash
 #==============================================================================
-# Copyright (C) 2016 Stephen F. Norledge and Alces Software Ltd.
+# Copyright (C) 2017 Stephen F. Norledge and Alces Software Ltd.
 #
 # This file/package is part of Alces Clusterware.
 #
@@ -49,9 +49,11 @@ main() {
 			esac
 			;;
 		*)
-			action_die "unrecognised: $cmd"
+			action_die "unrecognised operation: $cmd"
 	esac
 }
 
-process_reexec_sudo "$@"
+if [ -n "$1" -a "$1" != "status" ]; then
+	process_reexec_sudo "$@"
+fi
 main "$@"
