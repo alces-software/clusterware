@@ -30,17 +30,20 @@ shift
 cw_BINNAME="${cw_BINNAME} $(basename "$0")"
 
 case $action in
-    he|hel|help)
+    h|he|hel|help)
         exec /bin/bash "${cw_ROOT}"/libexec/configure/actions/help "$@"
-        ;;
-    n|no|nod|node)
-        exec /bin/bash "${cw_ROOT}"/libexec/configure/actions/node "$@"
         ;;
     a|au|aut|auto|autos|autosc|autosca|autoscal|autoscali|autoscalin|autoscaling)
         exec /bin/bash "${cw_ROOT}"/libexec/configure/actions/autoscaling "$@"
         ;;
+    c|cl|clo|cloc|clock|clocks|clockso|clocksou|clocksour|clocksourc|clocksource)
+        exec /bin/bash "${cw_ROOT}"/libexec/configure/actions/clocksource "$@"
+        ;;
     hy|hyp|hype|hyper|hypert|hyperth|hyperthr|hyperthre|hyperthrea|hyperthread|hyperthreadi|hyperthreadin|hyperthreading)
         exec /bin/bash "${cw_ROOT}"/libexec/configure/actions/hyperthreading "$@"
+        ;;
+    n|no|nod|node)
+        exec /bin/bash "${cw_ROOT}"/libexec/configure/actions/node "$@"
         ;;
     s|sc|sch|sche|sched|schedu|schedul|schedule|scheduler)
         exec /bin/bash "${cw_ROOT}"/libexec/configure/actions/scheduler "$@"
