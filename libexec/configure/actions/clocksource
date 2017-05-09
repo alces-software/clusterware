@@ -31,11 +31,8 @@ main() {
 		"")
 			clocksource_list
 			;;
-		default)
-			clocksource_set_default
-			;;
 		*)
-			clocksource_set_source $cmd
+			clocksource_set $cmd
 			;;
 	esac
 }
