@@ -205,12 +205,8 @@ if [ "$BASH_VERSION" ]; then
                     values="default $(cat /sys/devices/system/clocksource/clocksource0/available_clocksource)"
                     ;;  
             esac
-        else
-            case ${COMP_WORDS[2]} in
-                s|sc|sch|sche|sched|schedu|schedul|schedule|scheduler)
-                    values=$(_alces_configure_scheduler_action "$cur" "$prev")
-                    ;;
-            esac
+        elif [[ "scheduler" =~ ${COMP_WORDS[2]}* ]]; then
+            values=$(_alces_configure_scheduler_action "$cur" "$prev")
         fi
         echo "$values"
     }
