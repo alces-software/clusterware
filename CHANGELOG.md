@@ -8,7 +8,7 @@ This project adheres to [Semantic Versioning](http://semver.org/).
 ### Added
 - The `alces configure` action has gained a `thp` operation for control of transparent hugepages behaviour
 - The Clusterware VPN IP address may optionally be added to DNS and as a SAN within the SSL certificate within a `.vpn` subdomain
-- The `clocksource` option to `alces configure`. Can modify and display the clocksource on a node. Also added a `customization profile` to modify it on `configure`
+- Added `clocksource` as an option to `alces configure`. It modifies and displays the clocksource of the node.
 
 ### Changed
 - Nothing yet

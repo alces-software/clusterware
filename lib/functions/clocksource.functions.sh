@@ -50,7 +50,7 @@ _clocksource_get_available() {
 }
 
 _clocksource_validate_source() {
-    local input="$1"
+    local input="$1" validated
     shift
 
     validated=$(_clocksource_get_available | grep -wo "$input")
@@ -60,7 +60,6 @@ _clocksource_validate_source() {
 }
 
 _clocksource_set_default() {
-    local validated
     if files_load_config --optional cluster-clocksource; then
         
         _clocksource_validate_source $cw_CLUSTER_default_clocksource
@@ -71,7 +70,7 @@ _clocksource_set_default() {
 }
 
 _clocksource_set_source() {
-    local input="$1" validated default
+    local input="$1" default
     shift
 
     _clocksource_validate_source $input
@@ -83,7 +82,7 @@ _clocksource_set_source() {
     fi
 
     echo $input > $cw_CLOCKSOURCE_current_file
-    _clocksource_write_config "$default" "$validated"
+    _clocksource_write_config "$default" "$input"
     
     if clocksource_is_master_node; then
         ln -fs $cw_CLOCKSOURCE_config_file $cw_CLOCKSOURCE_sym_link
@@ -111,17 +110,17 @@ clocksource_is_master_node() {
 }
 
 clocksource_set() {
-    local cmd="$1"
+    local input="$1"
     shift
 
-    if [[ "$cmd" == "default" ]]; then
+    if [[ "$input" == "default" ]]; then
         _clocksource_set_default
     else
-        _clocksource_set_source "$cmd"
+        _clocksource_set_source "$input"
     fi
 
     if clocksource_is_master_node; then
-        member_each _clocksource_ssh_compute_nodes $(hostname) "$cmd"
+        member_each _clocksource_ssh_compute_nodes $(hostname) "$input"
     fi
 }
 
@@ -132,8 +131,10 @@ clocksource_list() {
     cur=$(cat $cw_CLOCKSOURCE_current_file)
     
     if [[ ! -z "$cw_CLUSTER_clocksource" ]] && [[ "$cw_CLUSTER_clocksource" != "$cur" ]]; then
-        action_die "conflict between system clocksource and config file"
-    elif [[ -z "$cw_CLUSTER_default_clocksource" ]]; then
+        action_warn "Conflict between system clocksource and config detected"
+        action_warn "Run to fix conflict: alces configure clocksource <source>"
+    fi
+    if [[ -z "$cw_CLUSTER_default_clocksource" ]]; then
         default_set="default"
     fi
 

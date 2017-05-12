@@ -173,10 +173,10 @@ help_for_clocksource() {
 
   DESCRIPTION:
 
-    Change or retrieve the clocksource.  If no action is
+    Change or retrieve the clocksource.  If no source is
     specified, lists the current and available clocksources.
 
-    The 'default' action resets the clocksource to the system default.
+    The 'default' source resets the clocksource to the system default.
 
     Changes on the master node are reflected cluster wide.
 
