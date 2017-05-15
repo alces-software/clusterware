@@ -201,6 +201,9 @@ if [ "$BASH_VERSION" ]; then
                 t|th|thp)
                     values="enable disable status"
                     ;;
+                c|cl|clo|cloc|clock|clocks|clockso|clocksou|clocksour|clocksourc|clocksource)
+                    values="default $(cat /sys/devices/system/clocksource/clocksource0/available_clocksource)"
+                    ;;  
             esac
         elif [[ "scheduler" =~ ${COMP_WORDS[2]}* ]]; then
             values=$(_alces_configure_scheduler_action "$cur" "$prev")
