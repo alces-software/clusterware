@@ -27,7 +27,7 @@ main() {
     shift
 
     case $action in
-        help|node|autoscaling|hyperthreading|scheduler|thp|clocksource)
+        help|node|autoscaling|hyperthreading|scheduler|thp|clocksource|dropcache)
             help_for_${action}
             ;;
         ?*)
@@ -62,6 +62,7 @@ printf "    %-30s  %s\n" "$binname autoscaling" "Control autoscaling behaviour."
 printf "    %-30s  %s\n" "$binname hyperthreading" "Control hyperthreading behaviour."
 printf "    %-30s  %s\n" "$binname thp" "Control transparent hugepages behaviour."
 printf "    %-30s  %s\n" "$binname clocksource" "Control clocksource behaviour."
+printf "    %-30s  %s\n" "$binname dropcache" "Clears the vfscache."
 cat <<EOF
 
 Please report bugs to support@alces-software.com
@@ -180,6 +181,29 @@ help_for_clocksource() {
 
     Changes on the master node are reflected cluster wide.
 
+EOF
+}
+
+help_for_dropcache() {
+  cat <<EOF
+  SYNOPSIS:
+
+    alces configure dropcache <pagecache|slabobjs|both|1|2|3>
+
+  DESCRIPTION:
+
+    Clears the vfscache. Does not prevent the cache from filling again.
+
+    Requires one of the following options:
+
+    To clear the pagecache:
+      1 OR pagecache
+
+    To clear the dentries and inodes:
+      2 OR slabobjs
+
+    To clear pagecache, dentries and inodes:
+      3 OR both
 EOF
 }
 

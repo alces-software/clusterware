@@ -9,6 +9,7 @@ This project adheres to [Semantic Versioning](http://semver.org/).
 - The `alces configure` action has gained a `thp` operation for control of transparent hugepages behaviour
 - The Clusterware VPN IP address may optionally be added to DNS and as a SAN within the SSL certificate within a `.vpn` subdomain
 - Added `clocksource` as an option to `alces configure`. It modifies and displays the clocksource of the node.
+- Added 'dropcache' as an option to `alces configure`. It allows the user to drop the pagecache, dentrie, and inode caches.
 
 ### Changed
 - Nothing yet
