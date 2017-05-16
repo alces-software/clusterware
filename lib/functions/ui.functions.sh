@@ -21,6 +21,14 @@
 #==============================================================================
 require action
 
+_ui_trap_sig() {
+  if [ "$spin_pid" ]; then
+    kill $spin_pid
+    echo
+  fi
+  exit 1
+}
+
 toggle_spin() {
         if [ -z "$spin_pid" ]; then
             (
@@ -37,6 +45,7 @@ toggle_spin() {
                 done
             ) &
             spin_pid=$!
+            trap _ui_trap_sig INT
         else
             sleep 1
             kill $spin_pid
