@@ -62,7 +62,7 @@ printf "    %-30s  %s\n" "$binname autoscaling" "Control autoscaling behaviour."
 printf "    %-30s  %s\n" "$binname hyperthreading" "Control hyperthreading behaviour."
 printf "    %-30s  %s\n" "$binname thp" "Control transparent hugepages behaviour."
 printf "    %-30s  %s\n" "$binname clocksource" "Control clocksource behaviour."
-printf "    %-30s  %s\n" "$binname dropcache" "Clears the vfscache."
+printf "    %-30s  %s\n" "$binname dropcache" "Free pagecache and/or reclaimable slab objects."
 cat <<EOF
 
 Please report bugs to support@alces-software.com
@@ -188,22 +188,19 @@ help_for_dropcache() {
   cat <<EOF
   SYNOPSIS:
 
-    alces configure dropcache <pagecache|slabobjs|both|1|2|3>
+    alces configure dropcache <pagecache|slabobjs|both>
 
   DESCRIPTION:
 
-    Clears the vfscache. Does not prevent the cache from filling again.
+    Allows an administrator user to write a value to /proc/sys/vm/drop_caches
+    causing the kernel to drop clean caches from the pagecache and/or 
+    reclaimable slab objects like dentries and inodes. Once dropped, their 
+    memory becomes free.
 
-    Requires one of the following options:
-
-    To clear the pagecache:
-      1 OR pagecache
-
-    To clear the dentries and inodes:
-      2 OR slabobjs
-
-    To clear pagecache, dentries and inodes:
-      3 OR both
+    Specify 'pagecache' to drop clean caches from the pagecache, 'slabobjs' to
+    free reclaimable slab objects like dentries and inodes or 'both' to free
+    both the pagecache and slab objects.
+    
 EOF
 }
 

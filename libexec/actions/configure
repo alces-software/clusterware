@@ -68,7 +68,7 @@ printf "    %-30s  %s\n" "$cw_BINNAME hyperthreading" "Control hyperthreading be
 printf "    %-30s  %s\n" "$cw_BINNAME scheduler" "Control scheduler behaviour."
 printf "    %-30s  %s\n" "$cw_BINNAME thp" "Control transparent hugepages behaviour."
 printf "    %-30s  %s\n" "$cw_BINNAME clocksource" "Control clocksource behaviour."
-printf "    %-30s  %s\n" "$cw_BINNAME dropcache" "Clears the vfscache."
+printf "    %-30s  %s\n" "$cw_BINNAME dropcache" "Free pagecache and/or reclaimable slab objects."
 cat <<EOF
 
 Please report bugs to support@alces-software.com
