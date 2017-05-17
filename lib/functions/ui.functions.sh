@@ -22,7 +22,7 @@
 require action
 require process
 
-_ui_trap_sig() {
+_ui_spinner_kill() {
   if [ "$spin_pid" ]; then
     kill $spin_pid 2>/dev/null
     echo
@@ -45,8 +45,8 @@ toggle_spin() {
                 done
             ) &
             spin_pid=$!
-            process_trap_add INT '_ui_trap_sig'
-            if [ ! $(process_trap_get_exit INT) ]; then
+            process_trap_add INT _ui_spinner_kill
+            if ! process_trap_get_exit INT >/dev/null; then
               process_trap_set_exit INT 1
             fi
         else

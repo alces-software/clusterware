@@ -98,7 +98,7 @@ process_trap_handle() {
   signal=$1
   trap_list_var="_PROCESS_${signal}"
   trap_exit_var="_PROCESS_EXIT_${signal}"
-  echo $(eval ${!trap_list_var})
+  ${!trap_list_var}
   if [ ${!trap_exit_var} -a ${!trap_exit_var} != "false" ]; then
     exit ${!trap_exit_var}
   fi
