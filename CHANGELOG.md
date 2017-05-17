@@ -16,6 +16,7 @@ This project adheres to [Semantic Versioning](http://semver.org/).
 
 ### Fixed
 - Correct autocompletion for `alces configure`
+- Prevents the `ui-spinner` from continuing on process interrupt
 
 #### Issues/PRs
 
