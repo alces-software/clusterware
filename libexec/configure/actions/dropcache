@@ -28,28 +28,42 @@ _dropcache_clear_cache() {
     shift
 
     echo "$cache_int" > /proc/sys/vm/drop_caches
+    return $?
 }
 
 main() {
-    local input="$1"
+    local input="$1" exit_code cache_type
     shift
 
     case "$input" in
         "")
             $cw_ROOT/bin/alces configure help dropcache
+            exit 1
             ;;
-        1|p|pa|pag|page|pagec|pageca|pagecac|pagecac|pagecach|pagecache)
+        p|pa|pag|page|pagec|pageca|pagecac|pagecac|pagecach|pagecache)
             _dropcache_clear_cache 1
+            exit_code=$?
+            cache_type="pagecache"
             ;;
-        2|s|sl|sla|slab|slabo|slabob|slabobj|slabobjs)
+        s|sl|sla|slab|slabo|slabob|slabobj|slabobjs)
             _dropcache_clear_cache 2
+            exit_code=$?
+            cache_type="reclaimable slab objects"
             ;;
-        3|b|bo|bot|both)
+        b|bo|bot|both)
             _dropcache_clear_cache 3
+            exit_code=$?
+            cache_type="pagecache and reclaimable objects"
             ;;
         *)
             action_die "unrecognised option: $input"
     esac
+
+    if [ "$exit_code" ]; then
+        action_warn "clean caches from $cache_type dropped"
+    else
+        action_die "could not clean cache" "$exit_code"
+    fi
 }
 
 if [ -n "$1" ]; then
