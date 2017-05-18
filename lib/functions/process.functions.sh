@@ -115,10 +115,23 @@ process_trap_add() {
 # By default the trap does not exit
 # An exit_code of 'false' explicitly prevents the trap exiting
 process_trap_set_exit() { 
-  local signal=$1 exit_code=$2 trap_exit_var
-  shift 2
+  local force signal exit_code trap_exit_var
+  if [[ "$1" == "--force" ]]; then
+    force="true"
+    shift
+  fi
+  signal="$1"
+  if [[ -z "$2" ]]; then
+    exit_code=1
+  else
+    exit_code="$2"
+  fi
 
   trap_exit_var="_PROCESS_EXIT_${signal}"
+  if [[ -n "${!trap_exit_var}" && -z "$force" ]]; then
+    return 1
+  fi
+
   printf -v "$trap_exit_var" "$exit_code"
   trap "process_trap_handle $signal" $signal   
 }

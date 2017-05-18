@@ -46,9 +46,7 @@ toggle_spin() {
             ) &
             spin_pid=$!
             process_trap_add INT _ui_spinner_kill
-            if ! process_trap_get_exit INT >/dev/null; then
-              process_trap_set_exit INT 1
-            fi
+            process_trap_set_exit INT
         else
             sleep 1
             kill $spin_pid
