@@ -9,12 +9,14 @@ This project adheres to [Semantic Versioning](http://semver.org/).
 - The `alces configure` action has gained a `thp` operation for control of transparent hugepages behaviour
 - The Clusterware VPN IP address may optionally be added to DNS and as a SAN within the SSL certificate within a `.vpn` subdomain
 - Added `clocksource` as an option to `alces configure`. It modifies and displays the clocksource of the node.
+- Signal trap handling added to the `process` function library
 
 ### Changed
 - Nothing yet
 
 ### Fixed
 - Correct autocompletion for `alces configure`
+- The progress spinner no longer continues spinning forever when the process receives an interrupt signal
 
 #### Issues/PRs
 

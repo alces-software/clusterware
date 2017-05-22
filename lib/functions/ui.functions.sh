@@ -20,6 +20,14 @@
 # https://github.com/alces-software/clusterware
 #==============================================================================
 require action
+require process
+
+_ui_spinner_kill() {
+  if [ "$spin_pid" ]; then
+    kill $spin_pid 2>/dev/null
+    echo
+  fi
+}
 
 toggle_spin() {
         if [ -z "$spin_pid" ]; then
@@ -37,6 +45,8 @@ toggle_spin() {
                 done
             ) &
             spin_pid=$!
+            process_trap_add INT _ui_spinner_kill
+            process_trap_set_exit INT
         else
             sleep 1
             kill $spin_pid
