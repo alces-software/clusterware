@@ -189,6 +189,12 @@ if [ "$BASH_VERSION" ]; then
                 a|au|aut|auto|autos|autosc|autosca|autoscal|autoscali|autoscalin|autoscaling)
                     values="enable disable status"
                     ;;
+                d|dr|dro|drop|dropc|dropca|dropcac|dropcach|dropcache)
+                    values="pagecache slabobjs both"
+                    ;;
+                c|cl|clo|cloc|clock|clocks|clockso|clocksou|clocksour|clocksourc|clocksource)
+                    values="default $(cat /sys/devices/system/clocksource/clocksource0/available_clocksource)"
+                    ;;
                 he|hel|help)
                     values=$(ls $(_cw_root)/libexec/configure/actions)
                     ;;
@@ -200,9 +206,6 @@ if [ "$BASH_VERSION" ]; then
                     ;;
                 t|th|thp)
                     values="enable disable status"
-                    ;;
-                c|cl|clo|cloc|clock|clocks|clockso|clocksou|clocksour|clocksourc|clocksource)
-                    values="default $(cat /sys/devices/system/clocksource/clocksource0/available_clocksource)"
                     ;;
             esac
         elif [[ "scheduler" =~ ${COMP_WORDS[2]}* ]]; then
