@@ -203,7 +203,7 @@ if [ "$BASH_VERSION" ]; then
                     ;;
                 c|cl|clo|cloc|clock|clocks|clockso|clocksou|clocksour|clocksourc|clocksource)
                     values="default $(cat /sys/devices/system/clocksource/clocksource0/available_clocksource)"
-                    ;;  
+                    ;;
             esac
         elif [[ "scheduler" =~ ${COMP_WORDS[2]}* ]]; then
             values=$(_alces_configure_scheduler_action "$cur" "$prev")
@@ -246,6 +246,11 @@ if [ "$BASH_VERSION" ]; then
     _alces_complete() {
         local cur="$1" prev="$2" action="$3" values="$4"
         if ((COMP_CWORD == 2)); then
+            case "$prev" in
+                ser|serv|servi|servic|service)
+                    values=$(echo $values | sed "s/\(build\)\|\(package\)//g")
+                    ;;
+            esac
             COMPREPLY=( $(compgen -W "$values" -- "$cur") )
         else
             case "${COMP_WORDS[2]}" in
@@ -314,37 +319,17 @@ if [ "$BASH_VERSION" ]; then
             COMPREPLY=( $(compgen -W "$cmds" -- "$cur") )
         else
             case "${COMP_WORDS[1]}" in
-                g|gr|gri|grid|gridw|gridwa|gridwar|gridware)
-                    _alces_gridware "$cur" "$prev"
-                    ;;
-                m|mo|mod|modu|modul|module)
-                    unset COMP_WORDS[0]
-                    COMP_CWORD=$(($COMP_CWORD-1))
-                    _module "module" "$cur" "$prev"
-                    ;;
-                st|sto|stor|stora|storag|storage)
-                    _alces_storage "$cur" "$prev"
-                    ;;
-                ha|han|hand|handl|handle|handler)
-                    _alces_action "$cur" "$prev" "handler"
+                a|ab|abo|abou|about)
+                    _alces_about "$cur" "$prev" "about"
                     ;;
                 c|co|con|conf|confi|config|configu|configur|configure)
                     _alces_action "$cur" "$prev" "configure"
                     ;;
-                a|ab|abo|abou|about)
-                    _alces_about "$cur" "$prev" "about"
+                g|gr|gri|grid|gridw|gridwa|gridwar|gridware)
+                    _alces_gridware "$cur" "$prev"
                     ;;
-                ho|how|howt|howto)
-                    _alces_action "$cur" "$prev" "howto"
-                    ;;
-                ser|ser|serv|servi|servic|service)
-                    _alces_action "$cur" "$prev" "service"
-                    ;;
-                ses|sess|sessi|sessio|session)
-                    _alces_action "$cur" "$prev" "session"
-                    ;;
-                t|te|tem|temp|templ|templa|templat|template)
-                    _alces_action "$cur" "$prev" "template"
+                ha|han|hand|handl|handle|handler)
+                    _alces_action "$cur" "$prev" "handler"
                     ;;
                 help)
                     case "$cur" in
@@ -352,6 +337,26 @@ if [ "$BASH_VERSION" ]; then
                             COMPREPLY=( $(compgen -W "$cmds" -- "$cur") )
                             ;;
                     esac
+                    ;;
+                ho|how|howt|howto)
+                    _alces_action "$cur" "$prev" "howto"
+                    ;;
+                m|mo|mod|modu|modul|module)
+                    unset COMP_WORDS[0]
+                    COMP_CWORD=$(($COMP_CWORD-1))
+                    _module "module" "$cur" "$prev"
+                    ;;
+                ser|ser|serv|servi|servic|service)
+                    _alces_action "$cur" "$prev" "service"
+                    ;;
+                ses|sess|sessi|sessio|session)
+                    _alces_action "$cur" "$prev" "session"
+                    ;;
+                st|sto|stor|stora|storag|storage)
+                    _alces_storage "$cur" "$prev"
+                    ;;
+                t|te|tem|temp|templ|templa|templat|template)
+                    _alces_action "$cur" "$prev" "template"
                     ;;
             esac
         fi
