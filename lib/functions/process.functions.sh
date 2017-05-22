@@ -92,3 +92,58 @@ process_sh() {
         /bin/bash ${script} "$@"
     fi
 }
+
+process_trap_handle() {
+  local signal trap_list_var trap_exit_var
+  signal=$1
+  trap_list_var="_PROCESS_${signal}"
+  trap_exit_var="_PROCESS_EXIT_${signal}"
+  ${!trap_list_var}
+  if [ ${!trap_exit_var} -a ${!trap_exit_var} != "false" ]; then
+    exit ${!trap_exit_var}
+  fi
+}
+
+process_trap_add() {
+  local signal=$1 fn=$2 trap_list_var
+
+  trap_list_var="_PROCESS_${signal}"
+  printf -v "$trap_list_var" "${!trap_list_var}$fn ; "
+  trap "process_trap_handle $signal" $signal
+}
+
+# By default the trap does not exit
+# An exit_code of 'false' explicitly prevents the trap exiting
+process_trap_set_exit() { 
+  local force signal exit_code trap_exit_var
+  if [[ "$1" == "--force" ]]; then
+    force="true"
+    shift
+  fi
+  signal="$1"
+  if [[ -z "$2" ]]; then
+    exit_code=1
+  else
+    exit_code="$2"
+  fi
+
+  trap_exit_var="_PROCESS_EXIT_${signal}"
+  if [[ -n "${!trap_exit_var}" && -z "$force" ]]; then
+    return 1
+  fi
+
+  printf -v "$trap_exit_var" "$exit_code"
+  trap "process_trap_handle $signal" $signal   
+}
+
+process_trap_get_exit() {
+  local signal=$1 trap_exit_var
+
+  trap_exit_var="_PROCESS_EXIT_$signal"
+  if [ ${!trap_exit_var} ]; then
+    echo ${!trap_exit_var}
+    return 0
+  else
+    return 1
+  fi
+}
