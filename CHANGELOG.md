@@ -17,6 +17,7 @@ This project adheres to [Semantic Versioning](http://semver.org/).
 - The new `alces customize slave` command manages profiles to be ran on booting slave nodes. Has the options to `add`, `remove` and `list` the profiles to be booted.
 - Added initial support for Clusterware operation within bare metal environments.
 - Completion for `alces customize` and `alces sync`
+- GridScheduler serviceware now supports 64-core and 128-core machines out of the box
 
 ### Changed
 - EPEL installation is now direct from the EPEL URL rather than the CentOS-specific `epel-release` package
