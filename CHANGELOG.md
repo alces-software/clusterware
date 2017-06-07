@@ -11,9 +11,14 @@ This project adheres to [Semantic Versioning](http://semver.org/).
 - Added `clocksource` as an option to `alces configure`. It modifies and displays the clocksource of the node.
 - Added `dropcache` as an option to `alces configure`. It allows the user to drop clean caches from the pagecache and/or reclaimable slab objects like dentries and inodes.
 - Signal trap handling added to the `process` function library
+- Shell autocompletion for `alces gridware docker` and subcommands has been added
+- Gridware Docker images may be shared across the cluster with `alces gridware docker share`, or by using a Docker registry via `alces gridware docker start-registry`
+- `alces gridware docker run` now has an `--mpi` option to allow running MPI applications in a Gridware environment
+- Custom volumes to mount in containers may be specified with `alces gridware docker run`
 
 ### Changed
 - Accounting data is now written by default when using the Slurm Workload Manager job scheduler, allowing users to query historic resource usage using `sacct`
+- `alces gridware docker build` now has more options, including the ability to include multiple Gridware packages in a container image
 
 ### Fixed
 - Correct autocompletion for `alces configure`
