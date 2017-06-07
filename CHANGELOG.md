@@ -13,7 +13,7 @@ This project adheres to [Semantic Versioning](http://semver.org/).
 - Signal trap handling added to the `process` function library
 
 ### Changed
-- Nothing yet
+- Accounting data is now written by default when using the Slurm Workload Manager job scheduler, allowing users to query historic resource usage using `sacct`
 
 ### Fixed
 - Correct autocompletion for `alces configure`
