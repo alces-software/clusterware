@@ -54,6 +54,8 @@ toggle_spin() {
             printf "\b"
             unset spin_pid
         fi
+
+        return 0  # Don't accidentally propagate nonzero return codes
 }
 
 title() {
