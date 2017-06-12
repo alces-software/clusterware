@@ -24,9 +24,7 @@ require action
 require process
 
 _has_ht() {
-    local threads_per_core
-    threads_per_core=$(lscpu | grep "^Thread(s) per core:" | awk '{print $4;}')
-    [ "$threads_per_core" -gt 1 ]
+    grep '^flags\s*: .* ht ' /proc/cpuinfo > /dev/null
 }
 
 _logical_cpu_count() {

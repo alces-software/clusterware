@@ -1,5 +1,5 @@
 #==============================================================================
-# Copyright (C) 2015-2016 Stephen F. Norledge and Alces Software Ltd.
+# Copyright (C) 2015 Stephen F. Norledge and Alces Software Ltd.
 #
 # This file/package is part of Alces Clusterware.
 #
@@ -19,23 +19,34 @@
 # For more information on the Alces Clusterware, please visit:
 # https://github.com/alces-software/clusterware
 #==============================================================================
-ruby_run() {
-    . "${cw_ROOT}"/etc/ruby.rc
-    export PATH LD_LIBRARY_PATH
-    ${cw_ROOT}/opt/ruby/bin/ruby -se 'eval ARGF.read'
+detect_components() {
+    [ -d "${target}/lib/ruby/.bundle" ]
 }
 
-ruby_bundle_exec() {
-    . "${cw_ROOT}"/etc/ruby.rc
-    export PATH LD_LIBRARY_PATH
-    (
-        cd "${cw_ROOT}"/lib/ruby
-        ${cw_ROOT}/opt/ruby/bin/bundle exec "$@"
-    )
+fetch_components() {
+    if ! fetch_handling_is_source; then
+        title "Fetching Ruby components"
+        fetch_dist 'components'
+    fi
 }
 
-ruby_exec() {
-    . "${cw_ROOT}"/etc/ruby.rc
-    export PATH LD_LIBRARY_PATH
-    ${cw_ROOT}/opt/ruby/bin/ruby "$@"
+install_components() {
+    title "Installing Ruby components"
+    if fetch_handling_is_source; then
+        cd "${target}/lib/ruby"
+        rm -rf vendor/ruby
+        doing 'Configure'
+	# XXX - path into opt/clusterware-bundle or something to allow
+	# for easier dev separation...? .bundle file probably still
+	# awkward tho... perhaps dev operation copies .bundle and
+	# vendor/ruby into dev tree...
+        "${cw_RUBYHOME}/bin/bundle" install \
+            --local \
+            --without test \
+            --path=vendor \
+            &> "${dep_logs}/components-install.log"
+        say_done $?
+    else
+        install_dist 'components'
+    fi
 }

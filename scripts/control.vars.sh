@@ -1,5 +1,5 @@
 #==============================================================================
-# Copyright (C) 2015-2016 Stephen F. Norledge and Alces Software Ltd.
+# Copyright (C) 2015-2017 Stephen F. Norledge and Alces Software Ltd.
 #
 # This file/package is part of Alces Clusterware.
 #
@@ -19,7 +19,7 @@
 # For more information on the Alces Clusterware, please visit:
 # https://github.com/alces-software/clusterware
 #==============================================================================
-deps="git libyaml ruby bundler serf pluginhook jq jo"
+deps="git libyaml ruby bundler serf pluginhook jq jo components"
 serviceware="alces-access-manager-daemon alces-flight-trigger alces-flight-www alces-storage-manager-daemon aws clusterware-dropbox-cli galaxy genders gridscheduler gridware modules openlava openvpn pbspro pdsh s3cmd simp_le slurm tigervnc torque websockify xwd"
 dists="el6 el7"
 dist_url=${cw_BUILD_dist_url:-https://s3-eu-west-1.amazonaws.com/packages.alces-software.com/clusterware/dist}

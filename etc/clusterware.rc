@@ -4,6 +4,6 @@
 ## Copyright (c) 2015-2017 Alces Software Ltd
 ##
 ################################################################################
-cw_VERSION=1.7.0
-cw_CODENAME="Grotesque Gerbil"
+cw_VERSION=1.8.0
+cw_CODENAME="Helpful Hummingbird"
 cw_STATUS=unconfigured

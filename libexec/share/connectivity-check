@@ -1,0 +1,62 @@
+#!/bin/bash
+#==============================================================================
+# Copyright (C) 2017 Stephen F. Norledge and Alces Software Ltd.
+#
+# This file/package is part of Alces Clusterware.
+#
+# Alces Clusterware is free software: you can redistribute it and/or
+# modify it under the terms of the GNU Affero General Public License
+# as published by the Free Software Foundation, either version 3 of
+# the License, or (at your option) any later version.
+#
+# Alces Clusterware is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+# Affero General Public License for more details.
+#
+# You should have received a copy of the GNU Affero General Public License
+# along with this package.  If not, see <http://www.gnu.org/licenses/>.
+#
+# For more information on the Alces Clusterware, please visit:
+# https://github.com/alces-software/clusterware
+#==============================================================================
+if [ ! -x "${cw_ROOT}"/opt/tcping/bin/tcping ]; then
+    "${cw_ROOT}"/bin/alces service install tcping
+fi
+ip="$1"
+if [ "$ip" ]; then
+    # explicit IP to check
+    # 1. Try a simple ping
+    # 2. Try a TCP ping on any supplied port (ICMP might be blocked)
+    #
+    # If none of these conditions are met then we assume we don't have
+    # sufficient connectivity.
+    if ping -c1 -w1 $ip &>/dev/null; then
+        echo "OK"
+    else
+        port="$2"
+        if [ "$port" ] && "${cw_ROOT}"/opt/tcping/bin/tcping -q -t1 "${ip}" "${port}" &>/dev/null; then
+            echo "OK"
+        else
+            echo "FAIL"
+            exit 1
+        fi
+    fi
+else
+    # 1. Try a simple ping
+    # 2. Try a TCP ping on port 53 (ICMP might be blocked)
+    # 3. If port 53 TCP is apparently blocked too then, finally, we
+    #    fall back to having to assume DNS is working and try a TCP
+    #    ping on port 80.
+    #
+    # If none of these conditions are met then we assume we don't have
+    # sufficient connectivity.
+    if ping -c1 -w1 8.8.8.8 &>/dev/null || \
+            "${cw_ROOT}"/opt/tcping/bin/tcping -q -t1 8.8.8.8 53 &>/dev/null || \
+            "${cw_ROOT}"/opt/tcping/bin/tcping -q -t1 $(dig +short google.com | head -n1) 80 &>/dev/null; then
+        echo "OK"
+    else
+        echo "FAIL"
+        exit 1
+    fi
+fi

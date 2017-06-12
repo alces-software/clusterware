@@ -1,6 +1,6 @@
 #!/bin/bash
 #==============================================================================
-# Copyright (C) 2015 Stephen F. Norledge and Alces Software Ltd.
+# Copyright (C) 2015-2017 Stephen F. Norledge and Alces Software Ltd.
 #
 # This file/package is part of Alces Clusterware.
 #
@@ -79,6 +79,7 @@ EOF
 
 main() {
     if is_target_user && ! has_existing_key; then
+        mkdir -p "$(dirname "${cw_SSH_LOG}")"
         echo -n "Generating SSH keypair: "
         if create_key >> "${cw_SSH_LOG}"; then
             echo 'OK'

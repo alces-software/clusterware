@@ -32,22 +32,46 @@ process_wait_for_pid() {
 }
 
 process_reexec_sudo() {
-    local cmd
+    local sudo_args
     if [ "$UID" != "0" ]; then
-        cmd="$(declare -f require); export -f require; exec /bin/bash \"\$0\" \"\$@\""
-        cw_BINNAME="${cw_BINNAME% *}"
-        exec sudo -E /bin/bash -c "${cmd}" "$0" "$@"
+        sudo_args=()
+        process_reexec_with_sudo "$@"
     fi
 }
 
 process_reexec_su() {
-    local uname cmd
+    local uname sudo_args
     uname="$1"
+    shift
     if [ "$UID" != "$(id -u ${uname})" ]; then
-        cmd="$(declare -f require); export -f require; exec /bin/bash \"\$0\" \"\$@\""
-        cw_BINNAME="${cw_BINNAME% *}"
-        exec sudo -u ${uname} -E /bin/bash -c "${cmd}" "$0" "$@"
+        sudo_args=(-u ${uname})
+        process_reexec_with_sudo "$@"
     fi
+}
+
+process_reexec_sg() {
+    local gname sudo_args
+    gname="$1"
+    shift
+    gid=$(getent group $gname | cut -d: -f3 2>/dev/null)
+    if [ -z "$gid" ]; then
+        return 1
+    elif ! id -G | grep -q "\b$gid\b"; then
+        sudo_args=(-g ${gname})
+        process_reexec_with_sudo "$@"
+    fi
+}
+
+process_reexec_with_sudo() {
+    local cmd
+    if [ "$1" == "--plain" ]; then
+        shift
+        cmd_args=("$0" "$@")
+    else
+        cmd_args=(-E /bin/bash -c "$(declare -f require); export -f require; exec /bin/bash \"\$0\" \"\$@\"" "$0" "$@")
+    fi
+    cw_BINNAME="${cw_BINNAME% *}"
+    exec sudo "${sudo_args[@]}" "${cmd_args[@]}"
 }
 
 process_run() {

@@ -24,7 +24,7 @@ if [ "$cw_DEBUG" ]; then
 fi
 
 if [ "$cw_BINNAME" ]; then
-  cw_BINNAME="$cw_BINNAME $(basename "$0")"
+  cw_BINNAME="$cw_BINNAME $(basename "$0" | sed 's/_/ /g')"
 else
   cw_BINNAME="$(basename "$0")"
 fi

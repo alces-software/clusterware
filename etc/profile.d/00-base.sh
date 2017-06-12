@@ -201,6 +201,15 @@ if [ "$BASH_VERSION" ]; then
         echo "$values"
     }
 
+    _alces_customize_action() {
+        local cur="$1" prev="$2"
+        case $prev in
+            slave)
+                echo -e "add\nremove\nlist"
+                ;;
+        esac
+    }
+
     _alces_complete() {
         local cur="$1" prev="$2" action="$3" values="$4"
         if ((COMP_CWORD == 2)); then
@@ -233,10 +242,13 @@ if [ "$BASH_VERSION" ]; then
                         st|sto|stor|stora|storag|storage)
                             values=$(_alces_storage_action "$cur" "$prev")
                             ;;
-                        c|co|con|conf|confi|config|configu|configur|configure)
+                        co|con|conf|confi|config|configu|configur|configure)
                             if ((COMP_CWORD == 3)); then
                                 values="status allocation packing"
                             fi
+                            ;;
+                        cu|cus|cust|custo|custom|customi|customiz|customize)
+                            values=$(_alces_customize_action "$cur" "$prev")
                             ;;
                     esac
                     if [ "$values" ]; then
@@ -274,34 +286,40 @@ if [ "$BASH_VERSION" ]; then
             COMPREPLY=( $(compgen -W "$cmds" -- "$cur") )
         else
             case "${COMP_WORDS[1]}" in
+                a|ab|abo|abou|about)
+                    _alces_about "$cur" "$prev" "about"
+                    ;;
+                co|con|conf|confi|config|configu|configur|configure)
+                    _alces_action "$cur" "$prev" "configure"
+                    ;;
+                cu|cus|cust|custo|custom|customi|customiz|customize)
+                    _alces_action "$cur" "$prev" "customize"
+                    ;;
                 g|gr|gri|grid|gridw|gridwa|gridwar|gridware)
                     _alces_gridware "$cur" "$prev"
+                    ;;
+                ha|han|hand|handl|handle|handler)
+                    _alces_action "$cur" "$prev" "handler"
+                    ;;
+                ho|how|howt|howto)
+                    _alces_action "$cur" "$prev" "howto"
                     ;;
                 m|mo|mod|modu|modul|module)
                     unset COMP_WORDS[0]
                     COMP_CWORD=$(($COMP_CWORD-1))
                     _module "module" "$cur" "$prev"
                     ;;
-                st|sto|stor|stora|storag|storage)
-                    _alces_storage "$cur" "$prev"
-                    ;;
-                ha|han|hand|handl|handle|handler)
-                    _alces_action "$cur" "$prev" "handler"
-                    ;;
-                c|co|con|conf|confi|config|configu|configur|configure)
-                    _alces_action "$cur" "$prev" "configure"
-                    ;;
-                a|ab|abo|abou|about)
-                    _alces_about "$cur" "$prev" "about"
-                    ;;
-                ho|how|howt|howto)
-                    _alces_action "$cur" "$prev" "howto"
-                    ;;
                 ser|ser|serv|servi|servic|service)
                     _alces_action "$cur" "$prev" "service"
                     ;;
                 ses|sess|sessi|sessio|session)
                     _alces_action "$cur" "$prev" "session"
+                    ;;
+                st|sto|stor|stora|storag|storage)
+                    _alces_storage "$cur" "$prev"
+                    ;;
+                sy|syn|sync)
+                    _alces_action "$cur" "$prev" "sync"
                     ;;
                 t|te|tem|temp|templ|templa|templat|template)
                     _alces_action "$cur" "$prev" "template"

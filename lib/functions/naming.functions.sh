@@ -109,12 +109,32 @@ naming_cert_exists() {
     [ -f "${cw_ROOT}"/etc/ssl/cluster/cert.pem ]
 }
 
+naming_ping_cert() {
+    local name meta k s output
+    name="$1"
+    s="$2"
+    k="$3"
+    meta="$4"
+    output=$(cat <<JSON | webapi_post \
+		     https://alces-custodian.herokuapp.com/ping
+    {
+	"name": "${name}",
+        "secret": "${cw_NAMING_secret}",
+        "s": "${s}",
+        "k": "${k}",
+        "meta": "${meta}"
+    }
+JSON
+	  )
+}
+
 naming_fetch_cert() {
     local name names ip secret a k s
     name="$1"
     ip="$2"
     s="$3"
     k="$4"
+    meta="$5"
     output=$(cat <<JSON | webapi_post \
 		     https://alces-custodian.herokuapp.com/create
     {
@@ -122,7 +142,8 @@ naming_fetch_cert() {
 	"ip": "${ip}",
         "secret": "${cw_NAMING_secret}",
         "s": "${s}",
-        "k": "${k}"
+        "k": "${k}",
+        "meta": "${meta}"
     }
 JSON
 	  )

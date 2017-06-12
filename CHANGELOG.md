@@ -3,6 +3,51 @@
 All notable changes to this project will be documented in this file.
 This project adheres to [Semantic Versioning](http://semver.org/).
 
+## [1.8.0] - 2017-06-12
+
+### Added
+- Autoscaling has been refactored to introduce an API that allows multiple autoscaling groups to be active simultaneously as well as providing abstraction of the autoscaling platform
+- `alces gridware` has support for Docker containers when a Docker installation is present via the `alces gridware docker` command
+- The new `alces customize push` command can upload shell scripts as customization profiles to a repository
+- The master node can now specify a set of repositories and a list of customization profiles to install, and compute nodes will apply this configuration on boot
+- Customization profiles may now have textual "tags" to store additional metadata
+- The `cluster-customizer` handler gained support for executing scripts periodically
+- The `cluster-customizer` handler gained support for processing job queues
+- The `gnome` session now comes with the Firefox web browser installed by default
+- The new `alces customize slave` command manages profiles to be ran on booting slave nodes. Has the options to `add`, `remove` and `list` the profiles to be booted.
+- Added initial support for Clusterware operation within bare metal environments.
+- Completion for `alces customize` and `alces sync`
+- GridScheduler serviceware now supports 64-core and 128-core machines out of the box
+
+### Changed
+- EPEL installation is now direct from the EPEL URL rather than the CentOS-specific `epel-release` package
+- Gridware now cowardly refuses to disable a depot from which modules are currently loaded (gridware#5)
+- `alces session` will show the VPN connection address for the master node when available (clusterware-services#29)
+- The Internet connectivity detection routine in the `cluster-customizer` handler has been improved to cope with the case where ICMP is blocked
+- Improved the default target configuration for the `alces sync` tool
+- The `alces sync` tool has been enhanced to allow more fine-grained control over file exclusions and inclusions
+- Changed clusterware-dropbox-cli to use a new `dropbox sdk gem` compatible with v2 of the `dropbox api`, major changes to `alces storage`:
+  - Various error messages have changed
+  - `configure` now uses OAuth2, procedure requires the user to enter a token supplied by dropbox
+  - `put` now displays a progress bar, improved file conflict dectection
+  - `get` downloads empty files and folders
+  - `list` directories no longer have a modified date
+
+### Fixed
+- `alces howto` tool no longer relies on `gridware` serviceware being installed
+- `alces customize` tool requests superuser access when necessary rather than failing (clusterware-handlers#59)
+- When exporting `compiler` type packages with the `alces gridware` tool, rewritten paths are now correctly handled (gridware#13)
+- Correct enable/disable behviour when the EPEL repo is already installed/uninstalled
+- Correct detection of hyperthreading when it had been disabled with `alces configure hyperthreading` (clusterware#228)
+- The `profile` input into `alces customize trigger` now delimited by both `/` and `-`
+- Booting slave nodes no longer run the `member-join` and `configure` events when retrieving profiles
+- `customize apply` runs node-started and start as well as configure and member-join
+- Slurm serviceware creates `tmpfiles.d` configuration to ensure directory `/run` directory structure is appropriately recreated after a reboot.
+
+#### Issues/PRs
+
+[Core 1.8], [Handlers 1.8], [Services 1.8], [Storage 1.8], [Sessions 1.8]
+
 ## [1.7.0] - 2017-01-03
 
 ### Changed
@@ -279,6 +324,12 @@ This project adheres to [Semantic Versioning](http://semver.org/).
 
 - Initial release
 
+[1.8.0]: https://github.com/alces-software/clusterware/compare/1.7.0...1.8.0
+[Core 1.8]: https://github.com/alces-software/clusterware/issues?q=milestone%3A1.8-release
+[Handlers 1.8]: https://github.com/alces-software/clusterware/issues?q=milestone%3A1.8-release
+[Services 1.8]: https://github.com/alces-software/clusterware/issues?q=milestone%3A1.8-release
+[Storage 1.8]: https://github.com/alces-software/clusterware/issues?q=milestone%3A1.8-release
+[Sessions 1.8]: https://github.com/alces-software/clusterware/issues?q=milestone%3A1.8-release
 [1.7.0]: https://github.com/alces-software/clusterware/compare/1.6.1...1.7.0
 [Core 1.7.0]: https://github.com/alces-software/clusterware/issues?q=milestone%3A1.7-release
 [Handlers 1.7.0]: https://github.com/alces-software/clusterware-handlers/issues?q=milestone%3A1.7-release

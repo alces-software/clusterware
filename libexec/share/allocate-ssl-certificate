@@ -1,6 +1,6 @@
 #!/bin/bash
 #==============================================================================
-# Copyright (C) 2015-2016 Stephen F. Norledge and Alces Software Ltd.
+# Copyright (C) 2015-2017 Stephen F. Norledge and Alces Software Ltd.
 #
 # This file/package is part of Alces Clusterware.
 #
@@ -63,6 +63,37 @@ _ensure_secret() {
         cw_NAMING_secret=$(uuid -v4)
         echo "cw_NAMING_secret=\"${cw_NAMING_secret}\"" >> ${cw_ROOT}/etc/naming.rc
     fi
+}
+
+_write_periodic_scripts() {
+    # write periodic ping script
+    cat <<'EOF' > "${cw_ROOT}"/var/lib/event-periodic/scripts/certificate-pinger
+#!/bin/bash
+################################################################################
+##
+## Alces Clusterware - Periodic executor
+## Copyright (c) 2017 Alces Software Ltd
+##
+################################################################################
+require naming
+require network
+require files
+files_load_config access
+name="${cw_ACCESS_fqdn%%.*}"
+s="$(dd if=/dev/urandom bs=8 count=1 2>/dev/null | base64 | cut -c1-8)"
+k="$(echo -n "${name}:${s}:${cw_NAMING_auth}" | md5sum | cut -f1 -d' ')"
+if network_is_ec2; then
+  meta="$(network_ec2_hashed_account)"
+else
+  meta="$(network_get_iface_mac $(network_get_first_iface))"
+fi
+if naming_ping_cert "$name" "$s" "$k" "$meta"; then
+  echo "Ping for ${name} succeeded."
+else
+  echo "Ping for ${name} failed."
+fi
+EOF
+    chmod 755 "${cw_ROOT}"/var/lib/event-periodic/scripts/certificate-pinger
 }
 
 main() {
@@ -136,13 +167,20 @@ EOF
         ip="${ip:-$(network_get_public_address)}"
         s="$(dd if=/dev/urandom bs=8 count=1 2>/dev/null | base64 | cut -c1-8)"
         k="$(echo -n "${name}:${s}:${cw_NAMING_auth}" | md5sum | cut -f1 -d' ')"
-	naming_fetch_cert "${name}" "${ip}" "${s}" "${k}"
+        if network_is_ec2; then
+            meta="$(network_ec2_hashed_account)"
+        else
+            meta="$(network_get_iface_mac $(network_get_first_iface))"
+        fi
+	naming_fetch_cert "${name}" "${ip}" "${s}" "${k}" "${meta}"
 	errlvl=$?
         if [ "$errlvl" == 0 ]; then
+            _write_periodic_scripts
 	    return
         elif [ "$errlvl" == 147 ]; then
 	    # retry
-	    if naming_fetch_cert "${name}" "${ip}" "${s}" "${k}"; then
+	    if naming_fetch_cert "${name}" "${ip}" "${s}" "${k}" "${meta}"; then
+                _write_periodic_scripts
 		return
 	    fi
         fi
