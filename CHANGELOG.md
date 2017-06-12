@@ -351,16 +351,16 @@ This project adheres to [Semantic Versioning](http://semver.org/).
 
 [Unreleased]: https://github.com/alces-software/clusterware/compare/1.8.0...develop
 [Core 1.9]: https://github.com/alces-software/clusterware/issues?q=milestone%3A1.9-release
-[Handlers 1.9]: https://github.com/alces-software/clusterware/issues?q=milestone%3A1.9-release
-[Services 1.9]: https://github.com/alces-software/clusterware/issues?q=milestone%3A1.9-release
-[Storage 1.9]: https://github.com/alces-software/clusterware/issues?q=milestone%3A1.9-release
-[Sessions 1.9]: https://github.com/alces-software/clusterware/issues?q=milestone%3A1.9-release
+[Handlers 1.9]: https://github.com/alces-software/clusterware-handlers/issues?q=milestone%3A1.9-release
+[Services 1.9]: https://github.com/alces-software/clusterware-services/issues?q=milestone%3A1.9-release
+[Storage 1.9]: https://github.com/alces-software/clusterware-storage/issues?q=milestone%3A1.9-release
+[Sessions 1.9]: https://github.com/alces-software/clusterware-sessions/issues?q=milestone%3A1.9-release
 [1.8.0]: https://github.com/alces-software/clusterware/compare/1.7.0...1.8.0
 [Core 1.8]: https://github.com/alces-software/clusterware/issues?q=milestone%3A1.8-release
-[Handlers 1.8]: https://github.com/alces-software/clusterware/issues?q=milestone%3A1.8-release
-[Services 1.8]: https://github.com/alces-software/clusterware/issues?q=milestone%3A1.8-release
-[Storage 1.8]: https://github.com/alces-software/clusterware/issues?q=milestone%3A1.8-release
-[Sessions 1.8]: https://github.com/alces-software/clusterware/issues?q=milestone%3A1.8-release
+[Handlers 1.8]: https://github.com/alces-software/clusterware-handlers/issues?q=milestone%3A1.8-release
+[Services 1.8]: https://github.com/alces-software/clusterware-services/issues?q=milestone%3A1.8-release
+[Storage 1.8]: https://github.com/alces-software/clusterware-storage/issues?q=milestone%3A1.8-release
+[Sessions 1.8]: https://github.com/alces-software/clusterware-sessions/issues?q=milestone%3A1.8-release
 [1.7.0]: https://github.com/alces-software/clusterware/compare/1.6.1...1.7.0
 [Core 1.7.0]: https://github.com/alces-software/clusterware/issues?q=milestone%3A1.7-release
 [Handlers 1.7.0]: https://github.com/alces-software/clusterware-handlers/issues?q=milestone%3A1.7-release
