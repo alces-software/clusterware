@@ -246,6 +246,15 @@ if [ "$BASH_VERSION" ]; then
         echo "$values"
     }
 
+    _alces_customize_action() {
+        local cur="$1" prev="$2"
+        case $prev in
+            slave)
+                echo -e "add\nremove\nlist"
+                ;;
+        esac
+    }
+
     _alces_complete() {
         local cur="$1" prev="$2" action="$3" values="$4"
         if ((COMP_CWORD == 2)); then
@@ -283,8 +292,11 @@ if [ "$BASH_VERSION" ]; then
                         st|sto|stor|stora|storag|storage)
                             values=$(_alces_storage_action "$cur" "$prev")
                             ;;
-                        c|co|con|conf|confi|config|configu|configur|configure)
+                        co|con|conf|confi|config|configu|configur|configure)
                             values=$(_alces_configure_action "$cur" "$prev")
+                            ;;
+                        cu|cus|cust|custo|custom|customi|customiz|customize)
+                            values=$(_alces_customize_action "$cur" "$prev")
                             ;;
                     esac
                     if [ "$values" ]; then
@@ -325,8 +337,11 @@ if [ "$BASH_VERSION" ]; then
                 a|ab|abo|abou|about)
                     _alces_about "$cur" "$prev" "about"
                     ;;
-                c|co|con|conf|confi|config|configu|configur|configure)
+                co|con|conf|confi|config|configu|configur|configure)
                     _alces_action "$cur" "$prev" "configure"
+                    ;;
+                cu|cus|cust|custo|custom|customi|customiz|customize)
+                    _alces_action "$cur" "$prev" "customize"
                     ;;
                 g|gr|gri|grid|gridw|gridwa|gridwar|gridware)
                     _alces_gridware "$cur" "$prev"
@@ -357,6 +372,9 @@ if [ "$BASH_VERSION" ]; then
                     ;;
                 st|sto|stor|stora|storag|storage)
                     _alces_storage "$cur" "$prev"
+                    ;;
+                sy|syn|sync)
+                    _alces_action "$cur" "$prev" "sync"
                     ;;
                 t|te|tem|temp|templ|templa|templat|template)
                     _alces_action "$cur" "$prev" "template"

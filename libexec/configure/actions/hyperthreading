@@ -24,7 +24,7 @@ require action
 require process
 
 _has_ht() {
-    lscpu | grep "^Flags: .* ht " > /dev/null
+    grep '^flags\s*: .* ht ' /proc/cpuinfo > /dev/null
 }
 
 _logical_cpu_count() {
