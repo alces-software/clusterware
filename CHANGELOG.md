@@ -23,6 +23,7 @@ This project adheres to [Semantic Versioning](http://semver.org/).
 ### Fixed
 - Correct autocompletion for `alces configure`
 - The progress spinner no longer continues spinning forever when the process receives an interrupt signal
+- The `alces gridware default` command once again allows the default package for a depot to be set
 
 #### Issues/PRs
 
