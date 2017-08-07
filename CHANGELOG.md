@@ -24,6 +24,8 @@ This project adheres to [Semantic Versioning](http://semver.org/).
 - Correct autocompletion for `alces configure`
 - The progress spinner no longer continues spinning forever when the process receives an interrupt signal
 - The `alces gridware default` command once again allows the default package for a depot to be set
+- Correctly use the `default` account profile when a customization bucket is specified if no account profiles are specified (clusterware-handlers#80)
+- Fix display of customizer bucket prefix when a customization bucket is specified (clusterware-handlers#81)
 
 #### Issues/PRs
 
