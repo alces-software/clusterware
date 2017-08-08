@@ -27,6 +27,7 @@ This project adheres to [Semantic Versioning](http://semver.org/).
 - The `alces gridware default` command once again allows the default package for a depot to be set
 - Correctly use the `default` account profile when a customization bucket is specified if no account profiles are specified (clusterware-handlers#80)
 - Fix display of customizer bucket prefix when a customization bucket is specified (clusterware-handlers#81)
+- The Clusterware Serf service has been been reconfigured to use port 7947 in order to prevent a clash with Docker's swarm mode which has an internal Serf service hard-coded to use the default port 7946
 
 #### Issues/PRs
 
