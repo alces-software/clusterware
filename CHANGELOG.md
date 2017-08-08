@@ -19,6 +19,7 @@ This project adheres to [Semantic Versioning](http://semver.org/).
 ### Changed
 - Accounting data is now written by default when using the Slurm Workload Manager job scheduler, allowing users to query historic resource usage using `sacct`
 - `alces gridware docker build` now has more options, including the ability to include multiple Gridware packages in a container image
+- The Alces Gridware tools can now be used by any user to manage Gridware software trees in their own home directory
 
 ### Fixed
 - Correct autocompletion for `alces configure`
