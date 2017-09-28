@@ -175,8 +175,9 @@ network_cidr_to_mask() {
 }
 
 network_is_ec2() {
-    [ -f /sys/hypervisor/uuid ] && [ "$(head -c3 /sys/hypervisor/uuid)" == "ec2" ] ||
-        [ "${cw_TEST_ec2}" == "true" ]
+  [ -f /sys/hypervisor/uuid ] && [ "$(head -c3 /sys/hypervisor/uuid)" == "ec2" ] ||
+      [ "$(dmidecode -s baseboard-manufacturer)" == "Amazon Corporate LLC" ] ||
+      [ "${cw_TEST_ec2}" == "true" ]
 }
 
 network_get_ec2_vpc_cidr_block() {
