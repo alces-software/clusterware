@@ -58,7 +58,7 @@ webapi_send() {
 		shift
 		;;
             *)
-                params+=($1)
+                params+=("$1")
                 shift
                 ;;
         esac
