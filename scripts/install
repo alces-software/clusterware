@@ -128,20 +128,7 @@ for dep in ${deps}; do
     fi
 done
 
-title "Setting up handler base repository"
-if [ -d "${target}/var/lib/handler/repos" ]; then
-    doing 'Detect'
-else
-    doing 'Initialize'
-    if [ "$cw_BUILD_repos_url" ]; then
-        mkdir -p "${target}"/var/lib/handler/repos/base
-        tar -C "${target}"/var/lib/handler/repos/base -xvzf "${source}"/clusterware-handlers.tar.gz &> "${dep_logs}/handler-init.log"
-    else
-        export cw_HANDLER_rev cw_HANDLER_track
-        "${target}/bin/alces" handler update &>> "${dep_logs}/handler-init.log"
-    fi
-fi
-say_done $?
+# XXX - replace with forge
 
 title "Setting up services base repository"
 if [ -d "${target}/var/lib/services/repos" ]; then
@@ -184,19 +171,6 @@ for a in "${source}"/dist/sudoers/*; do
     sed -e "s,_ROOT_,${target},g" "${a}" > "${t}"
     chmod 0400 "${t}"
 done
-say_done $?
-
-title "Updating system files"
-doing 'Update'
-if ! grep -q 'account \[default=ignore success=1\] pam_succeed_if.so quiet user ingroup adm' /etc/pam.d/sshd; then
-    sed -i '/^account\s*required\s*pam_nologin.so/i account [default=ignore success=1] pam_succeed_if.so quiet user ingroup adm' \
-        /etc/pam.d/sshd
-fi
-say_done $?
-
-title "Installing startup scripts"
-doing 'Install'
-install_startup_hooks &> "${dep_logs}/install-startup-hooks.log"
 say_done $?
 
 title "Performing distro-specific customizations"

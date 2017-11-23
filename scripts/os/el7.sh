@@ -44,18 +44,6 @@ install_build_prerequisites() {
         yum -e0 -y install git golang
 }
 
-install_startup_hooks() {
-    for a in "${source}/dist/init/systemd"/*; do
-        if [ "${a##*.}" == 'inactive' ]; then
-            cp $a /etc/systemd/system/$(basename "$a" .inactive) || return 1
-        else
-            cp $a /etc/systemd/system && \
-                systemctl enable "$(basename $a)" || \
-                return 1
-        fi
-    done
-}
-
 install_distro_specific() {
     :
 }
