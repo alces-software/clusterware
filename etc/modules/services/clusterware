@@ -72,9 +72,7 @@ For further information, execute:
 
 prepend-path PATH ${appdir}/jo/bin
 prepend-path PATH ${appdir}/jq/bin
-prepend-path PATH ${appdir}/pluginhook/bin
 prepend-path PATH ${appdir}/ruby/bin
-prepend-path PATH ${appdir}/serf/bin
 
 prepend-path LD_LIBRARY_PATH ${appdir}/ruby/lib
 
