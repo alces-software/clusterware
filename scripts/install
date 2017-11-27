@@ -94,7 +94,6 @@ if [ ! -d "${target}/etc" ]; then
     rm -f "${target}"/etc/handlers/.gitkeep
     rm -f "${target}"/etc/services/.gitkeep
     rm -f "${target}"/etc/skel/.gitkeep
-    chmod 0600 "${target}"/etc/naming.rc
     chmod 0750 "${target}"/etc/sudoers.d
     cp -R "${source}/dist/distro/${os}" "${target}"/etc/distro
 fi
