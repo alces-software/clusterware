@@ -1,5 +1,0 @@
-{
-  "event_handlers": [
-    "/opt/clusterware/libexec/share/serf-event-handler"
-  ]
-}

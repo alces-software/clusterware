@@ -4,7 +4,7 @@
 : VERSION: 1.0.0
 : '
 #==============================================================================
-# Copyright (C) 2007-2015 Stephen F. Norledge and Alces Software Ltd.
+# Copyright (C) 2007-2017 Stephen F. Norledge and Alces Software Ltd.
 #
 # This file/package is part of Alces Clusterware.
 #
@@ -54,10 +54,6 @@ EOF
 
 For more help on a particular command run:
   $cw_BINNAME COMMAND help
-
-Examples:
-  $cw_BINNAME gridware list  Display available HPC software packages.
-  $cw_BINNAME module avail   Display currently available HPC software packages.
 
 Report $cw_BINNAME bugs to support@alces-software.com
 Alces Software home page: <http://alces-software.com/>
