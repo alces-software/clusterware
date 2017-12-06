@@ -28,6 +28,10 @@
 action=$1
 shift
 
+available() {
+  [ -z "$cmd_ROOT" ] || sudo -l /bin/bash &>/dev/null
+}
+
 case $action in
     help|hel|he|h|--help|-h)
 	display_help $0
@@ -46,7 +50,7 @@ Commands:
 EOF
 	for a in $cw_CMDDIR/*; do
 	    extract_info $a
-	    if [ "$cmd_NAME" ]; then
+	    if [ "$cmd_NAME" ] && available "$cmd_NAME"; then
 		printf "  %-22s  %s\n" "$cw_BINNAME $cmd_NAME" "$cmd_SYNOPSIS."
 	    fi
 	done
