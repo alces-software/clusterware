@@ -20,11 +20,11 @@
 # https://github.com/alces-software/clusterware
 #==============================================================================
 cw_HANDLER_rev="HEAD"
-cw_HANDLER_track="release/1.9"
+cw_HANDLER_track="feature/forge-cli"
 cw_SESSION_rev="HEAD"
 cw_SESSION_track="master"
 cw_SERVICE_rev="HEAD"
-cw_SERVICE_track="release/1.9"
+cw_SERVICE_track="feature/forge-cli"
 cw_STORAGE_rev="HEAD"
 cw_STORAGE_track="master"
 cw_SERVICE_registry_galaxy="galaxy-20160301-cw1_3"
@@ -38,3 +38,4 @@ cw_SERVICE_registry_modules="modules-20161031-cw1_7"
 cw_SERVICE_registry_gridware="gridware-20171121-cw1_9"
 cw_SERVICE_registry_alces_flight_trigger="alces-flight-trigger-20170329-cw1_8"
 cw_SERVICE_registry_clusterware_dropbox_cli="clusterware-dropbox-cli-v2.0.0-cw1_8"
+cw_SERVICE_registry_forge="forge-dev-20171207-cw1_10"
