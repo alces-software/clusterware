@@ -3,7 +3,7 @@
 All notable changes to this project will be documented in this file.
 This project adheres to [Semantic Versioning](http://semver.org/).
 
-## [Unreleased] - 1.9.0
+## [1.9.0] - 2018-01-02
 
 ### Added
 - The `alces configure` action has gained a `thp` operation for control of transparent hugepages behaviour
@@ -354,7 +354,7 @@ This project adheres to [Semantic Versioning](http://semver.org/).
 
 - Initial release
 
-[Unreleased]: https://github.com/alces-software/clusterware/compare/1.8.0...develop
+[1.9.0]: https://github.com/alces-software/clusterware/compare/1.8.0...1.9.0
 [Core 1.9]: https://github.com/alces-software/clusterware/issues?q=milestone%3A1.9-release
 [Handlers 1.9]: https://github.com/alces-software/clusterware-handlers/issues?q=milestone%3A1.9-release
 [Services 1.9]: https://github.com/alces-software/clusterware-services/issues?q=milestone%3A1.9-release
