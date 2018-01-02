@@ -129,12 +129,18 @@ JSON
 }
 
 naming_fetch_cert() {
-    local name names ip secret a k s
+    local name names ip secret a k s meta alts
     name="$1"
     ip="$2"
     s="$3"
     k="$4"
     meta="$5"
+    shift 5
+    alts="["
+    for a in "$@"; do
+        alts="${alts}\"$a\","
+    done
+    alts="${alts%,}]"
     output=$(cat <<JSON | webapi_post \
 		     https://alces-custodian.herokuapp.com/create
     {
@@ -143,7 +149,8 @@ naming_fetch_cert() {
         "secret": "${cw_NAMING_secret}",
         "s": "${s}",
         "k": "${k}",
-        "meta": "${meta}"
+        "meta": "${meta}",
+        "alts": ${alts}
     }
 JSON
 	  )

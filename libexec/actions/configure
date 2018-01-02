@@ -30,20 +30,29 @@ shift
 cw_BINNAME="${cw_BINNAME} $(basename "$0")"
 
 case $action in
-    h|he|hel|help)
+    a|au|aut|auto|autos|autosc|autosca|autoscal|autoscali|autoscalin|autoscaling)
+        exec /bin/bash "${cw_ROOT}"/libexec/configure/actions/autoscaling "$@"
+        ;;
+    d|dr|dro|drop|dropc|dropca|dropcac|dropcach|dropcache)
+        exec /bin/bash "${cw_ROOT}"/libexec/configure/actions/dropcache "$@"
+        ;;
+    c|cl|clo|cloc|clock|clocks|clockso|clocksou|clocksour|clocksourc|clocksource)
+        exec /bin/bash "${cw_ROOT}"/libexec/configure/actions/clocksource "$@"
+        ;;
+    he|hel|help)
         exec /bin/bash "${cw_ROOT}"/libexec/configure/actions/help "$@"
+        ;;
+    hy|hyp|hype|hyper|hypert|hyperth|hyperthr|hyperthre|hyperthrea|hyperthread|hyperthreadi|hyperthreadin|hyperthreading)
+        exec /bin/bash "${cw_ROOT}"/libexec/configure/actions/hyperthreading "$@"
         ;;
     n|no|nod|node)
         exec /bin/bash "${cw_ROOT}"/libexec/configure/actions/node "$@"
         ;;
-    a|au|aut|auto|autos|autosc|autosca|autoscal|autoscali|autoscalin|autoscaling)
-        exec /bin/bash "${cw_ROOT}"/libexec/configure/actions/autoscaling "$@"
-        ;;
-    h|hy|hyp|hype|hyper|hypert|hyperth|hyperthr|hyperthre|hyperthrea|hyperthread|hyperthreadi|hyperthreadin|hyperthreading)
-        exec /bin/bash "${cw_ROOT}"/libexec/configure/actions/hyperthreading "$@"
-        ;;
     s|sc|sch|sche|sched|schedu|schedul|schedule|scheduler)
         exec /bin/bash "${cw_ROOT}"/libexec/configure/actions/scheduler "$@"
+        ;;
+    t|th|thp)
+        exec /bin/bash "${cw_ROOT}"/libexec/configure/actions/thp "$@"
         ;;
     *)
         cat <<EOF
@@ -57,6 +66,9 @@ printf "    %-30s  %s\n" "$cw_BINNAME node" "Perform initial node setup."
 printf "    %-30s  %s\n" "$cw_BINNAME autoscaling" "Control autoscaling behaviour."
 printf "    %-30s  %s\n" "$cw_BINNAME hyperthreading" "Control hyperthreading behaviour."
 printf "    %-30s  %s\n" "$cw_BINNAME scheduler" "Control scheduler behaviour."
+printf "    %-30s  %s\n" "$cw_BINNAME thp" "Control transparent hugepages behaviour."
+printf "    %-30s  %s\n" "$cw_BINNAME clocksource" "Control clocksource behaviour."
+printf "    %-30s  %s\n" "$cw_BINNAME dropcache" "Free pagecache and/or reclaimable slab objects."
 cat <<EOF
 
 Please report bugs to support@alces-software.com

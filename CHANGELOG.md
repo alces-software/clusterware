@@ -3,6 +3,36 @@
 All notable changes to this project will be documented in this file.
 This project adheres to [Semantic Versioning](http://semver.org/).
 
+## [1.9.0] - 2018-01-02
+
+### Added
+- The `alces configure` action has gained a `thp` operation for control of transparent hugepages behaviour
+- The Clusterware VPN IP address may optionally be added to DNS and as a SAN within the SSL certificate within a `.vpn` subdomain
+- Added `clocksource` as an option to `alces configure`. It modifies and displays the clocksource of the node.
+- Added `dropcache` as an option to `alces configure`. It allows the user to drop clean caches from the pagecache and/or reclaimable slab objects like dentries and inodes.
+- Signal trap handling added to the `process` function library
+- Shell autocompletion for `alces gridware docker` and subcommands has been added
+- Gridware Docker images may be shared across the cluster with `alces gridware docker share`, or by using a Docker registry via `alces gridware docker start-registry`
+- `alces gridware docker run` now has an `--mpi` option to allow running MPI applications in a Gridware environment
+- Custom volumes to mount in containers may be specified with `alces gridware docker run`
+
+### Changed
+- Accounting data is now written by default when using the Slurm Workload Manager job scheduler, allowing users to query historic resource usage using `sacct`
+- `alces gridware docker build` now has more options, including the ability to include multiple Gridware packages in a container image
+- The Alces Gridware tools can now be used by any user to manage Gridware software trees in their own home directory
+
+### Fixed
+- Correct autocompletion for `alces configure`
+- The progress spinner no longer continues spinning forever when the process receives an interrupt signal
+- The `alces gridware default` command once again allows the default package for a depot to be set
+- Correctly use the `default` account profile when a customization bucket is specified if no account profiles are specified (clusterware-handlers#80)
+- Fix display of customizer bucket prefix when a customization bucket is specified (clusterware-handlers#81)
+- The Clusterware Serf service has been been reconfigured to use port 7947 in order to prevent a clash with Docker's swarm mode which has an internal Serf service hard-coded to use the default port 7946
+
+#### Issues/PRs
+
+[Core 1.9], [Handlers 1.9], [Services 1.9], [Storage 1.9], [Sessions 1.9]
+
 ## [1.8.0] - 2017-06-12
 
 ### Added
@@ -324,12 +354,18 @@ This project adheres to [Semantic Versioning](http://semver.org/).
 
 - Initial release
 
+[1.9.0]: https://github.com/alces-software/clusterware/compare/1.8.0...1.9.0
+[Core 1.9]: https://github.com/alces-software/clusterware/issues?q=milestone%3A1.9-release
+[Handlers 1.9]: https://github.com/alces-software/clusterware-handlers/issues?q=milestone%3A1.9-release
+[Services 1.9]: https://github.com/alces-software/clusterware-services/issues?q=milestone%3A1.9-release
+[Storage 1.9]: https://github.com/alces-software/clusterware-storage/issues?q=milestone%3A1.9-release
+[Sessions 1.9]: https://github.com/alces-software/clusterware-sessions/issues?q=milestone%3A1.9-release
 [1.8.0]: https://github.com/alces-software/clusterware/compare/1.7.0...1.8.0
 [Core 1.8]: https://github.com/alces-software/clusterware/issues?q=milestone%3A1.8-release
-[Handlers 1.8]: https://github.com/alces-software/clusterware/issues?q=milestone%3A1.8-release
-[Services 1.8]: https://github.com/alces-software/clusterware/issues?q=milestone%3A1.8-release
-[Storage 1.8]: https://github.com/alces-software/clusterware/issues?q=milestone%3A1.8-release
-[Sessions 1.8]: https://github.com/alces-software/clusterware/issues?q=milestone%3A1.8-release
+[Handlers 1.8]: https://github.com/alces-software/clusterware-handlers/issues?q=milestone%3A1.8-release
+[Services 1.8]: https://github.com/alces-software/clusterware-services/issues?q=milestone%3A1.8-release
+[Storage 1.8]: https://github.com/alces-software/clusterware-storage/issues?q=milestone%3A1.8-release
+[Sessions 1.8]: https://github.com/alces-software/clusterware-sessions/issues?q=milestone%3A1.8-release
 [1.7.0]: https://github.com/alces-software/clusterware/compare/1.6.1...1.7.0
 [Core 1.7.0]: https://github.com/alces-software/clusterware/issues?q=milestone%3A1.7-release
 [Handlers 1.7.0]: https://github.com/alces-software/clusterware-handlers/issues?q=milestone%3A1.7-release

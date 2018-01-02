@@ -38,7 +38,11 @@ main() {
 	    # name is simply "<hostname>"
 	    short_name="${name}"
 	    name="${name}.${domainname}"
-	else
+	elif [[ ${#name} -eq 64 ]] ; then
+            # Probably a truncated fqdn.
+	    short_name=$(echo ${name} | cut -f1 -d'.')
+	    name="${short_name}.${domainname}"
+        else
 	    if [[ "${name}" != *".${domainname}" ]]; then
 		# name is "<hostname>.<subdomain>"
 		name="$1.${domainname}"

@@ -25,11 +25,11 @@ webapi_curl() {
     mimetype="$2"
     shift 2
 
-    curl -f "$@" -H "Accept: $mimetype" $url
+    curl "$@" -H "Accept: $mimetype" $url
 }
 
 webapi_send() {
-    local verb url mimetype params auth skip_payload
+    local verb url mimetype params auth skip_payload no_silent emit_code
     verb="$1"
     url="$2"
     shift 2
@@ -48,8 +48,17 @@ webapi_send() {
                 skip_payload=true
                 shift
                 ;;
+	    --no-silent)
+		no_silent=true
+		shift
+		;;
+	    --emit-code)
+		emit_code=true
+		no_silent=true
+		shift
+		;;
             *)
-                params+=($1)
+                params+=("$1")
                 shift
                 ;;
         esac
@@ -61,6 +70,12 @@ webapi_send() {
     fi
     if [ -z "${skip_payload}" ]; then
         params+=(-d @- -H "Content-Type: $mimetype")
+    fi
+    if [ -z "${no_silent}" ]; then
+	params+=(-f)
+    fi
+    if [ "${emit_code}" ]; then
+	params+=(-w "\n\ncode=%{http_code}\n")
     fi
     webapi_curl "${url}" "${mimetype}" "${params[@]}"
 }

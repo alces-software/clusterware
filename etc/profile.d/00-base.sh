@@ -182,6 +182,51 @@ if [ "$BASH_VERSION" ]; then
         echo "$values"
     }
 
+    _alces_configure_action() {
+        local cur="$1" prev="$2" values=""
+        if (( COMP_CWORD == 3)); then
+            case $prev in
+                a|au|aut|auto|autos|autosc|autosca|autoscal|autoscali|autoscalin|autoscaling)
+                    values="enable disable status"
+                    ;;
+                d|dr|dro|drop|dropc|dropca|dropcac|dropcach|dropcache)
+                    values="pagecache slabobjs both"
+                    ;;
+                c|cl|clo|cloc|clock|clocks|clockso|clocksou|clocksour|clocksourc|clocksource)
+                    values="default $(cat /sys/devices/system/clocksource/clocksource0/available_clocksource)"
+                    ;;
+                he|hel|help)
+                    values=$(ls $(_cw_root)/libexec/configure/actions)
+                    ;;
+                hy|hyp|hyper|hypert|hyperth|hyperthr|hyperthre|hyperthrea|hyperthread|hyperthreadi|hyperthreadin|hyperthreading)
+                    values="enable disable status"
+                    ;;
+                s|sc|sch|sche|sched|schedu|schedul|schedule|scheduler)
+                    values="status allocation submission"
+                    ;;
+                t|th|thp)
+                    values="enable disable status"
+                    ;;
+            esac
+        elif [[ "scheduler" =~ ${COMP_WORDS[2]}* ]]; then
+            values=$(_alces_configure_scheduler_action "$cur" "$prev")
+        fi
+        echo "$values"
+    }
+
+    _alces_configure_scheduler_action() {
+        local cur="$1" prev="$2" values=""
+        case $prev in
+            a|al|all|allo|alloc|alloca|allocat|allocati|allocatio|allocation)
+                values="packing spanning"
+                ;;
+            su|sub|subm|submi|submis|submiss|submissi|submissio|submission)
+                values="all master none"
+                ;;
+        esac
+        echo "$values"
+    }
+
     _alces_session_action() {
         local cur="$1" prev="$2" values
         case $prev in
@@ -213,9 +258,14 @@ if [ "$BASH_VERSION" ]; then
     _alces_complete() {
         local cur="$1" prev="$2" action="$3" values="$4"
         if ((COMP_CWORD == 2)); then
+            case "$prev" in
+                ser|serv|servi|servic|service)
+                    values=$(echo $values | sed "s/\(build\)\|\(package\)//g")
+                    ;;
+            esac
             COMPREPLY=( $(compgen -W "$values" -- "$cur") )
         else
-            case ${COMP_WORDS[2]} in
+            case "${COMP_WORDS[2]}" in
                 h|he|hel|help)
                     if ((COMP_CWORD == 3)); then
                         COMPREPLY=( $(compgen -W "$values" -- "$cur") )
@@ -243,9 +293,7 @@ if [ "$BASH_VERSION" ]; then
                             values=$(_alces_storage_action "$cur" "$prev")
                             ;;
                         co|con|conf|confi|config|configu|configur|configure)
-                            if ((COMP_CWORD == 3)); then
-                                values="status allocation packing"
-                            fi
+                            values=$(_alces_configure_action "$cur" "$prev")
                             ;;
                         cu|cus|cust|custo|custom|customi|customiz|customize)
                             values=$(_alces_customize_action "$cur" "$prev")
@@ -301,6 +349,13 @@ if [ "$BASH_VERSION" ]; then
                 ha|han|hand|handl|handle|handler)
                     _alces_action "$cur" "$prev" "handler"
                     ;;
+                help)
+                    case "$cur" in
+                        *)
+                            COMPREPLY=( $(compgen -W "$cmds" -- "$cur") )
+                            ;;
+                    esac
+                    ;;
                 ho|how|howt|howto)
                     _alces_action "$cur" "$prev" "howto"
                     ;;
@@ -323,13 +378,6 @@ if [ "$BASH_VERSION" ]; then
                     ;;
                 t|te|tem|temp|templ|templa|templat|template)
                     _alces_action "$cur" "$prev" "template"
-                    ;;
-                help)
-                    case "$cur" in
-                        *)
-                            COMPREPLY=( $(compgen -W "$cmds" -- "$cur") )
-                            ;;
-                    esac
                     ;;
             esac
         fi
