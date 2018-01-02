@@ -369,7 +369,7 @@ This project adheres to [Semantic Versioning](http://semver.org/).
 
 - Initial release
 
-[Unreleased]: https://github.com/alces-software/clusterware/compare/2.0.0...develop
+[Unreleased]: https://github.com/alces-software/clusterware/compare/1.9.0...develop
 [Core 2.0]: https://github.com/alces-software/clusterware/issues?q=milestone%3A2.0-release
 [Handlers 2.0]: https://github.com/alces-software/clusterware-handlers/issues?q=milestone%3A2.0-release
 [Services 2.0]: https://github.com/alces-software/clusterware-services/issues?q=milestone%3A2.0-release
