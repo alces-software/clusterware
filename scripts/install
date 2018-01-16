@@ -91,7 +91,6 @@ if [ ! -d "${target}/etc" ]; then
         grep "^cw_" ${source}/scripts/registry.rc >> "${target}/etc"/serviceware.rc
     fi
     rm -f "${target}"/etc/sudoers.d/.gitkeep
-    rm -f "${target}"/etc/handlers/.gitkeep
     rm -f "${target}"/etc/services/.gitkeep
     rm -f "${target}"/etc/skel/.gitkeep
     chmod 0750 "${target}"/etc/sudoers.d
