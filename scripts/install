@@ -143,14 +143,6 @@ done
 #fi
 #say_done $?
 
-title "Setting up Alces Forge"
-if [ -d "${target}/opt/forge-cli" ]; then
-  doing 'Detect'
-else
-  doing 'Downloading'
-fi
-say_done $?
-
 title "Setting up documents area"
 if [ -d "${target}/var/lib/docs/base" ]; then
     doing 'Detect'
