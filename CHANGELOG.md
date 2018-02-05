@@ -12,7 +12,7 @@ This project adheres to [Semantic Versioning](http://semver.org/).
 - Nothing yet.
 
 ### Fixed
-- Nothing yet.
+- Clusterware VPN zip file is now created at correct location, making it available for download. (#252)
 
 #### Issues/PRs
 
