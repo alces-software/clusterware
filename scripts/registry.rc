@@ -28,4 +28,4 @@ cw_SERVICE_track="feature/forge-packageize"
 cw_STORAGE_rev="HEAD"
 cw_STORAGE_track="feature/forge-packageize"
 
-cw_SERVICE_registry_forge="forge-dev-20180222"
+cw_SERVICE_registry_forge="forge-dev-debug-20180307"
