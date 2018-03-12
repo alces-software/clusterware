@@ -322,6 +322,11 @@ if [ "$BASH_VERSION" ]; then
         COMPREPLY=( $(compgen -W "help ${actions}" -- "$cur") )
     }
 
+    _alces_forge() {
+        local cur="$1" prev="$2"
+        COMPREPLY=( $(compgen -W "install search help" -- "$cur") )
+    }
+
     _alces() {
         local cur="$2" prev="$3" cmds opts _cw_ROOT
 
@@ -343,6 +348,10 @@ if [ "$BASH_VERSION" ]; then
                 cu|cus|cust|custo|custom|customi|customiz|customize)
                     _alces_action "$cur" "$prev" "customize"
                     ;;
+                f|fo|for|forg|forge)
+                    _alces_forge "$cur" "$prev"
+                    ;;
+
                 g|gr|gri|grid|gridw|gridwa|gridwar|gridware)
                     _alces_gridware "$cur" "$prev"
                     ;;
