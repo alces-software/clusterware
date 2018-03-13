@@ -324,7 +324,7 @@ if [ "$BASH_VERSION" ]; then
 
     _alces_forge() {
         local cur="$1" prev="$2"
-        COMPREPLY=( $(compgen -W "install search help" -- "$cur") )
+        COMPREPLY=( $(compgen -W "help install login logout search" -- "$cur") )
     }
 
     _alces() {
