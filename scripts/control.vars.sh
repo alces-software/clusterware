@@ -19,7 +19,7 @@
 # For more information on the Alces Clusterware, please visit:
 # https://github.com/alces-software/clusterware
 #==============================================================================
-deps="git libyaml ruby bundler jq jo"
+deps="git libyaml ruby bundler jq jo forge"
 serviceware="alces-access-manager-daemon alces-flight-trigger alces-flight-www alces-storage-manager-daemon aws clusterware-dropbox-cli galaxy genders gridscheduler gridware modules openlava openvpn pbspro pdsh s3cmd simp_le slurm tigervnc torque websockify xwd"
 dists="el6 el7"
 dist_url=${cw_BUILD_dist_url:-https://s3-eu-west-1.amazonaws.com/packages.alces-software.com/clusterware/dist}

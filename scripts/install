@@ -128,20 +128,20 @@ done
 
 # XXX - replace with forge
 
-title "Setting up services base repository"
-if [ -d "${target}/var/lib/services/repos" ]; then
-    doing 'Detect'
-else
-    doing 'Initialize'
-    if [ "$cw_BUILD_repos_url" ]; then
-        mkdir -p "${target}"/var/lib/services/repos/base
-        tar -C "${target}"/var/lib/services/repos/base -xvzf "${source}"/clusterware-services.tar.gz &> "${dep_logs}/services-init.log"
-    else
-        export cw_SERVICE_rev cw_SERVICE_track
-        "${target}/bin/alces" service update &> "${dep_logs}/services-init.log"
-    fi
-fi
-say_done $?
+#title "Setting up services base repository"
+#if [ -d "${target}/var/lib/services/repos" ]; then
+#    doing 'Detect'
+#else
+#    doing 'Initialize'
+#    if [ "$cw_BUILD_repos_url" ]; then
+#        mkdir -p "${target}"/var/lib/services/repos/base
+#        tar -C "${target}"/var/lib/services/repos/base -xvzf "${source}"/clusterware-services.tar.gz &> "${dep_logs}/services-init.log"
+#    else
+#        export cw_SERVICE_rev cw_SERVICE_track
+#        "${target}/bin/alces" service update &> "${dep_logs}/services-init.log"
+#    fi
+#fi
+#say_done $?
 
 title "Setting up documents area"
 if [ -d "${target}/var/lib/docs/base" ]; then

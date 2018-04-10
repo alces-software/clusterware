@@ -1,6 +1,5 @@
-#!/bin/bash
 #==============================================================================
-# Copyright (C) 2016 Stephen F. Norledge and Alces Software Ltd.
+# Copyright (C) 2018 Stephen F. Norledge and Alces Software Ltd.
 #
 # This file/package is part of Alces Clusterware.
 #
@@ -20,29 +19,22 @@
 # For more information on the Alces Clusterware, please visit:
 # https://github.com/alces-software/clusterware
 #==============================================================================
-require action
+cw_FORGE_HOME="${target}/opt/forge"
 
-# Action to package built serviceware for uploading to S3.
-# Note: This action currently has the limitation that it will only package
-# Serviceware that is self-contained within a directory in "$cw_ROOT/opt/", so
-# e.g. Slurm which consists of "$cw_ROOT/opt/{slurm,munge}" will not be
-# correctly packaged by this.
-
-# TODO: This action could do with some autocompletion.
-
-main() {
-    local service
-    service="$1"
-    if [ -z "$service" ]; then
-        action_die "service not specified"
-    fi
-    tarball="/tmp/${service}.tar.gz"
-
-    if (cd "${cw_ROOT}" && tar -zcvf "${tarball}" "opt/${service}"); then
-        action_die "packaged ${tarball}"
-    else
-        action_die "could not package ${service}"
-    fi
+detect_forge() {
+  [ -d "${cw_FORGE_HOME}" ]
 }
 
-main "$@"
+fetch_forge() {
+  title "Fetching Forge"
+  fetch_dist forge
+}
+
+install_forge() {
+  title "Installing Forge"
+  install_dist forge
+
+  pushd "${cw_FORGE_HOME}" > /dev/null
+  cp -r dist/* ${target}
+  popd > /dev/null
+}
