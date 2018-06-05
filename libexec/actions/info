@@ -1,5 +1,5 @@
 : '
-: NAME: about
+: NAME: info
 : SYNOPSIS: Information about your compute environment
 : VERSION: 1.0.0
 : '
@@ -31,7 +31,7 @@ cw_BINNAME="${cw_BINNAME} $(basename "$0")"
 
 case $action in
     h|he|hel|help)
-        exec /bin/bash $cw_ROOT/libexec/about/actions/help "$@"
+        exec /bin/bash $cw_ROOT/libexec/info/actions/help "$@"
         ;;
     ?*)
         x=("$cw_ROOT/etc/meta.d/$action"*.rc)
@@ -40,7 +40,7 @@ case $action in
             exit 1
         elif [ ${#x[*]} = 1 ]; then
             # matched one
-            exec /bin/bash $cw_ROOT/libexec/about/actions/show "$(basename "${x[0]}" .rc)" "$@"
+            exec /bin/bash $cw_ROOT/libexec/info/actions/show "$(basename "${x[0]}" .rc)" "$@"
         elif [ ${#x[*]} -gt 1 ]; then
             # matched > 1
             echo "$cw_BINNAME: ambiguous selection: $action"
