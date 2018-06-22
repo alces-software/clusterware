@@ -1,9 +1,0 @@
-################################################################################
-##
-## Alces Clusterware - Shell configuration
-## Copyright (c) 2015-2017 Alces Software Ltd
-##
-################################################################################
-cw_VERSION=2.0.0-dev
-cw_CODENAME="Inquisitive Ifrit"
-cw_STATUS=unconfigured

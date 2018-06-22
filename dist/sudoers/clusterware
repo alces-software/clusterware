@@ -1,8 +1,0 @@
-################################################################################
-##
-## Alces Clusterware - sudoers configuration file
-## Copyright (c) 2016 Alces Software Ltd
-##
-################################################################################
-# Note that the # in the following line does not mean a comment
-#includedir _ROOT_/etc/sudoers.d

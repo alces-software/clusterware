@@ -1,8 +1,0 @@
-################################################################################
-##
-## Alces Clusterware - Clusterware MOTD banner
-## Copyright (c) 2016 Stephen F. Norledge and Alces Software Ltd
-##
-################################################################################
-# Add MOTD messages to this file.
-# Note that lines beginning with '#' will not be displayed.

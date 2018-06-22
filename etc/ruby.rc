@@ -1,9 +1,0 @@
-################################################################################
-##
-## Alces Clusterware - Shell configuration
-## Copyright (c) 2015 Alces Software Ltd
-##
-################################################################################
-RUBY_HOME="_ROOT_"/opt/ruby
-PATH="${RUBY_HOME}/bin:$PATH"
-LD_LIBRARY_PATH="${RUBY_HOME}/lib:$LD_LIBRARY_PATH"
