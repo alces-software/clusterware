@@ -1,5 +1,5 @@
 #==============================================================================
-# Copyright (C) 2015-2017 Stephen F. Norledge and Alces Software Ltd.
+# Copyright (C) 2017 Stephen F. Norledge and Alces Software Ltd.
 #
 # This file/package is part of Alces Clusterware.
 #
@@ -19,24 +19,6 @@
 # For more information on the Alces Clusterware, please visit:
 # https://github.com/alces-software/clusterware
 #==============================================================================
-ruby_run() {
-    ruby -se 'eval ARGF.read'
-}
+source 'http://rubygems.org'
 
-ruby_bundle_exec() {
-  local bundle_dir
-  bundle_dir="$1"
-  if [ "${bundle_dir}" ]; then
-      shift
-  else
-    bundle_dir=cw_ROOT
-  fi
-  (
-    cd "${bundle_dir}"
-    bundle exec "$@"
-  )
-}
-
-ruby_exec() {
-    ruby "$@"
-}
+gem 'ronn'
