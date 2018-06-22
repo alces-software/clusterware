@@ -20,9 +20,7 @@
 # https://github.com/alces-software/clusterware
 #==============================================================================
 ruby_run() {
-    . "${cw_ROOT}"/etc/ruby.rc
-    export PATH LD_LIBRARY_PATH
-    ${cw_ROOT}/opt/ruby/bin/ruby -se 'eval ARGF.read'
+    ruby -se 'eval ARGF.read'
 }
 
 ruby_bundle_exec() {
@@ -33,16 +31,12 @@ ruby_bundle_exec() {
   else
     bundle_dir="${cw_ROOT}/lib/ruby"
   fi
-  . "${cw_ROOT}"/etc/ruby.rc
-  export PATH LD_LIBRARY_PATH
   (
     cd "${bundle_dir}"
-    ${cw_ROOT}/opt/ruby/bin/bundle exec "$@"
+    bundle exec "$@"
   )
 }
 
 ruby_exec() {
-    . "${cw_ROOT}"/etc/ruby.rc
-    export PATH LD_LIBRARY_PATH
-    ${cw_ROOT}/opt/ruby/bin/ruby "$@"
+    ruby "$@"
 }
